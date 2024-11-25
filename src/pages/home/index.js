@@ -379,7 +379,7 @@ const Home = ({ hotel_response, rooms_list, transport_response }) => {
   )
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
   const HOTEL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${HOTEL_SHEET_ID}/values/Sheet1?key=${API_KEY}`
