@@ -1,71 +1,34 @@
-// ** React Imports
 import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import toast from 'react-hot-toast'
 
-// ** Next Import
 import Link from 'next/link'
+import NextImage from 'next/image'
+import { useRouter } from 'next/router'
 
-// ** MUI Components
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
-import Checkbox from '@mui/material/Checkbox'
-import TextField from '@mui/material/TextField'
-import InputLabel from '@mui/material/InputLabel'
-import IconButton from '@mui/material/IconButton'
 import Box from '@mui/material/Box'
+import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
 import FormControl from '@mui/material/FormControl'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import OutlinedInput from '@mui/material/OutlinedInput'
-import { styled, useTheme } from '@mui/material/styles'
+import FormHelperText from '@mui/material/FormHelperText'
+import Button from '@mui/material/Button'
 import InputAdornment from '@mui/material/InputAdornment'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import IconButton from '@mui/material/IconButton'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import Typography from '@mui/material/Typography'
 
-// ** Icon Imports
+import { styled, useTheme } from '@mui/material/styles'
+
 import Icon from 'src/@core/components/icon'
 
-// ** Configs
-import themeConfig from 'src/configs/themeConfig'
-
-// ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 
-// ** Hooks
-import { useSettings } from 'src/@core/hooks/useSettings'
-
-// ** Demo Imports
-import FooterIllustrationsV2 from 'src/views/pages/auth/FooterIllustrationsV2'
-
-// ** Styled Components
-const RegisterIllustrationWrapper = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(20),
-  paddingRight: '0 !important',
-  [theme.breakpoints.down('lg')]: {
-    padding: theme.spacing(10)
-  }
-}))
-
-const RegisterIllustration = styled('img')(({ theme }) => ({
-  maxWidth: '46rem',
-  [theme.breakpoints.down('lg')]: {
-    maxWidth: '35rem'
-  }
-}))
-
-const TreeIllustration = styled('img')(({ theme }) => ({
-  bottom: 0,
-  left: '1.875rem',
-  position: 'absolute',
-  [theme.breakpoints.down('lg')]: {
-    left: 0
-  }
-}))
-
-const RightWrapper = styled(Box)(({ theme }) => ({
-  width: '100%',
-  [theme.breakpoints.up('md')]: {
-    maxWidth: 450
-  }
-}))
+import { UploadLogo } from 'src/utils/icons'
+import Loader from 'src/components/common/Loader'
+import { postRequest } from 'src/api-main-file/APIServices'
+import { SIGN_UP_REQUEST } from 'src/api-main-file/APIUrl'
 
 const BoxWrapper = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('xl')]: {
@@ -83,208 +46,357 @@ const TypographyStyled = styled(Typography)(({ theme }) => ({
 }))
 
 const LinkStyled = styled(Link)(({ theme }) => ({
+  display: 'flex',
+  fontSize: '0.875rem',
+  alignItems: 'center',
   textDecoration: 'none',
+  justifyContent: 'center',
   color: theme.palette.primary.main
 }))
 
-const Register = () => {
-  // ** States
-  const [showPassword, setShowPassword] = useState(false)
+const CustomLinkStyled = styled(Link)(({ theme }) => ({
+  fontSize: '0.875rem',
+  textDecoration: 'none'
+}))
 
-  // ** Hooks
+const ImgStyled = styled('img')(({ theme }) => ({
+  width: '90%',
+  // height: '100%',
+  borderRadius: 4,
+  marginRight: theme.spacing(5),
+  objectFit: 'contain'
+}))
+
+const Register = () => {
   const theme = useTheme()
-  const { settings } = useSettings()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
 
-  // ** Vars
-  const { skin } = settings
-  const imageSource = skin === 'bordered' ? 'auth-v2-register-illustration-bordered' : 'auth-v2-register-illustration'
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+
+  const {
+    control,
+    setError,
+    watch,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      logo: '',
+      name: '',
+      email: '',
+      password: '',
+      address: '',
+      companyName: '',
+      mobile: '',
+      referringAgent: ''
+    }
+  })
+
+  const logo = watch('logo')
+
+  const handleInputImageChange = (file, onImageChange) => {
+    const reader = new FileReader()
+    const { files } = file.target
+
+    if (files && files.length !== 0) {
+      reader.onload = () => {
+        const img = new Image()
+        img.src = reader.result
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          // canvas.width = 64
+          // canvas.height = 64
+          const ctx = canvas.getContext('2d')
+
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+          const resizedImage = canvas.toDataURL()
+
+          onImageChange(resizedImage)
+          // clearErrors(key)
+          file.target.value = null
+        }
+      }
+      reader.readAsDataURL(files[0])
+    }
+  }
+
+  const onSubmit = async data => {
+    // const { logo, name, email, password, address, companyName, mobile, referringAgent } = data
+    console.log(data)
+    setIsLoading(true)
+
+    const response = await postRequest(SIGN_UP_REQUEST, data)
+    setIsLoading(false)
+    if (response.status) {
+      router.push('/login')
+    } else {
+      toast.error(response.error)
+    }
+  }
 
   return (
     <Box className='content-right'>
-      {!hidden ? (
-        <Box sx={{ flex: 1, display: 'flex', position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
-          <RegisterIllustrationWrapper>
-            <RegisterIllustration
-              alt='register-illustration'
-              src={`/images/pages/${imageSource}-${theme.palette.mode}.png`}
-            />
-          </RegisterIllustrationWrapper>
-          <FooterIllustrationsV2 image={<TreeIllustration alt='tree' src='/images/pages/tree-2.png' />} />
+      <Loader open={isLoading} />
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          width: '100%'
+        }}
+      >
+        <Box sx={{ textAlign: 'center', mt: '20px' }}>
+          <NextImage src='/../public/images/white_logo.png' width={250} height={85} alt='company_logo' />
         </Box>
-      ) : null}
-      <RightWrapper sx={skin === 'bordered' && !hidden ? { borderLeft: `1px solid ${theme.palette.divider}` } : {}}>
-        <Box
-          sx={{
-            p: 12,
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'background.paper'
-          }}
-        >
-          <BoxWrapper>
-            <Box
-              sx={{
-                top: 30,
-                left: 40,
-                display: 'flex',
-                position: 'absolute',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <svg
-                width={35}
-                height={29}
-                version='1.1'
-                viewBox='0 0 30 23'
-                xmlns='http://www.w3.org/2000/svg'
-                xmlnsXlink='http://www.w3.org/1999/xlink'
-              >
-                <g stroke='none' strokeWidth='1' fill='none' fillRule='evenodd'>
-                  <g id='Artboard' transform='translate(-95.000000, -51.000000)'>
-                    <g id='logo' transform='translate(95.000000, 50.000000)'>
-                      <path
-                        id='Combined-Shape'
-                        fill={theme.palette.primary.main}
-                        d='M30,21.3918362 C30,21.7535219 29.9019196,22.1084381 29.7162004,22.4188007 C29.1490236,23.366632 27.9208668,23.6752135 26.9730355,23.1080366 L26.9730355,23.1080366 L23.714971,21.1584295 C23.1114106,20.7972624 22.7419355,20.1455972 22.7419355,19.4422291 L22.7419355,19.4422291 L22.741,12.7425689 L15,17.1774194 L7.258,12.7425689 L7.25806452,19.4422291 C7.25806452,20.1455972 6.88858935,20.7972624 6.28502902,21.1584295 L3.0269645,23.1080366 C2.07913318,23.6752135 0.850976404,23.366632 0.283799571,22.4188007 C0.0980803893,22.1084381 2.0190442e-15,21.7535219 0,21.3918362 L0,3.58469444 L0.00548573643,3.43543209 L0.00548573643,3.43543209 L0,3.5715689 C3.0881846e-16,2.4669994 0.8954305,1.5715689 2,1.5715689 C2.36889529,1.5715689 2.73060353,1.67359571 3.04512412,1.86636639 L15,9.19354839 L26.9548759,1.86636639 C27.2693965,1.67359571 27.6311047,1.5715689 28,1.5715689 C29.1045695,1.5715689 30,2.4669994 30,3.5715689 L30,3.5715689 Z'
-                      />
-                      <polygon
-                        id='Rectangle'
-                        opacity='0.077704'
-                        fill={theme.palette.common.black}
-                        points='0 8.58870968 7.25806452 12.7505183 7.25806452 16.8305646'
-                      />
-                      <polygon
-                        id='Rectangle'
-                        opacity='0.077704'
-                        fill={theme.palette.common.black}
-                        points='0 8.58870968 7.25806452 12.6445567 7.25806452 15.1370162'
-                      />
-                      <polygon
-                        id='Rectangle'
-                        opacity='0.077704'
-                        fill={theme.palette.common.black}
-                        points='22.7419355 8.58870968 30 12.7417372 30 16.9537453'
-                        transform='translate(26.370968, 12.771227) scale(-1, 1) translate(-26.370968, -12.771227) '
-                      />
-                      <polygon
-                        id='Rectangle'
-                        opacity='0.077704'
-                        fill={theme.palette.common.black}
-                        points='22.7419355 8.58870968 30 12.6409734 30 15.2601969'
-                        transform='translate(26.370968, 11.924453) scale(-1, 1) translate(-26.370968, -11.924453) '
-                      />
-                      <path
-                        id='Rectangle'
-                        fillOpacity='0.15'
-                        fill={theme.palette.common.white}
-                        d='M3.04512412,1.86636639 L15,9.19354839 L15,9.19354839 L15,17.1774194 L0,8.58649679 L0,3.5715689 C3.0881846e-16,2.4669994 0.8954305,1.5715689 2,1.5715689 C2.36889529,1.5715689 2.73060353,1.67359571 3.04512412,1.86636639 Z'
-                      />
-                      <path
-                        id='Rectangle'
-                        fillOpacity='0.35'
-                        fill={theme.palette.common.white}
-                        transform='translate(22.500000, 8.588710) scale(-1, 1) translate(-22.500000, -8.588710) '
-                        d='M18.0451241,1.86636639 L30,9.19354839 L30,9.19354839 L30,17.1774194 L15,8.58649679 L15,3.5715689 C15,2.4669994 15.8954305,1.5715689 17,1.5715689 C17.3688953,1.5715689 17.7306035,1.67359571 18.0451241,1.86636639 Z'
-                      />
-                    </g>
-                  </g>
-                </g>
-              </svg>
-              <Typography
-                variant='h6'
+        <Card className='inner-card' sx={{ mx: 10, p: 10, pb: 0 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <TypographyStyled color='white' variant='h4'>
+              Create Account
+            </TypographyStyled>
+            <Typography color='white' variant='body2'>
+              Have an account? <CustomLinkStyled href='/login'>Login</CustomLinkStyled>
+            </Typography>
+          </Box>
+          <Grid component='form' onSubmit={handleSubmit(onSubmit)} container spacing={6} sx={{ mt: 3 }}>
+            <Grid item xs={12} sm={1.5}>
+              <Card
+                className='common-card'
                 sx={{
-                  ml: 3,
-                  lineHeight: 1,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  fontSize: '1.5rem !important'
+                  height: '235px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  gap: 1,
+                  cursor: 'pointer'
                 }}
+                component='label'
+                htmlFor='logo'
               >
-                {themeConfig.templateName}
+                <FormControl>
+                  <Controller
+                    name='logo'
+                    control={control}
+                    rules={{ required: 'This field is required' }}
+                    render={({ field: { value, onChange } }) => (
+                      <>
+                        <input
+                          hidden
+                          type='file'
+                          // value={value}
+                          accept='image/png, image/jpeg'
+                          onChange={e => handleInputImageChange(e, onChange)}
+                          id='logo'
+                        />
+                        {logo.length == 0 ? (
+                          <>
+                            <Box>{UploadLogo}</Box>
+                            <Typography fontSize={17}>Upload Logo</Typography>
+                          </>
+                        ) : (
+                          <ImgStyled src={logo} alt='Logo' />
+                        )}
+                      </>
+                    )}
+                  />
+                </FormControl>
+                {/* {UploadLogo}
+                <Typography fontSize={17}>Upload Logo</Typography> */}
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={3.5}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 7.5 }}>
+                <FormControl fullWidth>
+                  <Controller
+                    name='name'
+                    control={control}
+                    rules={{ required: 'Name is required' }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <OutlinedInput
+                        value={value}
+                        onBlur={onBlur}
+                        placeholder='Name'
+                        sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
+                        onChange={onChange}
+                        id='auth-login-name'
+                        error={Boolean(errors.name)}
+                      />
+                    )}
+                  />
+                  {errors.name && <FormHelperText sx={{ color: 'error.main' }}>{errors.name.message}</FormHelperText>}
+                </FormControl>
+                <FormControl fullWidth>
+                  <Controller
+                    name='address'
+                    control={control}
+                    rules={{ required: 'Username is required' }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <OutlinedInput
+                        multiline
+                        rows={5}
+                        value={value}
+                        onBlur={onBlur}
+                        placeholder='Address'
+                        sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
+                        onChange={onChange}
+                        id='auth-login-address'
+                        error={Boolean(errors.address)}
+                      />
+                    )}
+                  />
+                  {errors.address && (
+                    <FormHelperText sx={{ color: 'error.main' }}>{errors.address.message}</FormHelperText>
+                  )}
+                </FormControl>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={3.5}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <FormControl fullWidth>
+                  <Controller
+                    name='email'
+                    control={control}
+                    rules={{ required: 'Name is required' }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <OutlinedInput
+                        value={value}
+                        onBlur={onBlur}
+                        placeholder='Email'
+                        sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
+                        onChange={onChange}
+                        id='auth-login-email'
+                        error={Boolean(errors.email)}
+                      />
+                    )}
+                  />
+                  {errors.email && <FormHelperText sx={{ color: 'error.main' }}>{errors.email.message}</FormHelperText>}
+                </FormControl>
+                <FormControl fullWidth>
+                  <Controller
+                    name='companyName'
+                    control={control}
+                    rules={{ required: 'Username is required' }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <OutlinedInput
+                        value={value}
+                        onBlur={onBlur}
+                        placeholder='Company Name'
+                        sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
+                        onChange={onChange}
+                        id='auth-login-companyName'
+                        error={Boolean(errors.companyName)}
+                      />
+                    )}
+                  />
+                  {errors.companyName && (
+                    <FormHelperText sx={{ color: 'error.main' }}>{errors.companyName.message}</FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl fullWidth>
+                  <Controller
+                    name='referringAgent'
+                    control={control}
+                    rules={{ required: 'Username is required' }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <OutlinedInput
+                        value={value}
+                        onBlur={onBlur}
+                        placeholder='Select Referring Agent'
+                        sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
+                        onChange={onChange}
+                        id='auth-login-referringAgent'
+                        error={Boolean(errors.referringAgent)}
+                      />
+                    )}
+                  />
+                  {errors.referringAgent && (
+                    <FormHelperText sx={{ color: 'error.main' }}>{errors.referringAgent.message}</FormHelperText>
+                  )}
+                </FormControl>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={3.5}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <FormControl fullWidth>
+                  <Controller
+                    name='password'
+                    control={control}
+                    rules={{ required: 'Name is required' }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <OutlinedInput
+                        value={value}
+                        onBlur={onBlur}
+                        placeholder='Password'
+                        sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
+                        onChange={onChange}
+                        id='auth-login-password'
+                        error={Boolean(errors.password)}
+                      />
+                    )}
+                  />
+                  {errors.password && (
+                    <FormHelperText sx={{ color: 'error.main' }}>{errors.password.message}</FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl fullWidth>
+                  <Controller
+                    name='mobile'
+                    control={control}
+                    rules={{ required: 'Username is required' }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <OutlinedInput
+                        value={value}
+                        onBlur={onBlur}
+                        placeholder='Mobile Number'
+                        sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
+                        onChange={onChange}
+                        id='auth-login-mobile'
+                        error={Boolean(errors.mobile)}
+                      />
+                    )}
+                  />
+                  {errors.mobile && (
+                    <FormHelperText sx={{ color: 'error.main' }}>{errors.mobile.message}</FormHelperText>
+                  )}
+                </FormControl>
+                <Button type='submit' sx={{ height: '56px', boxShadow: 'none' }} fullWidth variant='contained'>
+                  <Typography color='white'>Sign Up</Typography>
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+          <Box sx={{ mt: 10, textAlign: 'center' }}>
+            <Typography variant='body2' color='white'>
+              By creating an account, you accept the adventurerichaholidays.com
+            </Typography>
+            <Typography variant='body2' color='white'>
+              <CustomLinkStyled href='/'>Terms & conditions</CustomLinkStyled>
+               and 
+              <CustomLinkStyled href='/'>Privacy statement</CustomLinkStyled>
+            </Typography>
+          </Box>
+        </Card>
+        <Box sx={{ mb: '20px', mx: 10 }}>
+          <Card className='footer-card' sx={{ display: 'flex', alignItems: 'center', height: '45px' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <Typography color='white' fontSize={17}>
+                © 2019 - 2024 Adventure Richa Holidays. All rights reserved.
               </Typography>
-            </Box>
-            <Box sx={{ mb: 6 }}>
-              <TypographyStyled variant='h5'>Adventure starts here 🚀</TypographyStyled>
-              <Typography variant='body2'>Make your app management easy and fun!</Typography>
-            </Box>
-            <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-              <TextField autoFocus fullWidth sx={{ mb: 4 }} label='Username' placeholder='johndoe' />
-              <TextField fullWidth label='Email' sx={{ mb: 4 }} placeholder='user@email.com' />
-              <FormControl fullWidth>
-                <InputLabel htmlFor='auth-login-v2-password'>Password</InputLabel>
-                <OutlinedInput
-                  label='Password'
-                  id='auth-login-v2-password'
-                  type={showPassword ? 'text' : 'password'}
-                  endAdornment={
-                    <InputAdornment position='end'>
-                      <IconButton
-                        edge='end'
-                        onMouseDown={e => e.preventDefault()}
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-              </FormControl>
-              <FormControlLabel
-                control={<Checkbox />}
-                sx={{ mb: 4, mt: 1.5, '& .MuiFormControlLabel-label': { fontSize: '0.875rem' } }}
-                label={
-                  <>
-                    <Typography variant='body2' component='span'>
-                      I agree to{' '}
-                    </Typography>
-                    <LinkStyled href='/' onClick={e => e.preventDefault()}>
-                      privacy policy & terms
-                    </LinkStyled>
-                  </>
-                }
-              />
-              <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 7 }}>
-                Sign up
-              </Button>
-              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Typography variant='body2' sx={{ mr: 2 }}>
-                  Already have an account?
-                </Typography>
-                <Typography variant='body2'>
-                  <LinkStyled href='/login'>Sign in instead</LinkStyled>
-                </Typography>
-              </Box>
-              <Divider sx={{ my: theme => `${theme.spacing(5)} !important` }}>or</Divider>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconButton href='/' component={Link} sx={{ color: '#497ce2' }} onClick={e => e.preventDefault()}>
-                  <Icon icon='mdi:facebook' />
-                </IconButton>
-                <IconButton href='/' component={Link} sx={{ color: '#1da1f2' }} onClick={e => e.preventDefault()}>
-                  <Icon icon='mdi:twitter' />
-                </IconButton>
-                <IconButton
-                  href='/'
-                  component={Link}
-                  onClick={e => e.preventDefault()}
-                  sx={{ color: theme => (theme.palette.mode === 'light' ? '#272727' : 'grey.300') }}
-                >
-                  <Icon icon='mdi:github' />
-                </IconButton>
-                <IconButton href='/' component={Link} sx={{ color: '#db4437' }} onClick={e => e.preventDefault()}>
-                  <Icon icon='mdi:google' />
-                </IconButton>
-              </Box>
-            </form>
-          </BoxWrapper>
+              <IconButton size='small' sx={{ backgroundColor: theme => theme.palette.primary.main, color: 'white' }}>
+                <Icon icon='mdi:help' />
+              </IconButton>
+            </CardContent>
+          </Card>
         </Box>
-      </RightWrapper>
+      </Box>
     </Box>
   )
 }
+
 Register.getLayout = page => <BlankLayout>{page}</BlankLayout>
 Register.guestGuard = true
 

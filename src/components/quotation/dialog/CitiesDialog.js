@@ -16,10 +16,9 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import FormHelperText from '@mui/material/FormHelperText'
 
-import Icon from 'src/@core/components/icon'
-
 import { styled } from '@mui/material/styles'
-import toast from 'react-hot-toast'
+
+import Icon from 'src/@core/components/icon'
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(2)

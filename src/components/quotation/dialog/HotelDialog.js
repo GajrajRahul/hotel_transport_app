@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { Controller, useForm } from 'react-hook-form'
@@ -16,11 +16,9 @@ import Typography from '@mui/material/Typography'
 import InputAdornment from '@mui/material/InputAdornment'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
-import FormHelperText from '@mui/material/FormHelperText'
 import FormGroup from '@mui/material/FormGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
-import IconButton from '@mui/material/IconButton'
 import Tab from '@mui/material/Tab'
 import Card from '@mui/material/Card'
 import CardMedia from '@mui/material/CardMedia'
@@ -32,12 +30,13 @@ import MuiTabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 import TabContext from '@mui/lab/TabContext'
 
-import format from 'date-fns/format'
-
 import Icon from 'src/@core/components/icon'
 
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import RoomDialog from './RoomDialog'
+import CustomInput from 'src/components/common/CustomInput'
+import { getDayNightCount } from 'src/utils/function'
+import CusomInputWithButttons from 'src/components/common/CusomInputWithButttons'
 
 const TabList = styled(MuiTabList)(({ theme }) => ({
   '& .MuiTabs-indicator': {
@@ -53,67 +52,6 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius
   }
 }))
-
-const CustomInput = forwardRef((props, ref) => {
-  const { start, end, errors } = props
-  const startDate = start !== null ? format(start, 'dd MMM yyyy') : null
-  const endDate = end !== null ? ` - ${format(end, 'dd MMM yyyy')}` : null
-  const value = `${startDate}${endDate !== null ? endDate : ''}`
-  const theme = useTheme()
-
-  return (
-    <FormControl fullWidth>
-      <InputLabel htmlFor='stepper-linear-account-checkin' error={Boolean(errors.dates)}>
-        Check-In & Check-Out
-      </InputLabel>
-      <OutlinedInput
-        inputRef={ref}
-        label='Check-In & Check-Out'
-        {...props}
-        value={value}
-        error={Boolean(errors.dates)}
-        fullWidth
-        startAdornment={
-          <InputAdornment position='start'>
-            <Icon icon='mdi:outline-date-range' color={theme.palette.primary.main} />
-          </InputAdornment>
-        }
-      />
-      {errors.dates && (
-        <FormHelperText sx={{ color: 'error.main' }} id='stepper-linear-account-checkin'>
-          {errors.dates?.message}
-        </FormHelperText>
-      )}
-    </FormControl>
-  )
-})
-
-const HOTEL_LIST = [
-  {
-    id: 1,
-    name: 'Hotel Ashapurna',
-    location: 'India',
-    image: 'singapore',
-    price: '2xx - 3xx',
-    selected: false
-  },
-  { id: 2, name: 'Hotel Vienna Boutique', location: 'India', image: 'india', price: '1xx - 2xx', selected: false },
-  { id: 3, name: 'Nirali Dhani', location: 'India', image: 'new_york', price: '3xx - 4xx', selected: false }
-]
-
-const getDayNightCount = dates => {
-  if (dates[1] == null) {
-    return
-  }
-
-  const date1 = new Date(dates[0])
-  const date2 = new Date(dates[1])
-
-  const diffInMs = date2 - date1
-
-  const diffInDays = diffInMs / (1000 * 60 * 60 * 24)
-  return diffInDays
-}
 
 const HotelDialog = ({
   open,
@@ -159,7 +97,7 @@ const HotelDialog = ({
 
   const theme = useTheme()
   const rooms = hotelWatch('rooms')
-  const extraBed = hotelWatch('extraBed')
+  const child = hotelWatch('child')
 
   useEffect(() => {
     if (selectedCity) {
@@ -169,7 +107,7 @@ const HotelDialog = ({
 
   useEffect(() => {
     if (selectedHotelInfo) {
-      const { checkInCheckOut, daysNights, breakfast, lunch, dinner, rooms, extraBed } = selectedHotelInfo
+      const { checkInCheckOut, daysNights, breakfast, lunch, dinner, rooms, extraBed, child } = selectedHotelInfo
       hotelReset({
         checkInCheckOut: checkInCheckOut,
         breakfast,
@@ -177,7 +115,8 @@ const HotelDialog = ({
         dinner,
         extraBed,
         rooms,
-        daysNights
+        daysNights,
+        child
       })
       setSelectedHotelDetail(selectedHotelInfo.hotel)
     }
@@ -227,7 +166,7 @@ const HotelDialog = ({
   }
 
   const onDialogSubmit = data => {
-    const { checkInCheckOut, breakfast, lunch, dinner, rooms, daysNights, extraBed } = data
+    const { checkInCheckOut, breakfast, lunch, dinner, rooms, daysNights, extraBed, child } = data
     if (!selectedHotelDetail) {
       return
     }
@@ -256,6 +195,7 @@ const HotelDialog = ({
                       lunch,
                       dinner,
                       rooms,
+                      child,
                       daysNights,
                       extraBed,
                       hotel: selectedHotelDetail
@@ -276,6 +216,7 @@ const HotelDialog = ({
           lunch,
           dinner,
           rooms,
+          child,
           daysNights,
           extraBed,
           hotel: selectedHotelDetail
@@ -295,7 +236,7 @@ const HotelDialog = ({
   }
 
   return (
-    <Dialog fullWidth maxWidth='md' open={open} onClose={resetFields}>
+    <Dialog fullWidth maxWidth='laptopXs' open={open} onClose={resetFields}>
       <DialogTitle
         sx={{
           '&.MuiDialogTitle-root': {
@@ -341,7 +282,14 @@ const HotelDialog = ({
                           )
                         }}
                         popperPlacement='bottom-start'
-                        customInput={<CustomInput end={value[1]} start={value[0]} errors={errors} />}
+                        customInput={
+                          <CustomInput
+                            label='Check-In & Check-Out'
+                            end={value[1]}
+                            start={value[0]}
+                            propserror={errors}
+                          />
+                        }
                       />
                     )
                   }}
@@ -426,128 +374,51 @@ const HotelDialog = ({
                   />
                 </FormGroup>
               </Grid>
-              <Grid item xs={12} mobileSm={6} tablet={3}>
-                <FormControl>
-                  {/* <Typography>No. of Rooms</Typography> */}
-                  <Controller
-                    name='rooms'
-                    control={hotelControl}
-                    rules={{ required: 'This field is required' }}
-                    render={({ field: { value, onChange } }) => (
-                      <FormControlLabel
-                        label='No. of Rooms *'
-                        sx={{
-                          '&.MuiFormControlLabel-root': {
-                            alignItems: 'flex-start'
-                          }
-                        }}
-                        labelPlacement='top'
-                        control={
-                          <Box>
-                            <IconButton
-                              edge='end'
-                              onClick={e => {
-                                e.stopPropagation()
-                                if (Number(rooms) != 0) {
-                                  onChange(`${Number(rooms) - 1}`)
-                                }
-                              }}
-                              aria-label='toggle minus visibility'
-                              size='small'
-                              sx={{
-                                mr: 3,
-                                backgroundColor: theme => theme.palette.primary.main,
-                                color: 'white',
-                                '&.MuiIconButton-root:hover': {
-                                  backgroundColor: theme => theme.palette.primary.main
-                                }
-                              }}
-                            >
-                              <Icon icon='mdi:minus' />
-                            </IconButton>
-                            {value.length == 0 ? 0 : value}
-                            <IconButton
-                              edge='end'
-                              onClick={e => {
-                                e.stopPropagation()
-                                onChange(`${Number(rooms) + 1}`)
-                              }}
-                              aria-label='toggle plus visibility'
-                              size='small'
-                              sx={{
-                                ml: 3,
-                                backgroundColor: theme => theme.palette.primary.main,
-                                color: 'white',
-                                '&.MuiIconButton-root:hover': {
-                                  backgroundColor: theme => theme.palette.primary.main
-                                }
-                              }}
-                            >
-                              <Icon icon='mdi:plus' />
-                            </IconButton>
-                          </Box>
-                        }
-                      />
-                    )}
-                  />
-                  {errors?.rooms && (
-                    <FormHelperText sx={{ color: 'error.main' }} id='stepper-linear-rooms'>
-                      {errors?.rooms?.message}
-                    </FormHelperText>
-                  )}
-                </FormControl>
+              <Grid item xs={12} mobileSm={6} tablet={2.5}>
+                <CusomInputWithButttons
+                  name='rooms'
+                  hotelControl={hotelControl}
+                  isRequired='This field is required'
+                  label='No. of Rooms *'
+                  errors={errors}
+                />
               </Grid>
-              <Grid item xs={12} mobileSm={6} tablet={3}>
-                <Typography>Extra Bed</Typography>
-                <Controller
+              <Grid
+                item
+                xs={12}
+                mobileSm={6}
+                tablet={2}
+                sx={{
+                  '&.MuiGrid-root': {
+                    pl: 0
+                  }
+                }}
+              >
+                <CusomInputWithButttons
                   name='extraBed'
-                  control={hotelControl}
-                  rules={{ required: false }}
-                  render={({ field: { value, onChange } }) => (
-                    <Box>
-                      <IconButton
-                        edge='end'
-                        onClick={e => {
-                          e.stopPropagation()
-                          if (Number(extraBed) != 0) {
-                            onChange(`${Number(extraBed) - 1}`)
-                          }
-                        }}
-                        aria-label='toggle minus visibility'
-                        size='small'
-                        sx={{
-                          mr: 3,
-                          backgroundColor: theme => theme.palette.primary.main,
-                          color: 'white',
-                          '&.MuiIconButton-root:hover': {
-                            backgroundColor: theme => theme.palette.primary.main
-                          }
-                        }}
-                      >
-                        <Icon icon='mdi:minus' />
-                      </IconButton>
-                      {value.length == 0 ? 0 : value}
-                      <IconButton
-                        edge='end'
-                        onClick={e => {
-                          e.stopPropagation()
-                          onChange(`${Number(extraBed) + 1}`)
-                        }}
-                        aria-label='toggle plus visibility'
-                        size='small'
-                        sx={{
-                          ml: 3,
-                          backgroundColor: theme => theme.palette.primary.main,
-                          color: 'white',
-                          '&.MuiIconButton-root:hover': {
-                            backgroundColor: theme => theme.palette.primary.main
-                          }
-                        }}
-                      >
-                        <Icon icon='mdi:plus' />
-                      </IconButton>
-                    </Box>
-                  )}
+                  hotelControl={hotelControl}
+                  isRequired={false}
+                  label='Extra Bed'
+                  errors={errors}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                mobileSm={6}
+                tablet={1.5}
+                sx={{
+                  '&.MuiGrid-root': {
+                    pl: 0
+                  }
+                }}
+              >
+                <CusomInputWithButttons
+                  name='child'
+                  hotelControl={hotelControl}
+                  isRequired={false}
+                  label='Child'
+                  errors={errors}
                 />
               </Grid>
               {hotelList.length > 0 && (
@@ -605,12 +476,7 @@ const HotelDialog = ({
                                     {Number(rooms) == 0 || !selectedHotelDetail
                                       ? 'Select Rooms Type'
                                       : selectedHotelDetail.id == hotel.id
-                                      ? // `${
-                                        //     selectedHotelDetail.delux ||
-                                        //     selectedHotelDetail.silver ||
-                                        //     selectedHotelDetail.budget
-                                        //   } Room`
-                                        'Update Rooms Type'
+                                      ? 'Update Rooms Type'
                                       : 'Select Rooms Type'}
                                   </Button>
                                 </CardContent>

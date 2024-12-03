@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React from 'react'
 import { Controller, useFieldArray } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
 
@@ -6,7 +6,6 @@ import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
-import OutlinedInput from '@mui/material/OutlinedInput'
 import FormHelperText from '@mui/material/FormHelperText'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
@@ -17,46 +16,11 @@ import Box from '@mui/material/Box'
 import Fab from '@mui/material/Fab'
 import { useTheme } from '@mui/material'
 
-import format from 'date-fns/format'
-
 import Icon from 'src/@core/components/icon'
 
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import LocationAutocomplete from './LocationAutocomplete'
-
-const CustomInput = forwardRef((props, ref) => {
-  const { start, end, propsError } = props
-  const startDate = start !== null ? format(start, 'dd MMM yyyy') : null
-  const endDate = end !== null ? ` - ${format(end, 'dd MMM yyyy')}` : null
-  const value = `${startDate}${endDate !== null ? endDate : ''}`
-  const theme = useTheme()
-
-  return (
-    <FormControl fullWidth>
-      <InputLabel htmlFor='stepper-linear-account-password' error={Boolean(propsError.dates)}>
-        {props.label || ''}
-      </InputLabel>
-      <OutlinedInput
-        inputRef={ref}
-        label={props.label || ''}
-        {...props}
-        value={value}
-        error={Boolean(propsError.dates)}
-        fullWidth
-        startAdornment={
-          <InputAdornment position='start'>
-            <Icon icon='mdi:outline-date-range' color={theme.palette.primary.main} />
-          </InputAdornment>
-        }
-      />
-      {propsError.dates && (
-        <FormHelperText sx={{ color: 'error.main' }} id='stepper-linear-account-password'>
-          {propsError.dates?.message}
-        </FormHelperText>
-      )}
-    </FormControl>
-  )
-})
+import CustomInput from 'src/components/common/CustomInput'
 
 const TransportInfoStep = ({ transportErrors, transportControl, transportRate, handleBack, cities }) => {
   const { fields, append, remove } = useFieldArray({
@@ -127,7 +91,7 @@ const TransportInfoStep = ({ transportErrors, transportControl, transportRate, h
                       label='Depature & Return Date'
                       end={value[1]}
                       start={value[0]}
-                      propsError={transportErrors}
+                      propserror={transportErrors}
                     />
                   }
                 />

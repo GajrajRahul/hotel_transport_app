@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 
 import Link from 'next/link'
@@ -10,7 +11,8 @@ import FormControl from '@mui/material/FormControl'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import FormHelperText from '@mui/material/FormHelperText'
 import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
+import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Typography from '@mui/material/Typography'
 
@@ -52,10 +54,12 @@ const CustomLinkStyled = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main
 }))
 
-const ForgotPassword = () => {
+const ResetPassword = () => {
   const theme = useTheme()
-
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
+
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const {
     control,
@@ -64,7 +68,8 @@ const ForgotPassword = () => {
     formState: { errors }
   } = useForm({
     defaultValues: {
-      email: ''
+      password: '',
+      confirmPassword: ''
     }
   })
 
@@ -102,7 +107,7 @@ const ForgotPassword = () => {
               }}
             >
               <TypographyStyled color='white' variant='h4'>
-                Recover Your Account
+                Set New Password
               </TypographyStyled>
               <Typography color='white' variant='body2'>
                 A link to reset your password will be sent to your registered email address. Click the link to create a
@@ -111,31 +116,75 @@ const ForgotPassword = () => {
               <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
                 <FormControl sx={{ mb: 3, mt: 10 }}>
                   <Controller
-                    name='email'
+                    name='password'
                     control={control}
-                    rules={{ required: 'Username is required' }}
+                    rules={{ required: 'Password is required' }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <OutlinedInput
                         value={value}
                         onBlur={onBlur}
                         sx={{ background: 'rgba(234, 240, 247, 0.5)', width: '350px' }}
                         onChange={onChange}
-                        id='auth-login-email'
-                        error={Boolean(errors.email)}
+                        id='auth-login-password'
+                        error={Boolean(errors.password)}
+                        type={showPassword ? 'text' : 'password'}
+                        endAdornment={
+                          <InputAdornment position='end'>
+                            <IconButton
+                              edge='end'
+                              onMouseDown={e => e.preventDefault()}
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} fontSize={20} />
+                            </IconButton>
+                          </InputAdornment>
+                        }
                       />
                     )}
                   />
-                  {errors.email && <FormHelperText sx={{ color: 'error.main' }}>{errors.email.message}</FormHelperText>}
+                  {errors.password && (
+                    <FormHelperText sx={{ color: 'error.main' }}>{errors.password.message}</FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl sx={{ mb: 3 }}>
+                  <Controller
+                    name='confirmPassword'
+                    control={control}
+                    rules={{ required: 'ConfirmPassword is required' }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <OutlinedInput
+                        value={value}
+                        onBlur={onBlur}
+                        sx={{ background: 'rgba(234, 240, 247, 0.5)', width: '350px' }}
+                        onChange={onChange}
+                        id='auth-login-confirm-password'
+                        error={Boolean(errors.confirmPassword)}
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        endAdornment={
+                          <InputAdornment position='end'>
+                            <IconButton
+                              edge='end'
+                              onMouseDown={e => e.preventDefault()}
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                              <Icon
+                                icon={showConfirmPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
+                                fontSize={20}
+                              />
+                            </IconButton>
+                          </InputAdornment>
+                        }
+                      />
+                    )}
+                  />
+                  {errors.confirmPassword && (
+                    <FormHelperText sx={{ color: 'error.main' }}>{errors.confirmPassword.message}</FormHelperText>
+                  )}
                 </FormControl>
                 <Button type='submit' variant='contained' sx={{ width: '350px' }}>
                   Submit
                 </Button>
               </form>
-              <Divider sx={{ mb: 10, mt: 10, backgroundColor: 'white' }} />
-              <Typography variant='body2' color='white'>
-                Go to{' '}
-                <CustomLinkStyled href='/login'>Login Page</CustomLinkStyled>
-              </Typography>
             </Box>
           </Card>
         </Box>
@@ -152,7 +201,8 @@ const ForgotPassword = () => {
     </Box>
   )
 }
-ForgotPassword.getLayout = page => <BlankLayout>{page}</BlankLayout>
-ForgotPassword.guestGuard = true
 
-export default ForgotPassword
+ResetPassword.getLayout = page => <BlankLayout>{page}</BlankLayout>
+ResetPassword.guestGuard = true
+
+export default ResetPassword

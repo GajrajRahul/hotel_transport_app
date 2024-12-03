@@ -21,6 +21,7 @@ import AmountDisplayDialog from './dialog/AmountDisplayDialog'
 import TravelInfoStep from './quotation_steps/TravelInfoStep'
 import HotelInfoStep from './quotation_steps/HotelInfoStep'
 import TransportInfoStep from './quotation_steps/TransportInfoStep'
+import { getDayNightCount } from 'src/utils/function'
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
@@ -41,9 +42,6 @@ const steps = [
 
 const defaultTravelValues = {
   name: '',
-  persons: '',
-  adult: '0',
-  child: '0',
   dates: [new Date(), addDays(new Date(), 45)],
   'days-nights': '45 Days & 44 Nights'
 }
@@ -58,6 +56,7 @@ let defaultHotelInfoValues = {
   lunch: true,
   dinner: true,
   rooms: '',
+  child: '',
   daysNights: '45 Days & 44 Nights',
   extraBed: '',
   hotel: null
@@ -84,7 +83,6 @@ function loadScript(src, position, id) {
 }
 
 const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
-  const [selectedCityInfo, setSelectedCityInfo] = useState(defaultHotelInfoValues) // will do when city wishlist is added
   const [isAmountDialogOpen, setIsAmountDialogOpen] = useState(false)
   const [calculatedAmount, setCalculatedAmount] = useState(null)
   const [activeStep, setActiveStep] = useState(0)
@@ -142,28 +140,11 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
     defaultValues: defaultTransportValues
   })
 
-  const child = travelWatch('child')
-  const adult = travelWatch('adult')
-  const persons = travelWatch('persons')
   const travelDates = travelWatch('dates')
   const cities = hotelWatch('cities')
 
   const handleBack = () => {
     setActiveStep(prevActiveStep => prevActiveStep - 1)
-  }
-
-  const getDayNightCount = dates => {
-    if (dates[1] == null) {
-      return
-    }
-
-    const date1 = new Date(dates[0])
-    const date2 = new Date(dates[1])
-
-    const diffInMs = date2 - date1
-
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24)
-    return diffInDays
   }
 
   const handleReset = () => {
@@ -177,9 +158,6 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
     })
     travelReset({
       name: '',
-      persons: '',
-      child: '0',
-      adult: '0',
       dates: [new Date(), addDays(new Date(), 45)],
       'days-nights': '45 Days & 44 Nights'
     })
@@ -228,22 +206,12 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
       const diffInMs = date2 - date1
 
       const totalDays = diffInMs / (1000 * 60 * 60 * 24)
-      // const totalTransportAmount = getTransportFare({ ...data, totalDays: totalDays + 1, additionalStops })
-      // const totalHotelAmount = getHotelFare()
-      // setCalculatedAmount({
-      //   transport: Number(totalTransportAmount),
-      //   hotel: Number(totalHotelAmount),
-      //   total: Number(totalTransportAmount) + Number(totalHotelAmount)
-      // })
-      // setIsAmountDialogOpen(true)
 
       const directionsService = new window.google.maps.DirectionsService()
 
       let waypoints =
         additionalStops.length > 0
           ? additionalStops.map((item, index) => {
-              // return { location: item, stopover: true }
-              // console.log(item)
               return { location: item.description, stopover: true }
             })
           : []
@@ -257,12 +225,7 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
       if (to.description != from.description) {
         waypoints = [...waypoints, { location: to.description, stopover: true }]
         distanceObj = { ...distanceObj, destination: from.description }
-        // console.log('waypoints: ', waypoints)
-        // console.log(distanceObj)
       }
-      // console.log('waypoints: ', waypoints)
-      // console.log('distanceObj: ', distanceObj)
-      // return
 
       directionsService.route(
         waypoints.length > 0
@@ -275,7 +238,6 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
           if (status === window.google.maps.DirectionsStatus.OK) {
             const totalDist = result.routes[0].legs.reduce((acc, leg) => acc + leg.distance.value, 0)
             const totalDistance = (totalDist / 1000).toFixed(2)
-            // console.log('totalDistance: ', totalDistance)
             const totalTransportAmount = getTransportFare({
               ...data,
               totalDistance,
@@ -302,7 +264,7 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
     cities.map(city => {
       const { label, info } = city
       info.map(currHotel => {
-        const { breakfast, lunch, dinner, rooms, extraBed, hotel, checkInCheckOut } = currHotel
+        const { breakfast, lunch, dinner, rooms, child, extraBed, hotel, checkInCheckOut } = currHotel
         const { type, name } = hotel
         const totalDayNight = Number(getDayNightCount(checkInCheckOut))
         const hotelInfo =
@@ -318,20 +280,30 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
         Object.keys(hotel).map(data => {
           if (roomsList.includes(data)) {
             hotelAmount += Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight
+            // console.log(hotelAmount);
           }
         })
 
-        if (breakfast) {
-          hotelAmount += Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight
-        }
-        if (lunch) {
-          hotelAmount += Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight
-        }
-        if (dinner) {
-          hotelAmount += Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight
-        }
+        let totalPersons = 0;
         if (extraBed) {
           hotelAmount += Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight
+          totalPersons += Number(extraBed);
+        }
+  
+        if (breakfast) {
+          // hotelAmount += Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight
+          hotelAmount += Number(hotelInfo['breakfast']) * (Number(rooms)*2 + Number(child) + totalPersons) * totalDayNight
+          // console.log("breakfast: ", Number(hotelInfo['breakfast']) * (Number(rooms)*2 + Number(child) + totalPersons) * totalDayNight);
+        }
+        if (lunch) {
+          // hotelAmount += Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight
+          hotelAmount += Number(hotelInfo['lunch']) * (Number(rooms)*2 + Number(child) + totalPersons) * totalDayNight
+          // console.log("lunch: ", Number(hotelInfo['lunch']) * (Number(rooms)*2 + Number(child) + totalPersons) * totalDayNight);
+        }
+        if (dinner) {
+          // hotelAmount += Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight
+          hotelAmount += Number(hotelInfo['dinner']) * (Number(rooms)*2 + Number(child) + totalPersons) * totalDayNight
+          // console.log("dinner: ", Number(hotelInfo['dinner']) * (Number(rooms)*2 + Number(child) + totalPersons) * totalDayNight);
         }
       })
     })
@@ -344,7 +316,6 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
 
     if (cities.length == 1) {
       let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
-      // console.log('totalAmount: ', totalAmount)
       if (additionalStops.length > 0) {
         const remainingAmount =
           totalDistance * Number(vehicleRates['amount_per_km']) +
@@ -352,26 +323,19 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
           Number(vehicleRates['driver_charges_per_day']) +
           Number(vehicleRates['parking_charges_per_day']) +
           Number(vehicleRates['service_cleaning_charge_one_time'])
-        // console.log('remainingAmount: ', remainingAmount)
         totalAmount += remainingAmount
       }
       return totalAmount
     } else {
       const distanceAmount =
         Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
-      // console.log('distanceAmount: ', distanceAmount)
 
       const distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
-      // console.log('distanceAmount2: ', distanceAmount2)
 
       const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
-      // console.log('tollAmount: ', tollAmount)
       const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
-      // console.log('driverAmount: ', driverAmount)
       const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
-      // console.log('parkingCharges: ', parkingCharges)
       const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
-      // console.log('cleaningAmount: ', cleaningAmount)
 
       const totalAmount =
         (distanceAmount > distanceAmount2 ? distanceAmount : distanceAmount2) +
@@ -395,9 +359,6 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
               travelControl={travelControl}
               travelErrors={travelErrors}
               travelDates={travelDates}
-              persons={persons}
-              adult={adult}
-              child={child}
             />
           </form>
         )
@@ -460,14 +421,7 @@ const QuotationSteps = ({ hotelRate, transportRate, roomsList }) => {
               const labelProps = {}
               if (index === activeStep) {
                 labelProps.error = false
-                if (
-                  (travelErrors.name ||
-                    travelErrors.adult ||
-                    travelErrors.child ||
-                    travelErrors.dates ||
-                    travelErrors['days-nights']) &&
-                  activeStep === 0
-                ) {
+                if ((travelErrors.name || travelErrors.dates || travelErrors['days-nights']) && activeStep === 0) {
                   labelProps.error = true
                 } else if (hotelErrors.cities && activeStep === 1) {
                   labelProps.error = true

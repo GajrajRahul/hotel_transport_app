@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Controller } from 'react-hook-form'
+import { addDays } from 'date-fns'
 
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
@@ -21,7 +22,6 @@ import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Menu from '@mui/material/Menu'
 import { useTheme } from '@mui/material'
-import toast from 'react-hot-toast'
 
 import Icon from 'src/@core/components/icon'
 
@@ -35,6 +35,18 @@ const icons = {
   lunch: 'lunch',
   dinner: 'dinner-outline'
 }
+
+// let defaultHotelInfoValues = {
+//   checkInCheckOut: [new Date(), addDays(new Date(), 45)],
+//   breakfast: true,
+//   lunch: true,
+//   dinner: true,
+//   rooms: '',
+//   child: '',
+//   daysNights: '45 Days & 44 Nights',
+//   extraBed: '',
+//   hotel: null
+// }
 
 const HotelInfoStep = props => {
   const {
@@ -307,6 +319,8 @@ const HotelInfoStep = props => {
                                           ? `${data[item]} Room`
                                           : item == 'extraBed'
                                           ? `${data[item]} Extra Bed`
+                                          : item == 'child'
+                                          ? data[item] != 0 && `${data[item]} Child`
                                           : `${item[0].toUpperCase()}${item.slice(1)}`}
                                       </Typography>
                                     </Box>
