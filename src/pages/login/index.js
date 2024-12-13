@@ -35,10 +35,7 @@ const LoginPage = () => {
           container
           spacing={6}
           // sx={{
-          //   flexDirection: {
-          //     xs: 'column',
-          //     md: 'row'
-          //   }
+          //   border: '1px solid red'
           // }}
         >
           <Grid item xs={12} md={6}>
@@ -49,20 +46,18 @@ const LoginPage = () => {
               <LoginRight />
             </Card>
           </Grid>
-          <Grid item xs={12}>
-            <Card className='footer-card'>
-              <CardContent>
-                <Typography
-                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
-                  color='white'
-                  fontSize={20}
-                >
-                  © 2019 - 2024 Adventure Richa Holidays. All rights reserved.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
         </Grid>
+        <Card className='footer-card'>
+          <CardContent sx={{ pt: '15px !important', pb: '15px !important' }}>
+            <Typography
+              sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '1rem' } }}
+              color='white'
+              // fontSize={20}
+            >
+              © 2019 - 2024 Adventure Richa Holidays. All rights reserved.
+            </Typography>
+          </CardContent>
+        </Card>
         {/* <Box sx={{ display: 'flex', justifyContent: 'space-evenly', flexWrap: 'wrap', gap: 3, mb: 3 }}>
           <Card className='inner-card' sx={{ width: '550px' }}></Card>
           <Card className='inner-card' sx={{ width: '550px' }}>

@@ -125,18 +125,19 @@ const Register = ({ registerUrl }) => {
 
   const onSubmit = async data => {
     // const { logo, name, email, password, address, companyName, mobile, referringAgent } = data
-    console.log(data)
-    setIsLoading(true)
-    console.log(registerUrl)
+    const routes = registerUrl.split('/')
 
-    // const response = await postRequest(SIGN_UP_REQUEST, data)
-    // setIsLoading(false)
-    // if (response.status) {
-    //   toast.success('Signup Successful')
-    //   router.push('/login')
-    // } else {
-    //   toast.error(response.error)
-    // }
+    setIsLoading(true)
+
+    const api_url = `${BASE_URL}/${routes[routes.length - 1]}`
+    const response = await postRequest(`${api_url}/login`, data)
+    setIsLoading(false)
+    if (response.status) {
+      toast.success('Signup Successful')
+      router.push('/login')
+    } else {
+      toast.error(response.error)
+    }
   }
 
   return (
@@ -183,7 +184,7 @@ const Register = ({ registerUrl }) => {
                   <Controller
                     name='logo'
                     control={control}
-                    rules={{ required: 'This field is required' }}
+                    // rules={{ required: 'This field is required' }}
                     render={({ field: { value, onChange } }) => (
                       <>
                         <input
@@ -235,7 +236,7 @@ const Register = ({ registerUrl }) => {
                   <Controller
                     name='address'
                     control={control}
-                    rules={{ required: 'Username is required' }}
+                    rules={{ required: 'Address is required' }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <OutlinedInput
                         multiline
@@ -262,7 +263,7 @@ const Register = ({ registerUrl }) => {
                   <Controller
                     name='email'
                     control={control}
-                    rules={{ required: 'Name is required' }}
+                    rules={{ required: 'Email is required' }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <OutlinedInput
                         value={value}
@@ -281,7 +282,7 @@ const Register = ({ registerUrl }) => {
                   <Controller
                     name='companyName'
                     control={control}
-                    rules={{ required: 'Username is required' }}
+                    rules={{ required: 'Company Name is required' }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <OutlinedInput
                         value={value}
@@ -302,12 +303,12 @@ const Register = ({ registerUrl }) => {
                   <Controller
                     name='referringAgent'
                     control={control}
-                    rules={{ required: 'Username is required' }}
+                    rules={{ required: 'Referring agent is required' }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <OutlinedInput
                         value={value}
                         onBlur={onBlur}
-                        placeholder='Select Referring Agent'
+                        placeholder='Referring Agent'
                         sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
                         onChange={onChange}
                         id='auth-login-referringAgent'
@@ -327,7 +328,7 @@ const Register = ({ registerUrl }) => {
                   <Controller
                     name='password'
                     control={control}
-                    rules={{ required: 'Name is required' }}
+                    rules={{ required: 'Password is required' }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <OutlinedInput
                         value={value}
@@ -348,7 +349,7 @@ const Register = ({ registerUrl }) => {
                   <Controller
                     name='mobile'
                     control={control}
-                    rules={{ required: 'Username is required' }}
+                    rules={{ required: 'Mobile is required' }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <OutlinedInput
                         value={value}
@@ -399,7 +400,7 @@ const Register = ({ registerUrl }) => {
   )
 }
 
-Register.getLayout = page => <BlankLayout>{page}</BlankLayout>
-Register.guestGuard = true
+// Register.getLayout = page => <BlankLayout>{page}</BlankLayout>
+// Register.guestGuard = true
 
 export default Register

@@ -64,6 +64,7 @@ code[class*='language-'] {
   background-color: rgba(255, 255, 255, 0.2) !important;
   border-radius: 100px !important;
   backdrop-filter: blur(10px);
+  margin-bottom: 25px;
 }
 
 .custom_strike_through {

@@ -99,8 +99,8 @@ const LoginRight = () => {
   return (
     <TabContext value={tabValue}>
       <TabList onChange={handleTabValue} aria-label='customized tabs example'>
-        <Tab sx={{ width: 1 / 2 }} value='partner' label='Partners' />
-        <Tab sx={{ width: 1 / 2 }} value='employee' label='Travel Experts' />
+        <Tab sx={{ minWidth: 1 / 2 }} value='partner' label='Partners' />
+        <Tab sx={{ minWidth: 1 / 2 }} value='employee' label='Travel Experts' />
       </TabList>
       <TabPanel value='partner'>
         <Box
@@ -114,7 +114,7 @@ const LoginRight = () => {
           }}
         >
           <BoxWrapper>
-            <Box sx={{ mb: 6 }}>
+            <Box sx={{ mb: 6, mt: 5 }}>
               <TypographyStyled sx={{ typography: { xs: 'h4', laptopSm: 'h3' } }} color='white'>
                 Welcome Back!
               </TypographyStyled>
@@ -122,7 +122,12 @@ const LoginRight = () => {
                 Let's Plan Journey's Together!
               </Typography>
             </Box>
-            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
+            <form
+              style={{ display: 'flex', flexDirection: 'column' }}
+              noValidate
+              autoComplete='off'
+              onSubmit={handleSubmit(onSubmit)}
+            >
               <FormControl sx={{ mb: 3, mt: 0 }}>
                 <Controller
                   name='email'
@@ -132,9 +137,11 @@ const LoginRight = () => {
                     <OutlinedInput
                       value={value}
                       onBlur={onBlur}
+                      fullWidth
                       sx={{
                         background: 'rgba(234, 240, 247, 0.5)',
-                        width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' }
+                        // width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' },
+                        borderRadius: '10px'
                       }}
                       onChange={onChange}
                       id='auth-login-email'
@@ -153,9 +160,11 @@ const LoginRight = () => {
                     <OutlinedInput
                       value={value}
                       onBlur={onBlur}
+                      fullWidth
                       sx={{
                         background: 'rgba(234, 240, 247, 0.5)',
-                        width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' }
+                        // width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' },
+                        borderRadius: '10px'
                       }}
                       onChange={onChange}
                       id='auth-login-v2-password'
@@ -184,8 +193,9 @@ const LoginRight = () => {
               <Typography
                 sx={{
                   mt: 1,
-                  mb: 4,
-                  fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' }
+                  mb: 1,
+                  fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' },
+                  textAlign: 'end'
                 }}
               >
                 <LinkStyled href='/forgot-password'>Recover Password?</LinkStyled>
@@ -194,7 +204,10 @@ const LoginRight = () => {
                 type='submit'
                 variant='contained'
                 fullWidth
-                sx={{ width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' } }}
+                sx={{
+                  // width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' },
+                  borderRadius: '10px'
+                }}
               >
                 Sign In
               </Button>
@@ -236,7 +249,7 @@ const LoginRight = () => {
           }}
         >
           <BoxWrapper>
-            <Box sx={{ mb: 6 }}>
+            <Box sx={{ mb: 6, mt: 5 }}>
               <TypographyStyled color='white' variant='h3'>
                 Welcome Back!
               </TypographyStyled>
@@ -244,7 +257,12 @@ const LoginRight = () => {
                 Let's Plan Journey's Together!
               </Typography>
             </Box>
-            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
+            <form
+              style={{ display: 'flex', flexDirection: 'column' }}
+              noValidate
+              autoComplete='off'
+              onSubmit={handleSubmit(onSubmit)}
+            >
               <FormControl sx={{ mb: 3, mt: 0 }}>
                 <Controller
                   name='email'
@@ -254,7 +272,12 @@ const LoginRight = () => {
                     <OutlinedInput
                       value={value}
                       onBlur={onBlur}
-                      sx={{ background: 'rgba(234, 240, 247, 0.5)', width: '350px' }}
+                      fullWidth
+                      sx={{
+                        background: 'rgba(234, 240, 247, 0.5)',
+                        // width: '350px',
+                        borderRadius: '10px'
+                      }}
                       onChange={onChange}
                       id='auth-login-email'
                       error={Boolean(errors.email)}
@@ -272,7 +295,12 @@ const LoginRight = () => {
                     <OutlinedInput
                       value={value}
                       onBlur={onBlur}
-                      sx={{ background: 'rgba(234, 240, 247, 0.5)', width: '350px' }}
+                      fullWidth
+                      sx={{
+                        background: 'rgba(234, 240, 247, 0.5)',
+                        // width: '350px',
+                        borderRadius: '10px'
+                      }}
                       onChange={onChange}
                       id='auth-login-v2-password'
                       error={Boolean(errors.password)}
@@ -297,26 +325,40 @@ const LoginRight = () => {
                   </FormHelperText>
                 )}
               </FormControl>
-              <Box
+              <Typography
                 sx={{
                   mt: 1,
-                  mb: 4,
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center'
+                  mb: 1,
+                  fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' },
+                  textAlign: 'end'
                 }}
               >
                 <LinkStyled href='/forgot-password'>Recover Password?</LinkStyled>
-              </Box>
-              <Button type='submit' variant='contained' sx={{ width: '350px' }}>
+              </Typography>
+              <Button
+                type='submit'
+                variant='contained'
+                fullWidth
+                sx={{
+                  // width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' },
+                  borderRadius: '10px'
+                }}
+              >
                 Sign In
               </Button>
-              <Box sx={{ mt: 5 }}>
-                <Typography variant='body2' color='white'>
+              <Box sx={{ mt: 5, display: 'flex', flexDirection: 'column' }}>
+                <Typography
+                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                  variant='caption'
+                  color='white'
+                >
                   By logging in, you accept the adventurerichaholidays.com
                 </Typography>
-                <Typography variant='body2' color='white'>
+                <Typography
+                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                  variant='caption'
+                  color='white'
+                >
                   <CustomLinkStyled color='blue' href='/'>
                     Terms & conditions
                   </CustomLinkStyled>

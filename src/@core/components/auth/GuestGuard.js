@@ -10,9 +10,10 @@ const GuestGuard = props => {
   const router = useRouter()
 
   const { user, loading } = auth
+  const { isReady } = router;
 
   useEffect(() => {
-    if (!router.isReady) {
+    if (!isReady) {
       return
     }
 
@@ -22,7 +23,7 @@ const GuestGuard = props => {
       router.replace(redirectURL)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.route, user, loading])
+  }, [isReady, user, loading])
 
   if (loading || user !== null) {
     return fallback
