@@ -1,5 +1,11 @@
+import MainHome from './home'
+
 const Home = () => {
-  return <></>
+  return (
+    <>
+      <MainHome />
+    </>
+  )
 }
 
 export default Home

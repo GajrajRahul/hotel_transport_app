@@ -129,7 +129,7 @@ const Register = ({ registerUrl }) => {
 
     setIsLoading(true)
 
-    const api_url = `${BASE_URL}/${routes[routes.length - 1]}`
+    const api_url = `${process.env.NEXT_PUBLIC_BASE_URL}/${routes[routes.length - 1]}`
     const response = await postRequest(`${api_url}/login`, data)
     setIsLoading(false)
     if (response.status) {
@@ -152,7 +152,7 @@ const Register = ({ registerUrl }) => {
         }}
       >
         <Box sx={{ textAlign: 'center', mt: '20px' }}>
-          <NextImage src='/../public/images/white_logo.png' width={250} height={85} alt='company_logo' />
+          <NextImage src='/images/white_logo.png' width={250} height={85} alt='company_logo' />
         </Box>
         <Card className='inner-card' sx={{ mx: 10, p: 10, pb: 0 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

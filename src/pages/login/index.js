@@ -38,14 +38,21 @@ const LoginPage = () => {
           //   border: '1px solid red'
           // }}
         >
-          <Grid item xs={12} md={6}>
-            <Card className='inner-card'></Card>
-          </Grid>
+          {!hidden && (
+            <Grid item xs={12} md={6}>
+              <Card className='inner-card'></Card>
+            </Grid>
+          )}
           <Grid item xs={12} md={6}>
             <Card className='inner-card'>
               <LoginRight />
             </Card>
           </Grid>
+          {hidden && (
+            <Grid item xs={12} md={6} sx={{ mb: 7 }}>
+              <Card className='inner-card'></Card>
+            </Grid>
+          )}
         </Grid>
         <Card className='footer-card'>
           <CardContent sx={{ pt: '15px !important', pb: '15px !important' }}>

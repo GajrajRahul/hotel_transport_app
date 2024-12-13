@@ -2,22 +2,15 @@ import { API_RESPONSE } from 'src/api-main-file/APIResponse'
 import axiosInstance from './APIInterceptor'
 
 export const successResponse = ({ data: response, headers }) => {
-  const errorMessage =
-    typeof response.error == 'object'
-      ? Object.entries(response.error)
-          .map(item => `${item[1]}`)
-          .join(', ')
-      : response.error
-  return API_RESPONSE(response.data, response.status, 200, errorMessage, response.webVersion, headers.pv)
+  return API_RESPONSE(response.data, response.status, 200, response.error)
 }
 
 export const errorResponse = (error, url) => {
-  let statusCode, errorMessage, webVersion
+  let statusCode, errorMessage
 
   if (error.response && error.response.data?.error) {
     statusCode = error.response.status
     errorMessage = typeof error.response.data.error == 'object' ? 'Something went wrong' : error.response.data.error
-    webVersion = error.response.data.webVersion
   } else {
     statusCode = 500
     errorMessage = 'Something went wrong'
@@ -25,10 +18,10 @@ export const errorResponse = (error, url) => {
 
   if (statusCode == 401) {
     window.location.reload()
-    return API_RESPONSE(null, false, statusCode, errorMessage, webVersion, null)
+    return API_RESPONSE(null, false, statusCode, errorMessage)
   }
 
-  return API_RESPONSE(null, false, statusCode, errorMessage, webVersion)
+  return API_RESPONSE(null, false, statusCode, errorMessage)
 }
 
 export const getRequest = async (url, headers = {}) => {

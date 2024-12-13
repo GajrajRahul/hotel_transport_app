@@ -201,7 +201,7 @@ const transformTransportData = data => {
   return result
 }
 
-const Home = ({ hotel_response, rooms_list, transport_response }) => {
+const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
   const [openDrawer, setOpenDrawer] = useState(false)
   // const [slides, setSlides] = useState(data)
   const [loaded, setLoaded] = useState(false)
@@ -309,7 +309,16 @@ const Home = ({ hotel_response, rooms_list, transport_response }) => {
               }}
               key={index}
               // className='keen-slider__slide default-slide'
-              onClick={() => router.push(item.href)}
+              onClick={() => {
+                if (item.href == '/quotations' || item.href == '/quotations-history') {
+                  router.push(item.href)
+                }
+                if (item.href == '/quotations') {
+                  localStorage.removeItem('travel')
+                  localStorage.removeItem('citiesHotels')
+                  localStorage.removeItem('transport')
+                }
+              }}
             >
               <CardContent
                 sx={{
@@ -440,4 +449,4 @@ const Home = ({ hotel_response, rooms_list, transport_response }) => {
   )
 }
 
-export default Home
+export default MainHome

@@ -145,6 +145,7 @@ const LoginRight = () => {
                       }}
                       onChange={onChange}
                       id='auth-login-email'
+                      placeholder='Email'
                       error={Boolean(errors.email)}
                     />
                   )}
@@ -169,6 +170,7 @@ const LoginRight = () => {
                       onChange={onChange}
                       id='auth-login-v2-password'
                       error={Boolean(errors.password)}
+                      placeholder='Password'
                       type={showPassword ? 'text' : 'password'}
                       endAdornment={
                         <InputAdornment position='end'>
@@ -278,6 +280,7 @@ const LoginRight = () => {
                         // width: '350px',
                         borderRadius: '10px'
                       }}
+                      placeholder='Email'
                       onChange={onChange}
                       id='auth-login-email'
                       error={Boolean(errors.email)}
@@ -303,6 +306,7 @@ const LoginRight = () => {
                       }}
                       onChange={onChange}
                       id='auth-login-v2-password'
+                      placeholder='Password'
                       error={Boolean(errors.password)}
                       type={showPassword ? 'text' : 'password'}
                       endAdornment={

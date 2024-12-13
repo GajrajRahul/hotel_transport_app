@@ -101,9 +101,11 @@ const AdminLoginPage = () => {
           //   border: '1px solid red'
           // }}
         >
-          <Grid item xs={12} md={6}>
-            <Card className='inner-card'></Card>
-          </Grid>
+          {!hidden && (
+            <Grid item xs={12} md={6}>
+              <Card className='inner-card'></Card>
+            </Grid>
+          )}
           <Grid item xs={12} md={6}>
             <Card className='inner-card'>
               <Box
@@ -146,6 +148,7 @@ const AdminLoginPage = () => {
                               // width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' },
                               borderRadius: '10px'
                             }}
+                            placeholder='Email'
                             onChange={onChange}
                             id='auth-login-email'
                             error={Boolean(errors.email)}
@@ -171,6 +174,7 @@ const AdminLoginPage = () => {
                               // width: { mobileMd: '270px', sm: '350px', md: '270px', laptopSm: '350px' },
                               borderRadius: '10px'
                             }}
+                            placeholder='Password'
                             onChange={onChange}
                             id='auth-login-v2-password'
                             error={Boolean(errors.password)}
@@ -243,6 +247,11 @@ const AdminLoginPage = () => {
               </Box>
             </Card>
           </Grid>
+          {hidden && (
+            <Grid item xs={12} md={6} sx={{ mb: 7 }}>
+              <Card className='inner-card'></Card>
+            </Grid>
+          )}
         </Grid>
         <Card className='footer-card'>
           <CardContent sx={{ pt: '15px !important', pb: '15px !important' }}>

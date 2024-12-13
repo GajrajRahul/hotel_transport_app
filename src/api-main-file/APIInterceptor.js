@@ -6,12 +6,22 @@ const axiosInstance = axios.create()
 axiosInstance.interceptors.request.use(
   config => {
     let authToken = undefined
+    let clientId = undefined
+    let clientType = undefined
     if (typeof window !== 'undefined') {
       authToken = localStorage.getItem('authToken')
+      clientId = localStorage.getItem('clientId')
+      clientType =
+        localStorage.getItem('clientType') == 'admin'
+          ? 'AdminId'
+          : localStorage.getItem('clientType') == 'employee'
+          ? 'EmployeeId'
+          : 'PartnerId'
     }
 
     if (authToken) {
       config.headers['Authorization'] = `Bearer ${authToken}`
+      config.headers[clientType] = clientId
     }
     // else {
     //   // change this auth token
@@ -20,7 +30,6 @@ axiosInstance.interceptors.request.use(
     // }
 
     // config.headers["Content-Type"] = "application/json";
-
     return config
   },
 

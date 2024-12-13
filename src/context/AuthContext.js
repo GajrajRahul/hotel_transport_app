@@ -35,6 +35,7 @@ const AuthProvider = ({ children }) => {
       if (storedToken) {
         setLoading(true)
         const response = await getRequest(`${api_url}/fetch-profile`)
+        setLoading(false)
 
         if (response.status) {
           const {
@@ -76,6 +77,7 @@ const AuthProvider = ({ children }) => {
 
     localStorage.setItem('authToken', token)
     localStorage.setItem('clientId', user_data[`${clientType}Id`])
+    localStorage.setItem('clientType', clientType)
 
     setLoading(true)
 
@@ -86,6 +88,7 @@ const AuthProvider = ({ children }) => {
     if (response.status) {
       setUser(user_data)
     } else {
+    // return;
       logoutHandler()
       return
     }
