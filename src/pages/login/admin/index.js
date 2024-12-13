@@ -74,7 +74,7 @@ const AdminLoginPage = () => {
   const onSubmit = async data => {
     const { email, password } = data
     try {
-      const response = await auth.login({ email, password, clientType: tabValue })
+      const response = await auth.login({ email, password, clientType: 'admin' })
     } catch (error) {
       toast.error(error)
     }
