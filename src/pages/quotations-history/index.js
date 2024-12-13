@@ -3,11 +3,11 @@ import React, { useMemo } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
-import OptionsMenu from '@mui/material/OptionsMenu'
 
 import { DataGrid } from '@mui/x-data-grid'
 
 import Icon from 'src/@core/components/icon'
+import OptionsMenu from 'src/@core/components/option-menu'
 
 const defaultColumns = [
   //   {
