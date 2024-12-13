@@ -29,7 +29,7 @@ const LoginPage = () => {
         }}
       >
         <Box sx={{ textAlign: 'center', mt: '20px' }}>
-          <Image src='/../public/images/white_logo.png' width={250} height={85} alt='company_logo' />
+          <Image src='/images/white_logo.png' width={250} height={85} alt='company_logo' />
         </Box>
         <Grid
           container
