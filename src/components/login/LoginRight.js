@@ -1,5 +1,6 @@
 import { useForm, Controller } from 'react-hook-form'
 import React, { useState } from 'react'
+import toast from 'react-hot-toast'
 
 import Link from 'next/link'
 
@@ -66,7 +67,7 @@ const BoxWrapper = styled(Box)(({ theme }) => ({
 
 const LoginRight = () => {
   const [showPassword, setShowPassword] = useState(false)
-  const [tabValue, setTabValue] = useState('1')
+  const [tabValue, setTabValue] = useState('partner')
 
   const auth = useAuth()
 
@@ -77,8 +78,6 @@ const LoginRight = () => {
     formState: { errors }
   } = useForm({
     defaultValues: {
-      //   password: 'admin',
-      //   email: 'admin@materio.com'
       password: '',
       email: ''
     }
@@ -88,23 +87,22 @@ const LoginRight = () => {
     setTabValue(newValue)
   }
 
-  const onSubmit = data => {
+  const onSubmit = async data => {
     const { email, password } = data
-    auth.login({ email, password }, () => {
-      setError('email', {
-        type: 'manual',
-        message: 'Email or Password is invalid'
-      })
-    })
+    try {
+      const response = await auth.login({ email, password, clientType: tabValue })
+    } catch (error) {
+      toast.error(error)
+    }
   }
 
   return (
     <TabContext value={tabValue}>
       <TabList onChange={handleTabValue} aria-label='customized tabs example'>
-        <Tab sx={{ width: 1 / 2 }} value='1' label='Partners' />
-        <Tab sx={{ width: 1 / 2 }} value='2' label='Travel Experts' />
+        <Tab sx={{ width: 1 / 2 }} value='partner' label='Partners' />
+        <Tab sx={{ width: 1 / 2 }} value='employee' label='Travel Experts' />
       </TabList>
-      <TabPanel value='1'>
+      <TabPanel value='partner'>
         <Box
           sx={{
             p: '0px 40px 0px 40px',
@@ -141,11 +139,6 @@ const LoginRight = () => {
                       onChange={onChange}
                       id='auth-login-email'
                       error={Boolean(errors.email)}
-                      endAdornment={
-                        <InputAdornment position='end'>
-                          <Icon icon='mdi:email-outline' fontSize={20} />
-                        </InputAdornment>
-                      }
                     />
                   )}
                 />
@@ -231,7 +224,7 @@ const LoginRight = () => {
           </BoxWrapper>
         </Box>
       </TabPanel>
-      <TabPanel value='2'>
+      <TabPanel value='employee'>
         <Box
           sx={{
             p: '0px 40px 0px 40px',

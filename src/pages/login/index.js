@@ -31,7 +31,16 @@ const LoginPage = () => {
         <Box sx={{ textAlign: 'center', mt: '20px' }}>
           <Image src='/../public/images/white_logo.png' width={250} height={85} alt='company_logo' />
         </Box>
-        <Grid container spacing={6}>
+        <Grid
+          container
+          spacing={6}
+          // sx={{
+          //   flexDirection: {
+          //     xs: 'column',
+          //     md: 'row'
+          //   }
+          // }}
+        >
           <Grid item xs={12} md={6}>
             <Card className='inner-card'></Card>
           </Grid>
@@ -43,7 +52,11 @@ const LoginPage = () => {
           <Grid item xs={12}>
             <Card className='footer-card'>
               <CardContent>
-                <Typography sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }} color='white' fontSize={20}>
+                <Typography
+                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                  color='white'
+                  fontSize={20}
+                >
                   © 2019 - 2024 Adventure Richa Holidays. All rights reserved.
                 </Typography>
               </CardContent>

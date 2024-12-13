@@ -63,8 +63,7 @@ const VerticalLayout = props => {
   return (
     <>
       <VerticalLayoutWrapper className='layout-wrapper'>
-        {/* Navigation Menu */}
-        {navHidden && !(navHidden && settings.lastLayout === 'horizontal') ? null : (
+        {/* {navHidden && !(navHidden && settings.lastLayout === 'horizontal') ? null : (
           <Navigation
             navWidth={navWidth}
             navVisible={navVisible}
@@ -82,12 +81,11 @@ const VerticalLayout = props => {
             beforeNavMenuContent={verticalLayoutProps.navMenu.beforeContent}
             {...props}
           />
-        )}
+        )} */}
         <MainContentWrapper
           className='layout-content-wrapper'
           sx={{ ...(contentHeightFixed && { maxHeight: '100vh' }) }}
         >
-          {/* AppBar Component */}
           <AppBar
             toggleNavVisibility={toggleNavVisibility}
             appBarContent={verticalLayoutProps.appBar?.content}
@@ -95,7 +93,6 @@ const VerticalLayout = props => {
             {...props}
           />
 
-          {/* Content */}
           <ContentWrapper
             className='layout-page-content'
             sx={{
@@ -105,16 +102,13 @@ const VerticalLayout = props => {
               }),
               ...(contentWidth === 'boxed' && {
                 mx: 'auto',
-                '@media (min-width:1440px)': { maxWidth: 1440 },
+                '@media (min-width:1440px)': { maxWidth: 1500 },
                 '@media (min-width:1200px)': { maxWidth: '100%' }
               })
             }}
           >
             {children}
           </ContentWrapper>
-
-          {/* Footer Component */}
-          {/* <Footer footerStyles={footerProps?.sx} footerContent={footerProps?.content} {...props} /> */}
         </MainContentWrapper>
       </VerticalLayoutWrapper>
 

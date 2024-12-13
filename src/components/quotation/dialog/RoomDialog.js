@@ -70,14 +70,19 @@ const Room = ({ room, roomInfoRef, rooms, selectedHotelDetail }) => {
   }
 
   return (
-    <Box>
-      <Typography>{`${room[0].toUpperCase()}${room.slice(1)}`}</Typography>
+    <Box
+      sx={{ border: '1px solid #9A9A9A', borderRadius: '6px', position: 'relative', height: '56px', width: '125px' }}
+    >
+      <Typography
+        variant='caption'
+        sx={{ position: 'absolute', top: -11.5, left: 6, background: 'white', px: 1 }}
+      >{`${room[0].toUpperCase()}${room.slice(1)}`}</Typography>
       <Controller
         name={room}
         control={roomControl}
         rules={{ required: false }}
         render={({ field: { value, onChange } }) => (
-          <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width: '100%', mt: 3.5 }}>
             <IconButton
               edge='end'
               onClick={e => {
@@ -87,12 +92,13 @@ const Room = ({ room, roomInfoRef, rooms, selectedHotelDetail }) => {
               aria-label='toggle minus visibility'
               size='small'
               sx={{
-                mr: 3,
                 backgroundColor: theme => theme.palette.primary.main,
                 color: 'white',
                 '&.MuiIconButton-root:hover': {
                   backgroundColor: theme => theme.palette.primary.main
-                }
+                },
+                width: '25px',
+                height: '25px'
               }}
             >
               <Icon icon='mdi:minus' />
@@ -107,12 +113,13 @@ const Room = ({ room, roomInfoRef, rooms, selectedHotelDetail }) => {
               aria-label='toggle plus visibility'
               size='small'
               sx={{
-                ml: 3,
                 backgroundColor: theme => theme.palette.primary.main,
                 color: 'white',
                 '&.MuiIconButton-root:hover': {
                   backgroundColor: theme => theme.palette.primary.main
-                }
+                },
+                width: '25px',
+                height: '25px'
               }}
             >
               <Icon icon='mdi:plus' />
@@ -190,16 +197,17 @@ const RoomDialog = ({
       <DialogTitle
         sx={{
           '&.MuiDialogTitle-root': {
-            pb: 3
+            pb: 1
           }
         }}
         textAlign='center'
       >
-        Rooms
+        Select Room Type
       </DialogTitle>
       <DialogContent>
-        <DialogContentText textAlign='center'>Select {totalRooms == 0 ? rooms : totalRooms} rooms</DialogContentText>
-        <Box sx={{ mt: 5, display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+        {/* <DialogContentText textAlign='center'>Select {totalRooms == 0 ? rooms : totalRooms} rooms</DialogContentText> */}
+        <DialogContentText textAlign='center'>Select Cities where you want to book your stay</DialogContentText>
+        <Box sx={{ mt: 7, display: 'flex', flexWrap: 'wrap', gap: 7, justifyContent: 'center' }}>
           {roomTypes.map(room => (
             <Room
               key={room}
@@ -212,10 +220,10 @@ const RoomDialog = ({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button variant='outlined' onClick={resetFields}>
+        <Button size='small' variant='outlined' onClick={resetFields}>
           Cancel
         </Button>
-        <Button variant='contained' onClick={onSubmit}>
+        <Button size='small' variant='contained' onClick={onSubmit}>
           Submit
         </Button>
       </DialogActions>

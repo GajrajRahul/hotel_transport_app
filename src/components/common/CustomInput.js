@@ -1,4 +1,4 @@
-import { forwardRef } from "react"
+import { forwardRef } from 'react'
 import format from 'date-fns/format'
 
 import FormControl from '@mui/material/FormControl'
@@ -14,7 +14,7 @@ const CustomInput = forwardRef((props, ref) => {
   const { start, end, propserror } = props
   const startDate = start !== null ? format(start, 'dd MMM yyyy') : null
   const endDate = end !== null ? ` - ${format(end, 'dd MMM yyyy')}` : null
-  const value = `${startDate}${endDate !== null ? endDate : ''}`
+  const value = `${startDate !== null ? startDate : ''}${endDate !== null ? endDate : ''}`
   const theme = useTheme()
 
   return (

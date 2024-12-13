@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import DatePicker from 'react-datepicker'
+import { addDays } from 'date-fns'
 
 import { Controller, useForm } from 'react-hook-form'
 
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -23,6 +25,10 @@ import Tab from '@mui/material/Tab'
 import Card from '@mui/material/Card'
 import CardMedia from '@mui/material/CardMedia'
 import CardContent from '@mui/material/CardContent'
+import Paper from '@mui/material/Paper'
+import MenuList from '@mui/material/MenuList'
+import MenuItem from '@mui/material/MenuItem'
+import IconButton from '@mui/material/IconButton'
 
 import { styled, useTheme } from '@mui/material/styles'
 
@@ -54,73 +60,112 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
 }))
 
 const HotelDialog = ({
+  setSelectedCitiesHotels,
+  selectedCitiesHotels,
   open,
   handleClose,
-  cities,
-  setHotelValue,
   selectedCity,
   isEdit,
   selectedHotelInfo,
-  travelDates,
   hotelRate,
   roomsList
 }) => {
+  const travelInfoData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
+  // console.log('selectedCitiesHotels: ', selectedCitiesHotels)
+  // console.log(selectedHotelInfo)
+
   const dayCount = useMemo(() => {
-    return getDayNightCount(travelDates) + 1
+    // return getDayNightCount(quotationsData.travelInfo['dates']) + 1
+    return 0
   }, [])
+
+  const [tabValue, setTabValue] = useState('0')
+  const [hotelList, setHotelList] = useState([])
+
+  const [selectedHotelDetail, setSelectedHotelDetail] = useState(null)
+  const [openRoomDialog, setOpenRoomDialog] = useState(false)
+  const [selectedHotel, setSelectedHotel] = useState(null)
+  const [openMenuList, setOpenMenuList] = useState(false)
+  const [totalRooms, setTotalRooms] = useState(0)
 
   const {
     reset: hotelReset,
     watch: hotelWatch,
-    setValue,
+    setValue: setHotelValue,
     control: hotelControl,
     handleSubmit: handleHotelDialogSubmit,
     formState: { errors }
   } = useForm({
-    defaultValues: isEdit
-      ? selectedHotelInfo
-      : {
-          ...selectedHotelInfo,
-          checkInCheckOut: travelDates,
-          daysNights: `${dayCount} ${dayCount < 2 ? 'Day' : 'Days'} & ${dayCount - 1} ${
-            dayCount < 3 ? 'Night' : 'Nights'
-          }`
-        }
+    defaultValues: selectedHotelInfo
   })
-  const [tabValue, setTabValue] = useState('0')
-  const [hotelList, setHotelList] = useState([])
 
-  const [openRoomDialog, setOpenRoomDialog] = useState(false)
-  const [selectedHotel, setSelectedHotel] = useState(null)
-  const [selectedHotelDetail, setSelectedHotelDetail] = useState(null)
-  const [totalRooms, setTotalRooms] = useState(0)
+  const paperRef = useRef(null)
 
   const theme = useTheme()
+
   const rooms = hotelWatch('rooms')
   const child = hotelWatch('child')
+  const adult = hotelWatch('adult')
+
+  // useEffect(() => {
+  //   const travelDates = quotationsData.travelInfo['dates']
+  //   if (travelDates[0] != null && travelDates[1] != null) {
+  //     console.log(travelDates)
+  //     setHotelValue('checkInCheckOut', travelDates)
+  //     const daysNightsCount = getDayNightCount(travelDates) + 1
+  //     console.log("daysNightsCount: ", daysNightsCount)
+  //     setHotelValue(
+  //       'daysNights',
+  //       `${daysNightsCount} ${daysNightsCount < 2 ? 'Day' : 'Days'} & ${daysNightsCount - 1} ${
+  //         daysNightsCount < 3 ? 'Night' : 'Nights'
+  //       }`
+  //     )
+  //   }
+  // }, [quotationsData.travelInfo['days-nights']])
 
   useEffect(() => {
     if (selectedCity) {
       getHotelList()
     }
   }, [selectedCity])
+  // console.log(selectedHotelInfo)
 
   useEffect(() => {
     if (selectedHotelInfo) {
-      const { checkInCheckOut, daysNights, breakfast, lunch, dinner, rooms, extraBed, child } = selectedHotelInfo
+      const { checkInCheckOut, daysNights, breakfast, lunch, dinner, rooms, extraBed, child, adult, persons, hotel } =
+        selectedHotelInfo
       hotelReset({
-        checkInCheckOut: checkInCheckOut,
+        checkInCheckOut: [
+          checkInCheckOut[0] ? new Date(checkInCheckOut[0]) : null,
+          checkInCheckOut[1] ? new Date(checkInCheckOut[1]) : null
+        ],
+        daysNights,
         breakfast,
         lunch,
         dinner,
-        extraBed,
         rooms,
-        daysNights,
-        child
+        extraBed,
+        child,
+        adult,
+        persons,
+        hotel
       })
       setSelectedHotelDetail(selectedHotelInfo.hotel)
     }
   }, [selectedHotelInfo])
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const handleClickOutside = event => {
+    if (paperRef.current && !paperRef.current.contains(event.target)) {
+      setOpenMenuList(false)
+    }
+  }
 
   const getHotelList = () => {
     let finalHotelList = []
@@ -146,6 +191,50 @@ const HotelDialog = ({
     setTabValue(newValue)
   }
 
+  const handleChildIncrement = onChange => {
+    const newValue =
+      Number(adult) == 0 ? `${Number(child) + 1} Childs` : `${adult} Adults & ${Number(child) + 1} Childs`
+    setHotelValue('persons', newValue)
+    onChange(`${Number(child) + 1}`)
+  }
+
+  const handleChildDecrement = onChange => {
+    if (Number(child) != 0) {
+      onChange(`${Number(child) - 1}`)
+    }
+    const newValue =
+      Number(adult) == 0 && Number(child) == 0
+        ? ''
+        : Number(adult) != 0 && Number(child) != 0
+        ? `${adult} Adults & ${Number(child) - 1} Childs`
+        : Number(child) == 0
+        ? `${adult} Adults`
+        : `${Number(child) - 1} Childs`
+    setHotelValue('persons', newValue)
+  }
+
+  const handleAdultIncrement = onChange => {
+    const newValue =
+      Number(child) == 0 ? `${Number(adult) + 1} Adults` : `${Number(adult) + 1} Adults & ${child} Childs`
+    setHotelValue('persons', newValue)
+    onChange(`${Number(adult) + 1}`)
+  }
+
+  const handleAdultDecrement = onChange => {
+    if (Number(adult) != 0) {
+      onChange(`${Number(adult) - 1}`)
+    }
+    const newValue =
+      Number(adult) == 0 && Number(child) == 0
+        ? ''
+        : Number(adult) != 0 && Number(child) != 0
+        ? `${Number(adult) - 1} Adults & ${child} Childs`
+        : Number(adult) == 0
+        ? `${child} Childs`
+        : `${Number(adult) - 1} Adults`
+    setHotelValue('persons', newValue)
+  }
+
   const handleHotelChange = hotel => {
     setHotelList(prev =>
       prev.map(data => (data.id == hotel.id ? { ...data, selected: !data.selected } : { ...data, selected: false }))
@@ -166,7 +255,9 @@ const HotelDialog = ({
   }
 
   const onDialogSubmit = data => {
-    const { checkInCheckOut, breakfast, lunch, dinner, rooms, daysNights, extraBed, child } = data
+    // console.log(data)
+    // return;
+    const { checkInCheckOut, breakfast, lunch, dinner, rooms, daysNights, extraBed, child, adult, persons } = data
     if (!selectedHotelDetail) {
       return
     }
@@ -179,10 +270,10 @@ const HotelDialog = ({
       return
     }
 
-    const cityToFind = cities.find(city => city.id == selectedCity.id)
+    const cityToFind = selectedCitiesHotels.find(city => city.id == selectedCity.id)
 
     if (isEdit) {
-      const updatedCities = cities.map(city =>
+      const updatedCities = selectedCitiesHotels.map(city =>
         city.id == selectedCity.id
           ? {
               ...city,
@@ -198,7 +289,10 @@ const HotelDialog = ({
                       child,
                       daysNights,
                       extraBed,
-                      hotel: selectedHotelDetail
+                      hotel: selectedHotelDetail,
+                      child,
+                      adult,
+                      persons
                     }
                   : currHotel
               )
@@ -206,24 +300,54 @@ const HotelDialog = ({
           : city
       )
 
-      setHotelValue('cities', updatedCities)
+      // console.log(updatedCities)
+      setSelectedCitiesHotels(updatedCities)
+      // setHotelValue('cities', updatedCities)
     } else {
+      // console.log(cityToFind)
       if (cityToFind) {
-        cityToFind.info.push({
-          id: Date.now(),
-          checkInCheckOut,
-          breakfast,
-          lunch,
-          dinner,
-          rooms,
-          child,
-          daysNights,
-          extraBed,
-          hotel: selectedHotelDetail
-        })
-        setHotelValue('cities', cities)
+        const updatedCities = selectedCitiesHotels.map(city =>
+          city.id == selectedCity.id
+            ? {
+                ...city,
+                info: [
+                  ...city.info,
+                  {
+                    id: Date.now(),
+                    checkInCheckOut,
+                    breakfast,
+                    lunch,
+                    dinner,
+                    rooms,
+                    child,
+                    daysNights,
+                    extraBed,
+                    hotel: selectedHotelDetail,
+                    persons,
+                    adult
+                  }
+                ]
+              }
+            : city
+        )
+        // cityToFind.info.push({
+        //   id: Date.now(),
+        //   checkInCheckOut,
+        //   breakfast,
+        //   lunch,
+        //   dinner,
+        //   rooms,
+        //   child,
+        //   daysNights,
+        //   extraBed,
+        //   hotel: selectedHotelDetail
+        // })
+        // console.log(updatedCities)
+        setSelectedCitiesHotels(updatedCities)
+        // setHotelValue('cities', selectedCitiesHotels)
       }
     }
+    // return
     resetFields()
   }
 
@@ -236,21 +360,20 @@ const HotelDialog = ({
   }
 
   return (
-    <Dialog fullWidth maxWidth='laptopXs' open={open} onClose={resetFields}>
+    <Dialog fullWidth maxWidth='laptopSm' open={open} onClose={resetFields}>
       <DialogTitle
         sx={{
           '&.MuiDialogTitle-root': {
-            pb: 3
+            pb: 0
           }
         }}
-        textAlign='center'
       >
-        Select Hotel
+        Hotel Category
       </DialogTitle>
       <Box component='form' onSubmit={handleHotelDialogSubmit(onDialogSubmit)}>
         <DialogContent sx={{ pt: 0 }}>
-          <DialogContentText textAlign='center'>Select Hotel and Meal type.</DialogContentText>
-          <DatePickerWrapper sx={{ mt: 5 }}>
+          <DialogContentText>Need To Select at least 1 Hotel</DialogContentText>
+          <DatePickerWrapper sx={{ p: 2, pt: 5 }}>
             <Grid container spacing={6}>
               <Grid item xs={12} tablet={6}>
                 <Controller
@@ -261,18 +384,26 @@ const HotelDialog = ({
                     return (
                       <DatePicker
                         selectsRange
-                        minDate={travelDates[0]}
-                        maxDate={travelDates[1]}
+                        minDate={
+                          travelInfoData && Array.isArray(travelInfoData.dates) && travelInfoData.dates[0]
+                            ? new Date(travelInfoData.dates[0])
+                            : new Date()
+                        }
+                        maxDate={
+                          travelInfoData && Array.isArray(travelInfoData.dates) && travelInfoData.dates[1]
+                            ? new Date(travelInfoData.dates[1])
+                            : addDays(new Date(), 45)
+                        }
                         monthsShown={2}
-                        endDate={value[1]}
-                        selected={value[0]}
-                        startDate={value[0]}
+                        endDate={value[1] ? new Date(value[1]) : null}
+                        selected={value[0] ? new Date(value[0]) : null}
+                        startDate={value[0] ? new Date(value[0]) : null}
                         shouldCloseOnSelect={false}
                         id='date-range-picker-months'
                         onChange={e => {
                           onChange(e)
                           const dayCount = getDayNightCount(e) + 1
-                          setValue(
+                          setHotelValue(
                             'daysNights',
                             e[1] == null
                               ? '1 Day'
@@ -310,7 +441,7 @@ const HotelDialog = ({
                         id='stepper-linear-account-daysNights'
                         startAdornment={
                           <InputAdornment position='start'>
-                            <Icon icon='mdi:sun-moon-stars' color={theme.palette.primary.main} />
+                            <Icon icon='mdi:sun-moon-stars' />
                           </InputAdornment>
                         }
                       />
@@ -319,107 +450,301 @@ const HotelDialog = ({
                 </FormControl>
               </Grid>
               <Grid item xs={12} tablet={6}>
-                <FormGroup
-                  sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    border: '1px solid black',
-                    borderRadius: '6px',
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    height: '100%'
-                  }}
-                >
+                <Box sx={{ border: '1px solid #9A9A9A', borderRadius: '6px', position: 'relative', height: '56px' }}>
+                  <Typography
+                    variant='caption'
+                    sx={{ position: 'absolute', top: -11.5, left: 10, background: 'white', px: 1 }}
+                  >
+                    Meals
+                  </Typography>
+                  <FormGroup
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      height: '100%'
+                      // gap: 3,
+                      // pl: 3
+                    }}
+                  >
+                    <Controller
+                      name='breakfast'
+                      control={hotelControl}
+                      rules={{ required: false }}
+                      render={({ field: { value, onChange } }) => (
+                        <FormControlLabel
+                          value={value}
+                          checked={value}
+                          onChange={onChange}
+                          control={<Checkbox size='small' />}
+                          label='Breakfast'
+                        />
+                      )}
+                    />
+                    <Controller
+                      name='lunch'
+                      control={hotelControl}
+                      rules={{ required: false }}
+                      render={({ field: { value, onChange } }) => (
+                        <FormControlLabel
+                          value={value}
+                          checked={value}
+                          onChange={onChange}
+                          control={<Checkbox size='small' />}
+                          label='Lunch'
+                        />
+                      )}
+                    />
+                    <Controller
+                      name='dinner'
+                      control={hotelControl}
+                      rules={{ required: false }}
+                      render={({ field: { value, onChange } }) => (
+                        <FormControlLabel
+                          value={value}
+                          checked={value}
+                          onChange={onChange}
+                          control={<Checkbox size='small' />}
+                          label='Dinner'
+                        />
+                      )}
+                    />
+                  </FormGroup>
+                </Box>
+              </Grid>
+              <Grid item xs={12} tablet={6}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor='stepper-linear-account-person'>No. of Persons</InputLabel>
                   <Controller
-                    name='breakfast'
+                    name='persons'
                     control={hotelControl}
-                    rules={{ required: false }}
+                    rules={{ required: 'This field is required' }}
                     render={({ field: { value, onChange } }) => (
-                      <FormControlLabel
-                        value={value}
-                        checked={value}
-                        onChange={onChange}
-                        control={<Checkbox />}
-                        label='Breakfast'
+                      <OutlinedInput
+                        value={
+                          Number(adult) == 0 && Number(child) == 0
+                            ? ''
+                            : Number(adult) != 0 && Number(child) != 0
+                            ? `${adult} Adults & ${child} Childs`
+                            : Number(adult) == 0
+                            ? `${child} Childs`
+                            : `${adult} Adults`
+                        }
+                        label='No. of Persons'
+                        id='stepper-linear-account-person'
+                        startAdornment={
+                          <InputAdornment position='start'>
+                            <Icon icon='mdi:emoji-people' color={theme.palette.primary.main} />
+                          </InputAdornment>
+                        }
+                        onFocus={() => {
+                          setOpenMenuList(true)
+                        }}
                       />
                     )}
                   />
-                  <Controller
-                    name='lunch'
-                    control={hotelControl}
-                    rules={{ required: false }}
-                    render={({ field: { value, onChange } }) => (
-                      <FormControlLabel
-                        value={value}
-                        checked={value}
-                        onChange={onChange}
-                        control={<Checkbox />}
-                        label='Lunch'
+                  {openMenuList && (
+                    <Paper
+                      sx={{
+                        width: '100%',
+                        maxWidth: '100%',
+                        position: 'absolute',
+                        zIndex: 2,
+                        mt: '15%'
+                      }}
+                      ref={paperRef}
+                    >
+                      <MenuList>
+                        <MenuItem
+                          sx={{
+                            '&.MuiMenuItem-root': {
+                              backgroundColor: 'transparent'
+                            },
+                            '&.MuiMenuItem-root:hover': {
+                              backgroundColor: 'transparent'
+                            },
+                            cursor: 'default'
+                          }}
+                          disableRipple
+                        >
+                          Adult{' '}
+                          <Controller
+                            name='adult'
+                            control={hotelControl}
+                            rules={{ required: 'This field is required' }}
+                            render={({ field: { value, onChange } }) => (
+                              <>
+                                <IconButton
+                                  edge='end'
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    handleAdultDecrement(onChange)
+                                  }}
+                                  aria-label='toggle minus visibility'
+                                  size='small'
+                                  sx={{
+                                    mx: 3,
+                                    backgroundColor: theme => theme.palette.primary.main,
+                                    color: 'white',
+                                    '&.MuiIconButton-root:hover': {
+                                      backgroundColor: theme => theme.palette.primary.main
+                                    }
+                                  }}
+                                >
+                                  <Icon icon='mdi:minus' />
+                                </IconButton>
+                                {value}
+                                <IconButton
+                                  edge='end'
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    handleAdultIncrement(onChange)
+                                  }}
+                                  aria-label='toggle plus visibility'
+                                  size='small'
+                                  sx={{
+                                    mx: 3,
+                                    backgroundColor: theme => theme.palette.primary.main,
+                                    color: 'white',
+                                    '&.MuiIconButton-root:hover': {
+                                      backgroundColor: theme => theme.palette.primary.main
+                                    }
+                                  }}
+                                >
+                                  <Icon icon='mdi:plus' />
+                                </IconButton>
+                              </>
+                            )}
+                          />
+                        </MenuItem>
+                        <MenuItem
+                          sx={{
+                            '&.MuiMenuItem-root': {
+                              backgroundColor: 'transparent'
+                            },
+                            '&.MuiMenuItem-root:hover': {
+                              backgroundColor: 'transparent'
+                            },
+                            cursor: 'default'
+                          }}
+                          disableRipple
+                        >
+                          Child
+                          <Controller
+                            name='child'
+                            control={hotelControl}
+                            rules={{ required: 'This field is required' }}
+                            render={({ field: { value, onChange } }) => (
+                              <>
+                                <IconButton
+                                  edge='end'
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    handleChildDecrement(onChange)
+                                  }}
+                                  aria-label='toggle minus visibility'
+                                  size='small'
+                                  sx={{
+                                    mx: 3,
+                                    backgroundColor: theme => theme.palette.primary.main,
+                                    color: 'white',
+                                    '&.MuiIconButton-root:hover': {
+                                      backgroundColor: theme => theme.palette.primary.main
+                                    }
+                                  }}
+                                >
+                                  <Icon icon='mdi:minus' />
+                                </IconButton>
+                                {value}
+                                <IconButton
+                                  edge='end'
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    handleChildIncrement(onChange)
+                                  }}
+                                  aria-label='toggle plus visibility'
+                                  size='small'
+                                  sx={{
+                                    mx: 3,
+                                    backgroundColor: theme => theme.palette.primary.main,
+                                    color: 'white',
+                                    '&.MuiIconButton-root:hover': {
+                                      backgroundColor: theme => theme.palette.primary.main
+                                    }
+                                  }}
+                                >
+                                  <Icon icon='mdi:plus' />
+                                </IconButton>
+                              </>
+                            )}
+                          />
+                        </MenuItem>
+                      </MenuList>
+                    </Paper>
+                  )}
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <Grid container spacing={6} sx={{ justifyContent: 'center' }}>
+                  <Grid item xs={12} mobileSm={6} tablet={3}>
+                    <Box
+                      sx={{
+                        border: '1px solid #9A9A9A',
+                        borderRadius: '6px',
+                        position: 'relative',
+                        height: '55.7px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        px: 3
+                      }}
+                    >
+                      <Typography
+                        variant='caption'
+                        sx={{ position: 'absolute', top: -11.5, left: 10, background: 'white', px: 1 }}
+                      >
+                        No of Rooms
+                      </Typography>
+                      <CusomInputWithButttons
+                        name='rooms'
+                        hotelControl={hotelControl}
+                        isRequired='This field is required'
+                        // label='No. of Rooms *'
+                        errors={errors}
+                        icon='curtains-open'
+                        theme={theme}
                       />
-                    )}
-                  />
-                  <Controller
-                    name='dinner'
-                    control={hotelControl}
-                    rules={{ required: false }}
-                    render={({ field: { value, onChange } }) => (
-                      <FormControlLabel
-                        value={value}
-                        checked={value}
-                        onChange={onChange}
-                        control={<Checkbox />}
-                        label='Dinner'
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} mobileSm={6} tablet={3}>
+                    <Box
+                      sx={{
+                        border: '1px solid #9A9A9A',
+                        borderRadius: '6px',
+                        position: 'relative',
+                        height: '55.7px',
+                        display: 'flex',
+                        px: 3
+                      }}
+                    >
+                      <Typography
+                        variant='caption'
+                        sx={{ position: 'absolute', top: -11.5, left: 10, background: 'white', px: 1 }}
+                      >
+                        Extra Bed
+                      </Typography>
+                      <CusomInputWithButttons
+                        name='extraBed'
+                        hotelControl={hotelControl}
+                        isRequired={false}
+                        label='Extra Bed'
+                        errors={errors}
+                        icon='double-bed'
+                        theme={theme}
                       />
-                    )}
-                  />
-                </FormGroup>
-              </Grid>
-              <Grid item xs={12} mobileSm={6} tablet={2.5}>
-                <CusomInputWithButttons
-                  name='rooms'
-                  hotelControl={hotelControl}
-                  isRequired='This field is required'
-                  label='No. of Rooms *'
-                  errors={errors}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                mobileSm={6}
-                tablet={2}
-                sx={{
-                  '&.MuiGrid-root': {
-                    pl: 0
-                  }
-                }}
-              >
-                <CusomInputWithButttons
-                  name='extraBed'
-                  hotelControl={hotelControl}
-                  isRequired={false}
-                  label='Extra Bed'
-                  errors={errors}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                mobileSm={6}
-                tablet={1.5}
-                sx={{
-                  '&.MuiGrid-root': {
-                    pl: 0
-                  }
-                }}
-              >
-                <CusomInputWithButttons
-                  name='child'
-                  hotelControl={hotelControl}
-                  isRequired={false}
-                  label='Child'
-                  errors={errors}
-                />
+                    </Box>
+                  </Grid>
+                </Grid>
               </Grid>
               {hotelList.length > 0 && (
                 <Grid item xs={12}>
@@ -442,25 +767,25 @@ const HotelDialog = ({
                       <TabPanel key={currHotels?.hotelType} value={index.toString()} sx={{ mt: 3 }}>
                         <Grid container spacing={6}>
                           {currHotels.hotels.map(hotel => (
-                            <Grid key={hotel.id} item xs={12} sm={4}>
+                            <Grid key={hotel.id} item xs={12} sm={6}>
                               <Card>
-                                <CardMedia sx={{ height: '9.375rem' }} image={`/images/hotels/${hotel.image}.png`} />
-                                <CardContent sx={{ p: theme => `${theme.spacing(3, 5.25, 4)} !important` }}>
-                                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography variant='h6' sx={{ mb: 2 }}>
-                                      {hotel.name}
-                                    </Typography>
-                                    <Icon
-                                      onClick={() => handleHotelChange(hotel)}
-                                      style={{ cursor: 'pointer' }}
-                                      icon={`mdi:${hotel.selected ? 'bookmark' : 'bookmark-outline'}`}
-                                    />
+                                <CardMedia sx={{ height: '9.375rem' }} image={`/images/hotels/jaipur.jpg`} />
+                                <CardContent sx={{ p: theme => `${theme.spacing(3, 5, 4)} !important` }}>
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                      {/* <Icon icon='mdi:hotel-location' /> */}
+                                      <Typography variant='h6' sx={{ mb: 2 }}>
+                                        {hotel.name}
+                                      </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                      <Typography variant='h6'>₹3*** - ₹5***</Typography>
+                                      <Typography variant='body2' sx={{ mt: 3 }}>
+                                        /Room
+                                      </Typography>
+                                    </Box>
                                   </Box>
-                                  <Typography variant='body2'>Lorem ipsum dolor sit amet</Typography>
-                                  <Typography variant='body2'>Room Prices - {hotel.price} INR</Typography>
-                                  {/* {console.log(
-                                    selectedHotelDetail ? selectedHotelDetail.id != hotel.id : Number(rooms) == 0
-                                  )} */}
+                                  <Divider sx={{ mb: 2 }} />
                                   <Button
                                     disabled={
                                       Number(rooms) == 0
@@ -516,13 +841,13 @@ const HotelDialog = ({
       </Box>
       <RoomDialog
         open={openRoomDialog}
-        handleClose={handleCloseRoomDialog}
-        rooms={rooms}
-        selectedHotel={selectedHotel}
         selectedHotelDetail={selectedHotelDetail}
+        handleClose={handleCloseRoomDialog}
+        selectedHotel={selectedHotel}
         roomsList={roomsList}
         hotelRate={hotelRate}
         totalRooms={totalRooms}
+        rooms={rooms}
       />
     </Dialog>
   )

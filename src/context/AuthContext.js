@@ -1,58 +1,67 @@
-// ** React Imports
 import { createContext, useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
-// ** Next Import
 import { useRouter } from 'next/router'
 
-// ** Axios
-import axios from 'axios'
-
-// ** Config
-import authConfig from 'src/configs/auth'
+import { getRequest, postRequest } from 'src/api-main-file/APIServices'
 
 // ** Defaults
 const defaultProvider = {
   user: null,
   loading: true,
+  clientId: null,
+  authToken: null,
   setUser: () => null,
   setLoading: () => Boolean,
   login: () => Promise.resolve(),
   logout: () => Promise.resolve()
 }
 const AuthContext = createContext(defaultProvider)
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
 
 const AuthProvider = ({ children }) => {
-  // ** States
-  const [user, setUser] = useState(defaultProvider.user)
+  const [authToken, setAuthToken] = useState(defaultProvider.authToken)
+  const [clientId, setClientId] = useState(defaultProvider.clientId)
   const [loading, setLoading] = useState(defaultProvider.loading)
+  const [user, setUser] = useState(defaultProvider.user)
 
-  // ** Hooks
   const router = useRouter()
   useEffect(() => {
     const initAuth = async () => {
-      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+      const storedToken = localStorage.getItem('authToken')
+      const clientType = localStorage.getItem('clientType')
+      const api_url = `${BASE_URL}/${clientType}`
+
       if (storedToken) {
         setLoading(true)
-        await axios
-          .get(authConfig.meEndpoint, {
-            headers: {
-              Authorization: storedToken
-            }
-          })
-          .then(async response => {
-            setLoading(false)
-            setUser({ ...response.data.userData })
-          })
-          .catch(() => {
-            localStorage.removeItem('userData')
-            localStorage.removeItem('refreshToken')
-            localStorage.removeItem('accessToken')
+        const response = await getRequest(`${api_url}/fetch-profile`)
+
+        if (response.status) {
+          const {
+            logo,
+            name,
+            email,
+            address,
+            companyName,
+            mobile,
+            referringAgent,
+            [`${clientType}Id`]: clientId
+          } = response.data
+          setUser({ logo, name, email, address, companyName, mobile, referringAgent })
+          setClientId(clientId)
+          setAuthToken(storedToken)
+        } else {
+          setLoading(false)
+          if (response.statusCode == 401) {
+            logoutHandler()
+          } else if (response.statusCode == 500) {
+            // router.push("/500");
             setUser(null)
-            setLoading(false)
-            if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
-              router.replace('/login')
-            }
-          })
+            setClientId(null)
+          } else {
+            toast.error(response.error)
+          }
+        }
       } else {
         setLoading(false)
       }
@@ -61,33 +70,72 @@ const AuthProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleLogin = (params, errorCallback) => {
-    axios
-      .post(authConfig.loginEndpoint, params)
-      .then(async response => {
-        params.rememberMe
-          ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
-          : null
-        const returnUrl = router.query.returnUrl
-        setUser({ ...response.data.userData })
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
-        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-        router.replace(redirectURL)
-      })
-      .catch(err => {
-        if (errorCallback) errorCallback(err)
-      })
+  const fetchUserDataHandler = async data => {
+    const { token, clientType, user_data } = data
+    const api_url = `${BASE_URL}/${clientType}`
+
+    localStorage.setItem('authToken', token)
+    localStorage.setItem('clientId', user_data[`${clientType}Id`])
+
+    setLoading(true)
+
+    const response = await getRequest(`${api_url}/fetch-profile`)
+
+    setLoading(false)
+
+    if (response.status) {
+      setUser(user_data)
+    } else {
+      logoutHandler()
+      return
+    }
+
+    setAuthToken(token)
+
+    toast.success('Login Successful')
   }
 
-  const handleLogout = () => {
-    setUser(null)
-    window.localStorage.removeItem('userData')
-    window.localStorage.removeItem(authConfig.storageTokenKeyName)
+  const handleLogin = async params => {
+    setLoading(true)
+    const { email, password, clientType } = params
+    const api_url = `${BASE_URL}/${clientType}`
+    const response = await postRequest(`${api_url}/login`, { email, password })
+    setLoading(false)
+
+    if (response.status) {
+      fetchUserDataHandler({ ...response.data, clientType })
+    } else {
+      toast.error(response.error)
+    }
+  }
+
+  const logoutHandler = () => {
+    localStorage.clear()
+    setClientId(defaultProvider.clientId)
+    window.globalClinetId = ''
+    setAuthToken(defaultProvider.authToken)
+    setUser(defaultProvider.user)
+
     router.push('/login')
+  }
+
+  const handleLogout = async () => {
+    const clientType = localStorage.getItem('clientType')
+    const api_url = `${BASE_URL}/${clientType}`
+    setLoading(true)
+    const response = await getRequest(`${api_url}/logout`)
+    setLoading(false)
+
+    if (response.status) {
+      logoutHandler()
+    } else {
+      toast.error(response.error)
+    }
   }
 
   const values = {
     user,
+    authToken,
     loading,
     setUser,
     setLoading,

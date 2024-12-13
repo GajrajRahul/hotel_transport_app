@@ -120,7 +120,6 @@ const Navigation = props => {
           <StyledBoxForShadow ref={shadowRef} />
         )}
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
-          {/* @ts-ignore */}
           <ScrollWrapper
             {...(hidden
               ? {

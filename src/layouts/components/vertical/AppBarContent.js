@@ -19,46 +19,13 @@ const AppBarContent = props => {
 
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
-        {hidden ? (
-          <IconButton color='inherit' sx={{ ml: -2.75 }} onClick={toggleNavVisibility}>
-            <Icon icon='mdi:menu' />
-          </IconButton>
-        ) : null}
-
-        <Breadcrumbs aria-label='breadcrumb'>
-          {breadcrumb.map((data, index) => {
-            return (
-              <Typography key={index} fontWeight={800} variant='body2'>
-                {data.label}
-              </Typography>
-            )
-            // if (index + 1 === breadcrumb.length) {
-            //   return (
-            //     <Typography key={index} fontWeight={800} variant='body2'>
-            //       {data.label}
-            //     </Typography>
-            //   )
-            // } else {
-            //   if (LINK_OBJ[data.label]) {
-            //     return (
-            //       <Link key={index} href={LINK_OBJ[data.label]}>
-            //         <Typography variant='body2'>{data.label}</Typography>
-            //       </Link>
-            //     )
-            //   } else {
-            //     return (
-            //       <Typography key={index} variant='body2'>
-            //         {data.label}
-            //       </Typography>
-            //     )
-            //   }
-            // }
-          })}
-        </Breadcrumbs>
-        {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
-      </Box>
+      <img
+        style={{ width: '180px', height: '100px', objectFit: 'contain', marginTop: '0px' }}
+        src='/images/logo_full.png'
+        alt='logo'
+      />
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
+        {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
         <UserDropdown settings={settings} />
       </Box>
     </Box>

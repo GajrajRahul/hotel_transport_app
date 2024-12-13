@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
@@ -26,6 +27,7 @@ import EcommerceTotalSalesDonut from 'src/views/analytics/EcommerceTotalSalesDon
 import CrmTotalGrowth from 'src/views/analytics/CrmTotalGrowth'
 import QuotationSteps from 'src/components/quotation/QuotationSteps'
 import Loader from 'src/views/common/Loader'
+import Dashboard from 'src/components/dashboard/Dashboard'
 
 const MutationPlugin = slider => {
   const observer = new MutationObserver(mutations => {
@@ -46,7 +48,7 @@ const MutationPlugin = slider => {
 const Img = styled('img')({
   // right: 7,
   // bottom: 0,
-  height: 70
+  height: 50
   // position: 'absolute'
 })
 
@@ -55,56 +57,69 @@ const data = [
     title: 'Create Quotation',
     subtitle: 'Lorem Ipsum',
     src: '/images/icons/pencil.png',
-    color: '#FF9B9E'
+    color: '#FF9B9E',
+    href: '/quotations'
   },
   {
     title: 'Quote History',
     subtitle: '838 Quotes',
     src: '/images/icons/bill.png',
-    color: '#F9CD90'
+    color: '#F9CD90',
+    href: '/quotations-history'
   },
+  // {
+  //   title: 'Bookings',
+  //   subtitle: '419 bookings',
+  //   src: '/images/icons/keys.png',
+  //   color: '#84C9CC'
+  // },
   {
-    title: 'Bookings',
-    subtitle: '419 bookings',
-    src: '/images/icons/keys.png',
-    color: '#84C9CC'
-  },
-  {
-    title: 'Taxi Services',
+    // title: 'Taxi Services',
+    title: 'Book a Texi',
     subtitle: '345 taxi bookings',
     src: '/images/icons/taxi-stop.png',
-    color: '#97D786'
+    color: '#97D786',
+    href: '/texi'
   },
   {
     title: 'Travel Packages',
     subtitle: '1,288 packages',
     src: '/images/icons/luggage.png',
-    color: '#BBBAF6'
+    color: '#BBBAF6',
+    href: '/packages'
   },
   {
-    title: 'Activities',
-    subtitle: '74 activities',
+    title: 'Approval Status ',
+    // subtitle: 'Offer curated travel packages.',
+    subtitle: '325 approvals.',
     src: '/images/icons/kayak.png',
-    color: '#F9CD90'
-  },
-  {
-    title: 'Hotels',
-    subtitle: '3,214 hotels',
-    src: '/images/icons/bell.png',
-    color: '#84C9CC'
-  },
-  {
-    title: 'Attractions',
-    subtitle: '987 attractions',
-    src: '/images/icons/mummy.png',
-    color: '#BBBAF6'
-  },
-  {
-    title: 'Honeymoon',
-    subtitle: '86 Destinations',
-    src: '/images/icons/honeymoon.png',
-    color: '#97D786'
+    color: '#F9CD90',
+    href: '/approvals'
   }
+  // {
+  //   title: 'Activities',
+  //   subtitle: '74 activities',
+  //   src: '/images/icons/kayak.png',
+  //   color: '#F9CD90'
+  // },
+  // {
+  //   title: 'Hotels',
+  //   subtitle: '3,214 hotels',
+  //   src: '/images/icons/bell.png',
+  //   color: '#84C9CC'
+  // },
+  // {
+  //   title: 'Attractions',
+  //   subtitle: '987 attractions',
+  //   src: '/images/icons/mummy.png',
+  //   color: '#BBBAF6'
+  // },
+  // {
+  //   title: 'Honeymoon',
+  //   subtitle: '86 Destinations',
+  //   src: '/images/icons/honeymoon.png',
+  //   color: '#97D786'
+  // }
 ]
 
 const transformHotelData = data => {
@@ -197,6 +212,7 @@ const Home = ({ hotel_response, rooms_list, transport_response }) => {
   // const [roomsList, setRoomsList] = useState(finalData?.roomsList ?? [])
 
   const theme = useTheme()
+  const router = useRouter()
   const [sliderRef, instanceRef] = useKeenSlider(
     {
       rtl: false,
@@ -280,7 +296,52 @@ const Home = ({ hotel_response, rooms_list, transport_response }) => {
     <>
       <Loader open={isLoading} />
       {/* <KeenSliderWrapper> */}
-      <Grid container spacing={6} className='match-height' sx={{ height: '100%' }}>
+      <Grid container spacing={6}>
+        {data.map((item, index) => (
+          <Grid key={index} item xs={6} sm={2.4}>
+            <Card
+              sx={{
+                // overflow: 'visible',
+                // position: 'relative',
+                borderRadius: '17px',
+                backgroundColor: item.color,
+                cursor: 'pointer'
+              }}
+              key={index}
+              // className='keen-slider__slide default-slide'
+              onClick={() => router.push(item.href)}
+            >
+              <CardContent
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  pt: 3,
+                  '&.MuiCardContent-root': {
+                    pb: 3
+                  }
+                }}
+              >
+                <Box>
+                  <Typography fontWeight={600} fontSize={14} sx={{ mb: 1 }}>
+                    {item.title}
+                  </Typography>
+                  <Box sx={{ rowGap: 1, display: 'flex', flexWrap: 'wrap' }}>
+                    <Typography variant='caption' fontSize={10}>
+                      {item.subtitle}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Img src={item.src} alt={item.title} />
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container spacing={6} className='match-height' sx={{ mt: 0 }}>
+        <Grid item xs={12}>
+          <Dashboard />
+        </Grid>
         {/* <Grid item xs={12}> */}
         {/* <Box className='navigation-wrapper'> // this is not importnat */}
         {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -357,11 +418,11 @@ const Home = ({ hotel_response, rooms_list, transport_response }) => {
           <Grid item xs={12} md={3}>
             <CrmTotalGrowth />
           </Grid> */}
-        <Grid item xs={12} sx={{ height: '100%' }}>
+        {/* <Grid item xs={12} sx={{ height: '100%' }}>
           {hotel_response && rooms_list && transport_response && (
             <QuotationSteps hotelRate={hotel_response} roomsList={rooms_list} transportRate={transport_response} />
           )}
-        </Grid>
+        </Grid> */}
 
         {/* <Grid item xs={12}>
             <Card sx={{ height: '100%' }}>
@@ -377,50 +438,6 @@ const Home = ({ hotel_response, rooms_list, transport_response }) => {
       {/* </KeenSliderWrapper> */}
     </>
   )
-}
-
-export async function getServerSideProps() {
-  const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
-  const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  const HOTEL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${HOTEL_SHEET_ID}/values/Sheet1?key=${API_KEY}`
-
-  const TRANSPORT_SHEET_ID = process.env.NEXT_PUBLIC_TRANSPORT_SHEET_ID
-  // const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  const TRANSPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/${TRANSPORT_SHEET_ID}/values/Sheet1?key=${API_KEY}`
-
-  let hotel_response = null
-  let rooms_list = []
-  let transport_response = null
-
-  try {
-    const response = await axios.get(HOTEL_URL)
-    const finalData = transformHotelData(response.data.values ?? [])
-    hotel_response = finalData.hotelsRate
-    rooms_list = finalData.roomsList
-    // setHotelData(finalData.hotelsRate)
-    // setRoomsList(finalData.roomsList)
-  } catch (error) {
-    toast.error('Failed fetching transport data')
-    console.error('Error fetching data:', error)
-  }
-
-  try {
-    const response = await axios.get(TRANSPORT_URL)
-    const finalData = transformTransportData(response.data.values ?? [])
-    transport_response = finalData
-    // setTransportRate(finalData)
-  } catch (error) {
-    toast.error('Failed fetching transport data')
-    console.error('Error fetching data:', error)
-  }
-
-  return {
-    props: {
-      hotel_response,
-      rooms_list,
-      transport_response
-    }
-  }
 }
 
 export default Home

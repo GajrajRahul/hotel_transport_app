@@ -73,9 +73,9 @@ const LayoutAppBar = props => {
         className='navbar-content-container'
         sx={{
           ...(appBar === 'fixed' && scrollTrigger && { ...appBarFixedStyles() }),
-          ...(contentWidth === 'boxed' && {
-            '@media (min-width:1440px)': { maxWidth: `calc(1440px - ${theme.spacing(6)} * 2)` }
-          })
+          // ...(contentWidth === 'boxed' && {
+          //   '@media (min-width:1440px)': { maxWidth: `calc(1440px - ${theme.spacing(6)} * 2)` }
+          // })
         }}
       >
         {(userAppBarContent && userAppBarContent(props)) || null}

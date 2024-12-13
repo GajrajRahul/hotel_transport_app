@@ -1,6 +1,5 @@
 import { API_RESPONSE } from 'src/api-main-file/APIResponse'
 import axiosInstance from './APIInterceptor'
-import { FETCH_PARTNER_PROFILE } from './APIUrl'
 
 export const successResponse = ({ data: response, headers }) => {
   const errorMessage =
@@ -24,7 +23,7 @@ export const errorResponse = (error, url) => {
     errorMessage = 'Something went wrong'
   }
 
-  if (statusCode == 401 && url !== FETCH_PARTNER_PROFILE) {
+  if (statusCode == 401) {
     window.location.reload()
     return API_RESPONSE(null, false, statusCode, errorMessage, webVersion, null)
   }

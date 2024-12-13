@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { useDispatch, useSelector } from 'react-redux'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -24,7 +25,16 @@ const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(2)
 }))
 
-const CitiesDialog = ({ open, handleClose, cities, setHotelValue, hotelRate }) => {
+const CitiesDialog = ({
+  open,
+  handleClose,
+  hotelRate,
+  selectedCitiesHotels,
+  setSelectedCitiesHotels
+}) => {
+  const hotelInfoReduxData = useSelector(state => state.hotelInfo)
+  const dispatch = useDispatch()
+
   const {
     reset,
     watch,
@@ -40,10 +50,10 @@ const CitiesDialog = ({ open, handleClose, cities, setHotelValue, hotelRate }) =
   })
 
   const city = watch('city')
-  const [chipData, setChipData] = useState(cities)
+  const [chipData, setChipData] = useState(selectedCitiesHotels)
 
   useEffect(() => {
-    setChipData(cities)
+    setChipData(selectedCitiesHotels)
   }, [open])
 
   const onSubmit = () => {
@@ -79,7 +89,7 @@ const CitiesDialog = ({ open, handleClose, cities, setHotelValue, hotelRate }) =
   }
 
   const onFinalSubmit = () => {
-    setHotelValue('cities', chipData)
+    setSelectedCitiesHotels(chipData)
     resetValues()
   }
 
