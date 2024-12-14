@@ -130,7 +130,7 @@ const Register = ({ registerUrl }) => {
     setIsLoading(true)
 
     const api_url = `${process.env.NEXT_PUBLIC_BASE_URL}/${routes[routes.length - 1]}`
-    const response = await postRequest(`${api_url}/login`, data)
+    const response = await postRequest(`${api_url}/signup`, data)
     setIsLoading(false)
     if (response.status) {
       toast.success('Signup Successful')

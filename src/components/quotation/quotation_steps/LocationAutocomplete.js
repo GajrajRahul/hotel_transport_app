@@ -65,7 +65,7 @@ const LocationAutocomplete = ({ label, name, value, cities, onChange, error, the
   return (
     <Autocomplete
       id='google-map-demo'
-      disabled={cities.length == 1}
+      disabled={cities.length == 1 && (name == 'from' || name == 'to')}
       getOptionLabel={option => (typeof option === 'string' ? option : option.description)}
       isOptionEqualToValue={option => (typeof option === 'string' ? option : option.description)}
       filterOptions={x => x}
@@ -87,7 +87,7 @@ const LocationAutocomplete = ({ label, name, value, cities, onChange, error, the
           {...params}
           label={label}
           fullWidth
-          disabled={cities.length == 1}
+          disabled={cities.length == 1 && (name == 'from' || name == 'to')}
           error={Boolean(error)}
           //   InputProps={{
           //     startAdornment: (

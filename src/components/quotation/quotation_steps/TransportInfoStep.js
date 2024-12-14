@@ -25,6 +25,7 @@ import CustomInput from 'src/components/common/CustomInput'
 
 const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
   const cities = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
+  const transportData = localStorage.getItem('transport') ? JSON.parse(localStorage.getItem('transport')) : null
 
   const {
     reset: transportReset,
@@ -34,15 +35,27 @@ const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
     handleSubmit: handleTransportSubmit,
     formState: { errors: transportErrors }
   } = useForm({
-    defaultValues: {
-      vehicleType: '',
-      departureReturnDate: [new Date(), addDays(new Date(), 45)],
-      from:
-        cities.length > 1 || cities.length == 0 ? '' : `${cities[0].label[0].toUpperCase()}${cities[0].label.slice(1)}`,
-      additionalStops: [],
-      to:
-        cities.length > 1 || cities.length == 0 ? '' : `${cities[0].label[0].toUpperCase()}${cities[0].label.slice(1)}`
-    }
+    defaultValues: transportData
+      ? {
+          ...transportData,
+          departureReturnDate: [
+            new Date(transportData.departureReturnDate[0]),
+            new Date(transportData.departureReturnDate[1])
+          ]
+        }
+      : {
+          vehicleType: '',
+          departureReturnDate: [new Date(), addDays(new Date(), 45)],
+          from:
+            cities.length > 1 || cities.length == 0
+              ? ''
+              : `${cities[0].label[0].toUpperCase()}${cities[0].label.slice(1)}`,
+          additionalStops: [],
+          to:
+            cities.length > 1 || cities.length == 0
+              ? ''
+              : `${cities[0].label[0].toUpperCase()}${cities[0].label.slice(1)}`
+        }
   })
 
   const { fields, append, remove } = useFieldArray({

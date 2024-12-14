@@ -19,7 +19,7 @@ const CustomInput = forwardRef((props, ref) => {
 
   return (
     <FormControl fullWidth>
-      <InputLabel htmlFor='stepper-linear-account-password' error={Boolean(propserror.dates)}>
+      <InputLabel htmlFor='stepper-linear-account-password' error={Boolean(propserror.dates || propserror.daysNights)}>
         {props.label || ''}
       </InputLabel>
       <OutlinedInput
@@ -27,17 +27,18 @@ const CustomInput = forwardRef((props, ref) => {
         label={props.label || ''}
         {...props}
         value={value}
-        error={Boolean(propserror.dates)}
+        error={Boolean(propserror.dates || propserror.daysNights)}
         fullWidth
         startAdornment={
           <InputAdornment position='start'>
-            <Icon icon='mdi:outline-date-range' color={theme.palette.primary.main} />
+            <Icon icon='mdi:checkin-calendar' color={theme.palette.primary.main} />
           </InputAdornment>
         }
       />
-      {propserror.dates && (
+      {(propserror.dates || propserror.daysNights) && (
         <FormHelperText sx={{ color: 'error.main' }} id='stepper-linear-account-password'>
-          {propserror.dates?.message}
+          {/* {propserror.dates?.message || propserror.daysNights?.message} */}
+          This field is required
         </FormHelperText>
       )}
     </FormControl>

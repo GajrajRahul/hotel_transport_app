@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 
 import Icon from 'src/@core/components/icon'
+import { FormHelperText } from '@mui/material'
 
 const Room = ({ room, roomInfoRef, rooms, selectedHotelDetail }) => {
   const {
@@ -142,6 +143,7 @@ const RoomDialog = ({
   totalRooms
 }) => {
   const roomInfoRef = useRef([])
+  const [roomError, setRoomError] = useState('')
 
   const roomTypes = useMemo(() => {
     if (selectedHotel) {
@@ -176,6 +178,7 @@ const RoomDialog = ({
     }, 0)
 
     if (totalRoom != Number(rooms)) {
+      setRoomError('Would you like to add another room or modify your selection?')
       return
     }
 
@@ -189,6 +192,7 @@ const RoomDialog = ({
 
   const resetFields = (selectedHotelInfo, roomInfo, isSubmit) => {
     roomInfoRef.current = []
+    setRoomError('')
     handleClose(selectedHotelInfo, roomInfo, isSubmit)
   }
 
@@ -206,7 +210,9 @@ const RoomDialog = ({
       </DialogTitle>
       <DialogContent>
         {/* <DialogContentText textAlign='center'>Select {totalRooms == 0 ? rooms : totalRooms} rooms</DialogContentText> */}
-        <DialogContentText textAlign='center'>Select Cities where you want to book your stay</DialogContentText>
+        <DialogContentText textAlign='center'>
+          Select Rooms in {selectedHotel ? selectedHotel.name : ''}
+        </DialogContentText>
         <Box sx={{ mt: 7, display: 'flex', flexWrap: 'wrap', gap: 7, justifyContent: 'center' }}>
           {roomTypes.map(room => (
             <Room
@@ -218,6 +224,7 @@ const RoomDialog = ({
             />
           ))}
         </Box>
+        <FormHelperText sx={{ textAlign: 'center', color: 'error.main' }}>{roomError}</FormHelperText>
       </DialogContent>
       <DialogActions>
         <Button size='small' variant='outlined' onClick={resetFields}>

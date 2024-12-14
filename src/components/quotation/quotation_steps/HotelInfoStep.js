@@ -31,6 +31,7 @@ import Icon from 'src/@core/components/icon'
 import CitiesDialog from '../dialog/CitiesDialog'
 import HotelDialog from '../dialog/HotelDialog'
 import { updateHotelInfo } from 'src/store/quotations/HotelsInfoSlice'
+import toast from 'react-hot-toast'
 
 const icons = {
   rooms: 'meeting-room-outline',
@@ -135,6 +136,16 @@ const HotelInfoStep = props => {
   }
 
   const onHotelInfoSubmit = data => {
+    if(selectedCitiesHotels.length == 0) {
+      toast.error('City and Hotel is Required')
+      return;
+    }
+
+    const emptyCitisList = selectedCitiesHotels.filter(city => city.info.length == 0)
+    if(emptyCitisList.length > 0) {
+      toast.error('City and Hotel is Required')
+      return;
+    }
     localStorage.setItem('citiesHotels', JSON.stringify(selectedCitiesHotels))
     onSubmit()
   }
@@ -258,18 +269,18 @@ const HotelInfoStep = props => {
                         <Card sx={{ borderRadius: '15px' }}>
                           <CardMedia sx={{ height: '9.375rem' }} image={`/images/hotels/jaipur.jpg`} />
                           <CardContent sx={{ p: theme => `${theme.spacing(3, 3, 4)} !important` }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Icon icon='mdi:room-service-outline' fontSize='2rem' />
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <Icon icon='mdi:custom-hotel' fontSize='1.725rem' />
                                 <Typography sx={{ color: 'black' }} variant='h6'>
-                                  {data.hotel.name}
+                                  {data.hotel.name ? `${data.hotel.name.slice(0, 18)}...` : ''}
                                 </Typography>
                               </Box>
-                              <Box sx={{ display: 'flex', gap: 1 }}>
+                              <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline' }}>
                                 <Typography sx={{ color: 'black' }} variant='h6'>
-                                  ₹5***
+                                  ₹5xxx
                                 </Typography>
-                                <Typography variant='body2' sx={{ mt: 3, color: theme => theme.palette.primary.main }}>
+                                <Typography variant='caption' sx={{ color: theme => theme.palette.primary.main }}>
                                   /Room
                                 </Typography>
                               </Box>
@@ -281,11 +292,11 @@ const HotelInfoStep = props => {
                                   pl: 1,
                                   display: 'flex',
                                   flexDirection: 'column',
-                                  gap: 2
+                                  gap: 3
                                 }}
                               >
-                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                  <Icon icon='mdi:person' />
+                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                  <Icon fontSize='20px' icon='mdi:double-user' />
                                   <Typography fontSize={14}>
                                     {data.adult != '0' && data.child != '0'
                                       ? `${data.adult}A, ${data.child}C`
@@ -294,8 +305,8 @@ const HotelInfoStep = props => {
                                       : `${data.child}C`}
                                   </Typography>
                                 </Box>
-                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                  <Icon icon='mdi:person' />
+                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                  <Icon fontSize='20px' icon='mdi:custom-door-open' />
                                   <Typography fontSize={14}>
                                     {data.rooms} {data.rooms == '1' ? 'Room' : 'Rooms'}
                                   </Typography>
@@ -307,21 +318,21 @@ const HotelInfoStep = props => {
                                   pl: 3,
                                   display: 'flex',
                                   flexDirection: 'column',
-                                  gap: 2
+                                  gap: 3
                                 }}
                               >
-                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                  <Icon icon='mdi:person' />
+                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                  <Icon fontSize='20px' icon='mdi:custom-hotel' />
                                   <Typography fontSize={14}>{data.hotel.type} Hotel</Typography>
                                 </Box>
                                 {data.extraBed != '0' ? (
-                                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                    <Icon icon='mdi:person' />
+                                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                    <Icon fontSize='20px' icon='mdi:double-bed' />
                                     <Typography fontSize={14}>1 Extra Bed</Typography>
                                   </Box>
                                 ) : data.breakfast || data.lunch || data.dinner ? (
-                                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                    <Icon icon='mdi:person' />
+                                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                    <Icon fontSize='20px' icon='mdi:plate-eating' />
                                     <Typography fontSize={14}>
                                       {data.breakfast && data.lunch && data.dinner
                                         ? 'BB | HB | FB'
@@ -348,17 +359,17 @@ const HotelInfoStep = props => {
                                   pl: 3,
                                   display: 'flex',
                                   flexDirection: 'column',
-                                  gap: 2,
+                                  gap: 3,
                                   pr: 5
                                 }}
                               >
-                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                  <Icon icon='mdi:person' />
+                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                  <Icon fontSize='20px' icon='mdi:curtains-open' />
                                   <Typography fontSize={14}>Basic Room (+2)</Typography>
                                 </Box>
                                 {data.extraBed != '0' && (data.breakfast || data.lunch || data.dinner) ? (
-                                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                    <Icon icon='mdi:person' />
+                                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                    <Icon fontSize='20px' icon='mdi:plate-eating' />
                                     <Typography fontSize={14}>
                                       {data.breakfast && data.lunch && data.dinner
                                         ? 'BB | HB | FB'
@@ -390,10 +401,10 @@ const HotelInfoStep = props => {
                               }}
                             >
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Icon icon='mdi:person' />
+                                <Icon fontSize='20px' icon='mdi:checkin-calendar' />
                                 <Typography fontSize={14}>
-                                  {format(new Date(data.checkInCheckOut[0]), 'dd MM yyyy')} -{' '}
-                                  {format(new Date(data.checkInCheckOut[1]), 'dd MM yyyy')}{' '}
+                                  {format(new Date(data.checkInCheckOut[0]), 'dd MMM yyyy')} -{' '}
+                                  {format(new Date(data.checkInCheckOut[1]), 'dd MMM yyyy')}{' '}
                                 </Typography>
                               </Box>
                               <Divider
@@ -402,10 +413,12 @@ const HotelInfoStep = props => {
                                 sx={{ height: '25px', backgroundColor: '#9A9A9A' }}
                               />
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Icon icon='mdi:person' />
+                                <Icon fontSize='20px' icon='mdi:night-day' />
+                                {/* {console.log(data)} */}
                                 <Typography fontSize={14}>
-                                  {format(new Date(data.checkInCheckOut[0]), 'dd MM yyyy')} -{' '}
-                                  {format(new Date(data.checkInCheckOut[1]), 'dd MM yyyy')}{' '}
+                                  {/* {format(new Date(data.checkInCheckOut[0]), 'dd MM yyyy')} -{' '}
+                                  {format(new Date(data.checkInCheckOut[1]), 'dd MM yyyy')}{' '} */}
+                                  {data.daysNights}
                                 </Typography>
                               </Box>
                             </Box>

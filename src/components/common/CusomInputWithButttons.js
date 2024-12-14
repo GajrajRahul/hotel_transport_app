@@ -28,54 +28,56 @@ const CusomInputWithButttons = ({ name, hotelControl, isRequired, label, errors,
         //   control={
         //   }
         //   />
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width: '100%' }}>
-          <Icon icon={`mdi:${icon}`} color={theme.palette.primary.main} />
-          <IconButton
-            edge='end'
-            onClick={e => {
-              e.stopPropagation()
-              if (Number(value) != 0) {
-                onChange(`${Number(value) - 1}`)
-              }
-            }}
-            aria-label='toggle minus visibility'
-            size='small'
-            sx={{
-              // mr: 3,
-              backgroundColor: theme => theme.palette.primary.main,
-              color: 'white',
-              '&.MuiIconButton-root:hover': {
-                backgroundColor: theme => theme.palette.primary.main
-              },
-              width: '25px',
-              height: '25px'
-            }}
-          >
-            <Icon icon='mdi:minus' />
-          </IconButton>
-          {value.length == 0 ? 0 : value}
-          <IconButton
-            edge='end'
-            onClick={e => {
-              e.stopPropagation()
-              onChange(`${Number(value) + 1}`)
-            }}
-            aria-label='toggle plus visibility'
-            size='small'
-            sx={{
-              // ml: 3,
-              backgroundColor: theme => theme.palette.primary.main,
-              color: 'white',
-              '&.MuiIconButton-root:hover': {
-                backgroundColor: theme => theme.palette.primary.main
-              },
-              width: '25px',
-              height: '25px'
-            }}
-          >
-            <Icon icon='mdi:plus' />
-          </IconButton>
-        </Box>
+        <>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width: '100%' }}>
+            <Icon icon={`mdi:${icon}`} color={theme.palette.primary.main} />
+            <IconButton
+              edge='end'
+              onClick={e => {
+                e.stopPropagation()
+                if (Number(value) != 0) {
+                  onChange(`${Number(value) - 1}`)
+                }
+              }}
+              aria-label='toggle minus visibility'
+              size='small'
+              sx={{
+                // mr: 3,
+                backgroundColor: theme => theme.palette.primary.main,
+                color: 'white',
+                '&.MuiIconButton-root:hover': {
+                  backgroundColor: theme => theme.palette.primary.main
+                },
+                width: '25px',
+                height: '25px'
+              }}
+            >
+              <Icon icon='mdi:minus' />
+            </IconButton>
+            {value.length == 0 ? 0 : value}
+            <IconButton
+              edge='end'
+              onClick={e => {
+                e.stopPropagation()
+                onChange(`${Number(value) + 1}`)
+              }}
+              aria-label='toggle plus visibility'
+              size='small'
+              sx={{
+                // ml: 3,
+                backgroundColor: theme => theme.palette.primary.main,
+                color: 'white',
+                '&.MuiIconButton-root:hover': {
+                  backgroundColor: theme => theme.palette.primary.main
+                },
+                width: '25px',
+                height: '25px'
+              }}
+            >
+              <Icon icon='mdi:plus' />
+            </IconButton>
+          </Box>
+        </>
       )}
     />
     // <FormControl>

@@ -20,6 +20,7 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import FormGroup from '@mui/material/FormGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import FormHelperText from '@mui/material/FormHelperText'
 import Checkbox from '@mui/material/Checkbox'
 import Tab from '@mui/material/Tab'
 import Card from '@mui/material/Card'
@@ -87,6 +88,7 @@ const HotelDialog = ({
   const [selectedHotel, setSelectedHotel] = useState(null)
   const [openMenuList, setOpenMenuList] = useState(false)
   const [totalRooms, setTotalRooms] = useState(0)
+  const isSubmited = useRef(false)
 
   const {
     reset: hotelReset,
@@ -169,6 +171,7 @@ const HotelDialog = ({
 
   const getHotelList = () => {
     let finalHotelList = []
+    // console.log(hotelRate[selectedCity.label])
     Object.keys(hotelRate[selectedCity.label]).map(hotel_type => {
       let hotelsArr = []
       Object.keys(hotelRate[selectedCity.label][hotel_type]).map((hotel, index) => {
@@ -257,6 +260,7 @@ const HotelDialog = ({
   const onDialogSubmit = data => {
     // console.log(data)
     // return;
+    isSubmited.current = true
     const { checkInCheckOut, breakfast, lunch, dinner, rooms, daysNights, extraBed, child, adult, persons } = data
     if (!selectedHotelDetail) {
       return
@@ -352,6 +356,7 @@ const HotelDialog = ({
   }
 
   const resetFields = () => {
+    isSubmited.current = false
     setTotalRooms(0)
     setHotelList([])
     hotelReset()
@@ -441,7 +446,7 @@ const HotelDialog = ({
                         id='stepper-linear-account-daysNights'
                         startAdornment={
                           <InputAdornment position='start'>
-                            <Icon icon='mdi:sun-moon-stars' />
+                            <Icon icon='mdi:night-day' />
                           </InputAdornment>
                         }
                       />
@@ -449,7 +454,7 @@ const HotelDialog = ({
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} tablet={6}>
+              <Grid item xs={12} tablet={5}>
                 <Box sx={{ border: '1px solid #9A9A9A', borderRadius: '6px', position: 'relative', height: '56px' }}>
                   <Typography
                     variant='caption'
@@ -462,12 +467,14 @@ const HotelDialog = ({
                       display: 'flex',
                       flexWrap: 'wrap',
                       flexDirection: 'row',
-                      justifyContent: 'space-around',
-                      height: '100%'
+                      justifyContent: 'space-evenly',
+                      height: '100%',
+                      alignItems: 'center'
                       // gap: 3,
                       // pl: 3
                     }}
                   >
+                    <Icon icon='mdi:plate-eating' color={theme.palette.primary.main} />
                     <Controller
                       name='breakfast'
                       control={hotelControl}
@@ -513,7 +520,7 @@ const HotelDialog = ({
                   </FormGroup>
                 </Box>
               </Grid>
-              <Grid item xs={12} tablet={6}>
+              <Grid item xs={12} tablet={3}>
                 <FormControl fullWidth>
                   <InputLabel htmlFor='stepper-linear-account-person'>No. of Persons</InputLabel>
                   <Controller
@@ -535,7 +542,7 @@ const HotelDialog = ({
                         id='stepper-linear-account-person'
                         startAdornment={
                           <InputAdornment position='start'>
-                            <Icon icon='mdi:emoji-people' color={theme.palette.primary.main} />
+                            <Icon icon='mdi:double-user' color={theme.palette.primary.main} />
                           </InputAdornment>
                         }
                         onFocus={() => {
@@ -551,7 +558,7 @@ const HotelDialog = ({
                         maxWidth: '100%',
                         position: 'absolute',
                         zIndex: 2,
-                        mt: '15%'
+                        mt: { xs: '18%', mobileMd: '25%' }
                       }}
                       ref={paperRef}
                     >
@@ -683,11 +690,16 @@ const HotelDialog = ({
                       </MenuList>
                     </Paper>
                   )}
+                  {errors.persons && (
+                    <FormHelperText sx={{ color: 'error.main' }} id='stepper-linear-account-persons'>
+                      {errors.persons?.message}
+                    </FormHelperText>
+                  )}
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
-                <Grid container spacing={6} sx={{ justifyContent: 'center' }}>
-                  <Grid item xs={12} mobileSm={6} tablet={3}>
+              <Grid item xs={12} tablet={4}>
+                <Grid container spacing={6}>
+                  <Grid item xs={12} mobileSm={6} tablet={6}>
                     <Box
                       sx={{
                         border: '1px solid #9A9A9A',
@@ -715,8 +727,13 @@ const HotelDialog = ({
                         theme={theme}
                       />
                     </Box>
+                    {isSubmited.current && rooms.length == 0 && (
+                      <FormHelperText sx={{ color: 'error.main', ml: 3 }} id='stepper-linear-account-password'>
+                        This field is required
+                      </FormHelperText>
+                    )}
                   </Grid>
-                  <Grid item xs={12} mobileSm={6} tablet={3}>
+                  <Grid item xs={12} mobileSm={6} tablet={6}>
                     <Box
                       sx={{
                         border: '1px solid #9A9A9A',
@@ -771,16 +788,16 @@ const HotelDialog = ({
                               <Card>
                                 <CardMedia sx={{ height: '9.375rem' }} image={`/images/hotels/jaipur.jpg`} />
                                 <CardContent sx={{ p: theme => `${theme.spacing(3, 5, 4)} !important` }}>
-                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                       {/* <Icon icon='mdi:hotel-location' /> */}
                                       <Typography variant='h6' sx={{ mb: 2 }}>
-                                        {hotel.name}
+                                        {hotel.name ? `${hotel.name.slice(0, 18)}...` : ''}
                                       </Typography>
                                     </Box>
-                                    <Box sx={{ display: 'flex', gap: 1 }}>
-                                      <Typography variant='h6'>₹3*** - ₹5***</Typography>
-                                      <Typography variant='body2' sx={{ mt: 3 }}>
+                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline' }}>
+                                      <Typography variant='h6'>₹3xxx - ₹5xxx</Typography>
+                                      <Typography variant='caption'>
                                         /Room
                                       </Typography>
                                     </Box>
