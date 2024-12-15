@@ -7,12 +7,12 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
+import FormHelperText from '@mui/material/FormHelperText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 
 import Icon from 'src/@core/components/icon'
-import { FormHelperText } from '@mui/material'
 
 const Room = ({ room, roomInfoRef, rooms, selectedHotelDetail }) => {
   const {
@@ -224,7 +224,7 @@ const RoomDialog = ({
             />
           ))}
         </Box>
-        <FormHelperText sx={{ textAlign: 'center', color: 'error.main' }}>{roomError}</FormHelperText>
+        <FormHelperText>{roomError}</FormHelperText>
       </DialogContent>
       <DialogActions>
         <Button size='small' variant='outlined' onClick={resetFields}>

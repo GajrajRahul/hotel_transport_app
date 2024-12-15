@@ -136,15 +136,15 @@ const HotelInfoStep = props => {
   }
 
   const onHotelInfoSubmit = data => {
-    if(selectedCitiesHotels.length == 0) {
+    if (selectedCitiesHotels.length == 0) {
       toast.error('City and Hotel is Required')
-      return;
+      return
     }
 
     const emptyCitisList = selectedCitiesHotels.filter(city => city.info.length == 0)
-    if(emptyCitisList.length > 0) {
+    if (emptyCitisList.length > 0) {
       toast.error('City and Hotel is Required')
-      return;
+      return
     }
     localStorage.setItem('citiesHotels', JSON.stringify(selectedCitiesHotels))
     onSubmit()
@@ -157,332 +157,338 @@ const HotelInfoStep = props => {
 
   return (
     <>
-        <Grid container spacing={5}>
-          <Grid item xs={12}>
-            <Box
-              sx={{
-                border: '1px solid #9A9A9A',
-                borderRadius: '6px',
-                position: 'relative',
-                height: '55.7px',
-                display: 'flex',
-                alignItems: 'center',
-                width: '100%',
-                cursor: 'pointer',
-                px: 3
-              }}
-              onClick={handleOpenCitiesDialog}
+      <Grid container spacing={5}>
+        <Grid item xs={12}>
+          <Box
+            sx={{
+              border: '1px solid #9A9A9A',
+              borderRadius: '6px',
+              position: 'relative',
+              height: '55.7px',
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              cursor: 'pointer',
+              px: 3
+            }}
+            onClick={handleOpenCitiesDialog}
+          >
+            <Typography
+              variant='caption'
+              sx={{ position: 'absolute', top: -11.5, left: 10, background: 'white', px: 1 }}
             >
-              <Typography
-                variant='caption'
-                sx={{ position: 'absolute', top: -11.5, left: 10, background: 'white', px: 1 }}
-              >
-                Add City
-              </Typography>
-              <Icon icon='mdi:track' color={theme.palette.primary.main} style={{ position: 'absolute' }} />
-              <Stack direction='row' spacing={1} sx={{ position: 'absolute', left: '55px' }}>
-                {selectedCitiesHotels.map(city => (
-                  <Chip
-                    key={city.id}
-                    label={city.label
-                      .split('_')
-                      .map(c => `${c[0].toUpperCase()}${c.slice(1)}`)
-                      .join(' ')}
-                    sx={{
-                      backgroundColor: theme => theme.palette.primary.light,
-                      color: theme => theme.palette.primary.dark
-                    }}
-                    size='small'
-                  />
-                ))}
-              </Stack>
-              <Icon
-                icon='mdi:map-location-add'
-                color={theme.palette.primary.main}
-                style={{ position: 'absolute', right: '10px' }}
-              />
-            </Box>
-          </Grid>
-          {selectedCitiesHotels.map((city, index) => (
-            <Grid item xs={12} key={index}>
-              <Accordion
-                expanded={expanded === `panel${index}`}
-                onChange={handleChange(`panel${index}`)}
-                sx={{
-                  '&.MuiAccordion-root': {
-                    borderRadius: '6px'
-                  },
-                  '&.MuiAccordion-root::before': {
-                    backgroundColor: 'transparent'
-                  },
-                  backgroundColor: theme => theme.palette.primary.light
-                }}
-              >
-                <AccordionSummary
+              Add City
+            </Typography>
+            <Icon icon='mdi:track' color={theme.palette.primary.main} style={{ position: 'absolute' }} />
+            <Stack direction='row' spacing={1} sx={{ position: 'absolute', left: '55px' }}>
+              {selectedCitiesHotels.map(city => (
+                <Chip
+                  key={city.id}
+                  label={city.label
+                    .split('_')
+                    .map(c => `${c[0].toUpperCase()}${c.slice(1)}`)
+                    .join(' ')}
                   sx={{
-                    '&.MuiAccordionSummary-root': {
-                      px: '10px'
-                    },
-                    '& .MuiAccordionSummary-content': {
-                      my: '10px'
-                    }
+                    backgroundColor: theme => theme.palette.primary.light,
+                    color: theme => theme.palette.primary.dark
                   }}
-                  id={`customized-panel-header-${index}`}
-                  expandIcon={
-                    <Typography
-                      sx={{
-                        backgroundColor: '#FFFFFF80',
-                        height: '44px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        px: 3
-                      }}
-                    >
-                      {expandIcon(`panel${index}`)}
-                    </Typography>
+                  size='small'
+                />
+              ))}
+            </Stack>
+            <Icon
+              icon='mdi:map-location-add'
+              color={theme.palette.primary.main}
+              style={{ position: 'absolute', right: '10px' }}
+            />
+          </Box>
+        </Grid>
+        {selectedCitiesHotels.map((city, index) => (
+          <Grid item xs={12} key={index}>
+            <Accordion
+              expanded={expanded === `panel${index}`}
+              onChange={handleChange(`panel${index}`)}
+              sx={{
+                '&.MuiAccordion-root': {
+                  borderRadius: '6px'
+                },
+                '&.MuiAccordion-root::before': {
+                  backgroundColor: 'transparent'
+                },
+                backgroundColor: theme => theme.palette.primary.light
+              }}
+            >
+              <AccordionSummary
+                sx={{
+                  '&.MuiAccordionSummary-root': {
+                    px: '10px'
+                  },
+                  '& .MuiAccordionSummary-content': {
+                    my: '10px'
                   }
-                  aria-controls={`customized-panel-content-${index}`}
-                >
-                  <Box sx={{ width: '100%', backgroundColor: '#FFFFFF80', p: '10px 15px', display: 'flex', gap: 3 }}>
-                    <Typography>
-                      {city.label
-                        ? city.label
-                            .split('_')
-                            .map(c => `${c[0].toUpperCase()}${c.slice(1)}`)
-                            .join(' ')
-                        : ''}
-                    </Typography>
-                    <Icon
-                      onClick={e => {
-                        e.stopPropagation()
-                        handleDeleteCity(city.id)
-                      }}
-                      icon='mdi:delete-outline'
-                      color={theme.palette.primary.main}
-                    />
-                  </Box>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Grid container spacing={3}>
-                    {city.info.map(data => (
-                      <Grid key={data.id} item xs={12} sm={4}>
-                        <Card sx={{ borderRadius: '15px' }}>
-                          <CardMedia sx={{ height: '9.375rem' }} image={`/images/hotels/jaipur.jpg`} />
-                          <CardContent sx={{ p: theme => `${theme.spacing(3, 3, 4)} !important` }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Icon icon='mdi:custom-hotel' fontSize='1.725rem' />
-                                <Typography sx={{ color: 'black' }} variant='h6'>
-                                  {data.hotel.name ? `${data.hotel.name.slice(0, 18)}...` : ''}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline' }}>
-                                <Typography sx={{ color: 'black' }} variant='h6'>
-                                  ₹5xxx
-                                </Typography>
-                                <Typography variant='caption' sx={{ color: theme => theme.palette.primary.main }}>
-                                  /Room
-                                </Typography>
-                              </Box>
+                }}
+                id={`customized-panel-header-${index}`}
+                expandIcon={
+                  <Typography
+                    sx={{
+                      backgroundColor: '#FFFFFF80',
+                      height: '44px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      px: 3
+                    }}
+                  >
+                    {expandIcon(`panel${index}`)}
+                  </Typography>
+                }
+                aria-controls={`customized-panel-content-${index}`}
+              >
+                <Box sx={{ width: '100%', backgroundColor: '#FFFFFF80', p: '10px 15px', display: 'flex', gap: 3 }}>
+                  <Typography>
+                    {city.label
+                      ? city.label
+                          .split('_')
+                          .map(c => `${c[0].toUpperCase()}${c.slice(1)}`)
+                          .join(' ')
+                      : ''}
+                  </Typography>
+                  <Icon
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleDeleteCity(city.id)
+                    }}
+                    icon='mdi:delete-outline'
+                    color={theme.palette.primary.main}
+                  />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={3}>
+                  {city.info.map(data => (
+                    <Grid key={data.id} item xs={12} sm={4}>
+                      <Card sx={{ borderRadius: '15px' }}>
+                        <CardMedia sx={{ height: '9.375rem' }} image={`/images/hotels/jaipur.jpg`} />
+                        <CardContent sx={{ p: theme => `${theme.spacing(3, 3, 4)} !important` }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              flexWrap: 'wrap'
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Icon icon='mdi:custom-hotel' fontSize='1.725rem' />
+                              <Typography sx={{ color: 'black' }} variant='h6'>
+                                {data.hotel.name ? `${data.hotel.name.slice(0, 18)}...` : ''}
+                              </Typography>
                             </Box>
-                            <Divider sx={{ mt: 2, color: 'black' }} />
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', mt: 3 }}>
-                              <Box
-                                sx={{
-                                  pl: 1,
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: 3
-                                }}
-                              >
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                  <Icon fontSize='20px' icon='mdi:double-user' />
-                                  <Typography fontSize={14}>
-                                    {data.adult != '0' && data.child != '0'
-                                      ? `${data.adult}A, ${data.child}C`
-                                      : data.adult != '0'
-                                      ? `${data.adult}A`
-                                      : `${data.child}C`}
-                                  </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                  <Icon fontSize='20px' icon='mdi:custom-door-open' />
-                                  <Typography fontSize={14}>
-                                    {data.rooms} {data.rooms == '1' ? 'Room' : 'Rooms'}
-                                  </Typography>
-                                </Box>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline' }}>
+                              <Typography sx={{ color: 'black' }} variant='h6'>
+                                {data.hotel.price}
+                              </Typography>
+                              <Typography variant='caption' sx={{ color: theme => theme.palette.primary.main }}>
+                                /Room
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Divider sx={{ mt: 2, color: 'black' }} />
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', mt: 3 }}>
+                            <Box
+                              sx={{
+                                pl: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 3
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <Icon fontSize='20px' icon='mdi:double-user' />
+                                <Typography fontSize={14}>
+                                  {data.adult != '0' && data.child != '0'
+                                    ? `${data.adult}A, ${data.child}C`
+                                    : data.adult != '0'
+                                    ? `${data.adult}A`
+                                    : `${data.child}C`}
+                                </Typography>
                               </Box>
-                              <Box
-                                sx={{
-                                  borderLeft: '1px solid #9A9A9A',
-                                  pl: 3,
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: 3
-                                }}
-                              >
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                  <Icon fontSize='20px' icon='mdi:custom-hotel' />
-                                  <Typography fontSize={14}>{data.hotel.type} Hotel</Typography>
-                                </Box>
-                                {data.extraBed != '0' ? (
-                                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                    <Icon fontSize='20px' icon='mdi:double-bed' />
-                                    <Typography fontSize={14}>1 Extra Bed</Typography>
-                                  </Box>
-                                ) : data.breakfast || data.lunch || data.dinner ? (
-                                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                    <Icon fontSize='20px' icon='mdi:plate-eating' />
-                                    <Typography fontSize={14}>
-                                      {data.breakfast && data.lunch && data.dinner
-                                        ? 'BB | HB | FB'
-                                        : data.breakfast && data.lunch
-                                        ? 'BB | HB'
-                                        : data.breakfast && data.dinner
-                                        ? 'BB | FB'
-                                        : data.lunch && data.dinner
-                                        ? 'HB | FB'
-                                        : data.breakfast
-                                        ? 'BB'
-                                        : data.lunch
-                                        ? 'HB'
-                                        : 'FB'}
-                                    </Typography>
-                                  </Box>
-                                ) : (
-                                  <></>
-                                )}
-                              </Box>
-                              <Box
-                                sx={{
-                                  borderLeft: '1px solid #9A9A9A',
-                                  pl: 3,
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: 3,
-                                  pr: 5
-                                }}
-                              >
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                  <Icon fontSize='20px' icon='mdi:curtains-open' />
-                                  <Typography fontSize={14}>Basic Room (+2)</Typography>
-                                </Box>
-                                {data.extraBed != '0' && (data.breakfast || data.lunch || data.dinner) ? (
-                                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                    <Icon fontSize='20px' icon='mdi:plate-eating' />
-                                    <Typography fontSize={14}>
-                                      {data.breakfast && data.lunch && data.dinner
-                                        ? 'BB | HB | FB'
-                                        : data.breakfast && data.lunch
-                                        ? 'BB | HB'
-                                        : data.breakfast && data.dinner
-                                        ? 'BB | FB'
-                                        : data.lunch && data.dinner
-                                        ? 'HB | FB'
-                                        : data.breakfast
-                                        ? 'BB'
-                                        : data.lunch
-                                        ? 'HB'
-                                        : 'FB'}
-                                    </Typography>
-                                  </Box>
-                                ) : (
-                                  <></>
-                                )}
+                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <Icon fontSize='20px' icon='mdi:custom-door-open' />
+                                <Typography fontSize={14}>
+                                  {data.rooms} {data.rooms == '1' ? 'Room' : 'Rooms'}
+                                </Typography>
                               </Box>
                             </Box>
                             <Box
                               sx={{
-                                mt: 4,
+                                borderLeft: '1px solid #9A9A9A',
+                                pl: 3,
                                 display: 'flex',
-                                justifyContent: 'space-between',
-                                backgroundColor: 'rgba(251, 118, 1, 0.15)',
-                                px: 3
+                                flexDirection: 'column',
+                                gap: 3
                               }}
                             >
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Icon fontSize='20px' icon='mdi:checkin-calendar' />
+                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <Icon fontSize='20px' icon='mdi:custom-hotel' />
+                                <Typography fontSize={14}>{data.hotel.type}</Typography>
+                              </Box>
+                              {data.extraBed != '0' ? (
+                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                  <Icon fontSize='20px' icon='mdi:double-bed' />
+                                  <Typography fontSize={14}>{data.extraBed} Extra Bed</Typography>
+                                </Box>
+                              ) : data.breakfast || data.lunch || data.dinner ? (
+                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                  <Icon fontSize='20px' icon='mdi:plate-eating' />
+                                  <Typography fontSize={14}>
+                                    {data.breakfast && data.lunch && data.dinner
+                                      ? 'BB | HB | FB'
+                                      : data.breakfast && data.lunch
+                                      ? 'BB | HB'
+                                      : data.breakfast && data.dinner
+                                      ? 'BB | FB'
+                                      : data.lunch && data.dinner
+                                      ? 'HB | FB'
+                                      : data.breakfast
+                                      ? 'BB'
+                                      : data.lunch
+                                      ? 'HB'
+                                      : 'FB'}
+                                  </Typography>
+                                </Box>
+                              ) : (
+                                <></>
+                              )}
+                            </Box>
+                            <Box
+                              sx={{
+                                borderLeft: '1px solid #9A9A9A',
+                                pl: 3,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 3,
+                                pr: 5
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <Icon fontSize='20px' icon='mdi:curtains-open' />
                                 <Typography fontSize={14}>
-                                  {format(new Date(data.checkInCheckOut[0]), 'dd MMM yyyy')} -{' '}
-                                  {format(new Date(data.checkInCheckOut[1]), 'dd MMM yyyy')}{' '}
+                                  {data.hotel['Base Catagory'] ? 'Base Catagory' : 'Base Category'}
                                 </Typography>
                               </Box>
-                              <Divider
-                                orientation='vertical'
-                                variant='middle'
-                                sx={{ height: '25px', backgroundColor: '#9A9A9A' }}
-                              />
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Icon fontSize='20px' icon='mdi:night-day' />
-                                {/* {console.log(data)} */}
-                                <Typography fontSize={14}>
-                                  {/* {format(new Date(data.checkInCheckOut[0]), 'dd MM yyyy')} -{' '}
+                              {data.extraBed != '0' && (data.breakfast || data.lunch || data.dinner) ? (
+                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                  <Icon fontSize='20px' icon='mdi:plate-eating' />
+                                  <Typography fontSize={14}>
+                                    {data.breakfast && data.lunch && data.dinner
+                                      ? 'BB | HB | FB'
+                                      : data.breakfast && data.lunch
+                                      ? 'BB | HB'
+                                      : data.breakfast && data.dinner
+                                      ? 'BB | FB'
+                                      : data.lunch && data.dinner
+                                      ? 'HB | FB'
+                                      : data.breakfast
+                                      ? 'BB'
+                                      : data.lunch
+                                      ? 'HB'
+                                      : 'FB'}
+                                  </Typography>
+                                </Box>
+                              ) : (
+                                <></>
+                              )}
+                            </Box>
+                          </Box>
+                          <Box
+                            sx={{
+                              mt: 4,
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              backgroundColor: 'rgba(251, 118, 1, 0.15)',
+                              px: 3
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Icon fontSize='20px' icon='mdi:checkin-calendar' />
+                              <Typography fontSize={14}>
+                                {format(new Date(data.checkInCheckOut[0]), 'dd MMM yyyy')} -{' '}
+                                {format(new Date(data.checkInCheckOut[1]), 'dd MMM yyyy')}{' '}
+                              </Typography>
+                            </Box>
+                            <Divider
+                              orientation='vertical'
+                              variant='middle'
+                              sx={{ height: '25px', backgroundColor: '#9A9A9A' }}
+                            />
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Icon fontSize='20px' icon='mdi:night-day' />
+                              {/* {console.log(data)} */}
+                              <Typography fontSize={14}>
+                                {/* {format(new Date(data.checkInCheckOut[0]), 'dd MM yyyy')} -{' '}
                                   {format(new Date(data.checkInCheckOut[1]), 'dd MM yyyy')}{' '} */}
-                                  {data.daysNights}
-                                </Typography>
-                              </Box>
+                                {data.daysNights}
+                              </Typography>
                             </Box>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 5, gap: 3 }}>
-                              <Button
-                                fullWidth
-                                variant='contained'
-                                onClick={() => {
-                                  setSelectedCity(city)
-                                  setSelectedHotelInfo(data)
-                                  setOpenEditHotelDialog(true)
-                                }}
-                              >
-                                Edit Hotel
-                              </Button>
-                              <Button
-                                fullWidth
-                                variant='outlined'
-                                onClick={() => handleDeleteCityHotel(city.id, data.id)}
-                              >
-                                Delete
-                              </Button>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                    <Grid item xs={12} sm={4}>
-                      <Card
-                        sx={{ borderRadius: '15px', cursor: 'pointer' }}
-                        onClick={() => handleOpenHotelDialog(city)}
-                      >
-                        <CardContent
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'column',
-                            gap: 3,
-                            height: '407px'
-                          }}
-                        >
-                          <Icon icon='mdi:hotel' color={theme.palette.primary.main} fontSize='3.5rem' />
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Icon icon='mdi:plus' color={theme.palette.primary.main} />
-                            <Typography fontWeight={600}>Add Hotel</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 5, gap: 3 }}>
+                            <Button
+                              fullWidth
+                              variant='contained'
+                              onClick={() => {
+                                setSelectedCity(city)
+                                setSelectedHotelInfo(data)
+                                setOpenEditHotelDialog(true)
+                              }}
+                            >
+                              Edit Hotel
+                            </Button>
+                            <Button
+                              fullWidth
+                              variant='outlined'
+                              onClick={() => handleDeleteCityHotel(city.id, data.id)}
+                            >
+                              Delete
+                            </Button>
                           </Box>
                         </CardContent>
                       </Card>
                     </Grid>
+                  ))}
+                  <Grid item xs={12} sm={4}>
+                    <Card sx={{ borderRadius: '15px', cursor: 'pointer' }} onClick={() => handleOpenHotelDialog(city)}>
+                      <CardContent
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexDirection: 'column',
+                          gap: 3,
+                          height: '407px'
+                        }}
+                      >
+                        <Icon icon='mdi:hotel' color={theme.palette.primary.main} fontSize='3.5rem' />
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Icon icon='mdi:plus' color={theme.palette.primary.main} />
+                          <Typography fontWeight={600}>Add Hotel</Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
                   </Grid>
-                </AccordionDetails>
-              </Accordion>
-            </Grid>
-          ))}
-          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button size='large' variant='outlined' color='secondary' onClick={onHotelInfoBack}>
-              Back
-            </Button>
-            <Button size='large' variant='contained' onClick={onHotelInfoSubmit}>
-              Next
-            </Button>
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
           </Grid>
+        ))}
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Button size='large' variant='outlined' color='secondary' onClick={onHotelInfoBack}>
+            Back
+          </Button>
+          <Button size='large' variant='contained' onClick={onHotelInfoSubmit}>
+            Next
+          </Button>
         </Grid>
+      </Grid>
       {/* <form key={1}>
       </form> */}
       <CitiesDialog

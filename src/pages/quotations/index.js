@@ -1,14 +1,20 @@
 import { Fragment, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
+import { Controller, useForm } from 'react-hook-form'
 
+import FormHelperText from '@mui/material/FormHelperText'
+import OutlinedInput from '@mui/material/OutlinedInput'
 import CardContent from '@mui/material/CardContent'
+import FormControl from '@mui/material/FormControl'
 import Typography from '@mui/material/Typography'
+import InputLabel from '@mui/material/InputLabel'
 import StepLabel from '@mui/material/StepLabel'
 import Divider from '@mui/material/Divider'
 import Stepper from '@mui/material/Stepper'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Step from '@mui/material/Step'
+import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 
 import addDays from 'date-fns/addDays'
@@ -117,7 +123,25 @@ const transformHotelData = data => {
         [`${rowData.room_type_1_tag}`]: rowData.room_type_1 || '',
         [`${rowData.room_type_2_tag}`]: rowData.room_type_2 || '',
         [`${rowData.room_type_3_tag}`]: rowData.room_type_3 || '',
-        [`${rowData.room_type_4_tag}`]: rowData.room_type_4 || ''
+        [`${rowData.room_type_4_tag}`]: rowData.room_type_4 || '',
+        minPrice: rowData.room_type_1
+          ? rowData.room_type_1
+          : rowData.room_type_2
+          ? rowData.room_type_2
+          : rowData.room_type_3
+          ? rowData.room_type_3
+          : rowData.room_type_4
+          ? rowData.room_type_4
+          : '',
+        maxPrice: rowData.room_type_4
+          ? rowData.room_type_4
+          : rowData.room_type_3
+          ? rowData.room_type_3
+          : rowData.room_type_2
+          ? rowData.room_type_2
+          : rowData.room_type_1
+          ? rowData.room_type_1
+          : ''
       }
     }
   })
@@ -150,6 +174,7 @@ const transformTransportData = data => {
 const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
   const [isAmountDialogOpen, setIsAmountDialogOpen] = useState(false)
   const [calculatedAmount, setCalculatedAmount] = useState(null)
+  const [quotationNameError, setQuotationNameError] = useState('')
   const [activeStep, setActiveStep] = useState(0)
   // const { isLoaded } = useJsApiLoader({
   //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
@@ -158,6 +183,18 @@ const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
 
   const loaded = useRef(false)
   const router = useRouter()
+
+  const {
+    reset,
+    watch,
+    getValues,
+    setValue,
+    control,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
+    defaultValues: { quotationName: localStorage.getItem('quotationName') ?? '' }
+  })
 
   if (typeof window !== 'undefined' && !loaded.current) {
     if (!document.querySelector('#google-maps')) {
@@ -263,6 +300,16 @@ const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
   // }
 
   const onSubmit = data => {
+    if (activeStep == 0) {
+      const quotation_name = getValues('quotationName')
+      if (quotation_name.length == 0) {
+        setQuotationNameError('This field is required')
+        return
+      } else {
+        localStorage.setItem('quotationName', quotation_name)
+        setQuotationNameError('')
+      }
+    }
     if (activeStep != steps.length - 1) {
       // const dayNightCount = getDayNightCount(dates) + 1
       // defaultHotelInfoValues = {
@@ -275,9 +322,9 @@ const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
       // setTransportValue('depatureReturnDate', dates)
       setActiveStep(activeStep + 1)
     } else {
-      localStorage.setItem("transport", JSON.stringify(data))
+      localStorage.setItem('transport', JSON.stringify(data))
       router.push('/quotations/preview')
-      return;
+      return
       // const { from, to, additionalStops, departureReturnDate } = data
       // const date1 = new Date(departureReturnDate[0])
       // const date2 = new Date(departureReturnDate[1])
@@ -458,6 +505,34 @@ const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
 
   return (
     <Card sx={{ height: '100%' }}>
+      {activeStep == 0 && (
+        <Grid container spacing={6}>
+          <Grid item xs={12} sx={{ m: 7 }}>
+            <FormControl fullWidth>
+              <InputLabel htmlFor='stepper-linear-quotation-name'>Quotation Name</InputLabel>
+              <Controller
+                name='quotationName'
+                control={control}
+                rules={{ required: 'This field is required' }}
+                render={({ field: { value, onChange } }) => (
+                  <OutlinedInput
+                    value={value}
+                    error={Boolean(quotationNameError)}
+                    label='Quotation Name'
+                    id='stepper-linear-quotation-name'
+                    onChange={onChange}
+                  />
+                )}
+              />
+              {quotationNameError.length > 0 && (
+                <FormHelperText sx={{ color: 'error.main' }} id='stepper-linear-account-persons'>
+                  {quotationNameError}
+                </FormHelperText>
+              )}
+            </FormControl>
+          </Grid>
+        </Grid>
+      )}
       {activeStep == 0 && (
         <Box
           sx={{

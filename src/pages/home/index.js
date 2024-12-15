@@ -314,6 +314,8 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
                   router.push(item.href)
                 }
                 if (item.href == '/quotations') {
+                  localStorage.removeItem("quotationId")
+                  localStorage.removeItem("quotationName")
                   localStorage.removeItem('travel')
                   localStorage.removeItem('citiesHotels')
                   localStorage.removeItem('transport')

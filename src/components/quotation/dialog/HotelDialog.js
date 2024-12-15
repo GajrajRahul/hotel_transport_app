@@ -175,12 +175,19 @@ const HotelDialog = ({
     Object.keys(hotelRate[selectedCity.label]).map(hotel_type => {
       let hotelsArr = []
       Object.keys(hotelRate[selectedCity.label][hotel_type]).map((hotel, index) => {
+        const minPrice = hotelRate[selectedCity.label][hotel_type][hotel]['minPrice']
+        const maxPrice = hotelRate[selectedCity.label][hotel_type][hotel]['maxPrice']
+        // console.log(hotel)
+
         hotelsArr.push({
           id: index,
           name: hotel,
           location: selectedCity.label,
           image: 'singapore',
-          price: '2xx - 3xx',
+          price:
+            minPrice == maxPrice
+              ? `₹${minPrice?.slice(0, 1)}xxx`
+              : `₹${minPrice?.slice(0, 1)}xxx-₹${maxPrice.slice(0, 1)}xxx`,
           selected: false,
           type: hotel_type
         })
@@ -785,10 +792,19 @@ const HotelDialog = ({
                         <Grid container spacing={6}>
                           {currHotels.hotels.map(hotel => (
                             <Grid key={hotel.id} item xs={12} sm={6}>
+                              {/* {console.log('selectedHotelDetail: ', selectedHotelDetail)}
+                              {console.log('hotel: ', hotel)} */}
                               <Card>
                                 <CardMedia sx={{ height: '9.375rem' }} image={`/images/hotels/jaipur.jpg`} />
                                 <CardContent sx={{ p: theme => `${theme.spacing(3, 5, 4)} !important` }}>
-                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                                  <Box
+                                    sx={{
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center',
+                                      flexWrap: 'wrap'
+                                    }}
+                                  >
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                       {/* <Icon icon='mdi:hotel-location' /> */}
                                       <Typography variant='h6' sx={{ mb: 2 }}>
@@ -796,10 +812,8 @@ const HotelDialog = ({
                                       </Typography>
                                     </Box>
                                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline' }}>
-                                      <Typography variant='h6'>₹3xxx - ₹5xxx</Typography>
-                                      <Typography variant='caption'>
-                                        /Room
-                                      </Typography>
+                                      <Typography variant='h6'>{hotel.price}</Typography>
+                                      <Typography variant='caption'>/Room</Typography>
                                     </Box>
                                   </Box>
                                   <Divider sx={{ mb: 2 }} />
@@ -808,8 +822,8 @@ const HotelDialog = ({
                                       Number(rooms) == 0
                                         ? true
                                         : selectedHotelDetail
-                                        ? selectedHotelDetail.id != hotel.id
-                                        : false
+                                        ? selectedHotelDetail.name != hotel.name
+                                        : selectedHotelDetail ? selectedHotelDetail.id != hotel.id : false
                                     }
                                     variant='contained'
                                     sx={{ mt: 1, width: '100%', textTransform: 'none' }}
@@ -817,7 +831,7 @@ const HotelDialog = ({
                                   >
                                     {Number(rooms) == 0 || !selectedHotelDetail
                                       ? 'Select Rooms Type'
-                                      : selectedHotelDetail.id == hotel.id
+                                      : selectedHotelDetail.id == hotel.id || selectedHotelDetail.name == hotel.name
                                       ? 'Update Rooms Type'
                                       : 'Select Rooms Type'}
                                   </Button>
