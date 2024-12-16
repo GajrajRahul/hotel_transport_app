@@ -207,7 +207,7 @@ const QuotationsHistory = () => {
   )
 
   useEffect(() => {
-    // fetchQuotationList()
+    fetchQuotationList()
   }, [])
 
   const openDeleteDialog = row => {

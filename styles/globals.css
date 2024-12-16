@@ -86,3 +86,471 @@ code[class*='language-'] {
   -o-transform: rotate(-5deg);
   transform: rotate(-5deg);
 }
+
+/* body {
+    font-family: Arial, sans-serif;
+    margin: 0 auto;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+} */
+
+.a4-background {
+  background: url('/background-image.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 210mm;
+  height: 100%;
+  margin: 0 auto;
+  border: 1px solid #000;
+  padding: 30px;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.triangle {
+  background-image: url(/corner.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: top left;
+  width: 100vw;
+  height: 32vh;
+  z-index: 1;
+}
+
+/* Header */
+
+.Header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  height: 11vh;
+}
+
+.days-nights {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  text-align: center;
+  justify-content: center;
+  padding: 15px 0px 15px 0px;
+  width: 200px;
+  color: white;
+}
+
+.days-nights i {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  font-size: 17px;
+}
+
+
+
+/* Section 1 */
+
+.title-description {
+  margin: 40px auto 40px auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.tag-line {
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  letter-spacing: 3pt;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: #ffffff;
+}
+
+.title {
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  letter-spacing: 3pt;
+  text-transform: uppercase;
+  color: #ffffff;
+
+}
+
+.description {
+  margin: 0px;
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6em;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+/* Section 2 */
+
+.basic-info {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.traveller-name {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  text-align: center;
+  justify-content: start;
+  padding: 15px 0px 15px 16px;
+  width: 47%;
+  color: white;
+}
+
+.traveller-name i {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  font-size: 17px;
+}
+
+.date {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  text-align: center;
+  justify-content: start;
+  padding: 15px 0px 15px 16px;
+  width: 47%;
+  color: white;
+}
+
+.date i {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  font-size: 18px;
+}
+
+
+.route {
+  margin-top: 2%;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  text-align: center;
+  justify-content: start;
+  padding: 15px 0px 15px 16px;
+  color: white;
+}
+
+.route i {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  font-size: 18px;
+}
+
+/* Section 3 */
+
+.accommodation-section {
+  margin: 40px auto 40px auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+  padding: 20px;
+  border-radius: 15px;
+  height: 220px;
+}
+
+.accommodation-title {
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  letter-spacing: 2pt;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #ffffff;
+
+}
+
+/* input fields */
+
+.textfield-container {
+  width: 48%;
+  color: #ffffff;
+}
+
+.textfield-container label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  backdrop-filter: blur(10px);
+  border-radius: 3px;
+  padding: 0 14px;
+  color: #000000;
+  font-size: 14px;
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.textfield-container input:focus+label,
+.textfield-container input:not(:placeholder-shown)+label {
+  top: -2px;
+  font-size: 12px;
+  font-family: "Montserrat", sans-serif;
+  color: #ffffff;
+  padding: 3px 6px 3px 6px;
+}
+
+.textfield-container input {
+  /* width: 100%; */
+  padding: 16px 12px 8px 40px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  font-size: 16px;
+  outline: none;
+  box-sizing: border-box;
+  color: white;
+  background-color: #00000000;
+}
+
+.icon-input {
+  color: white;
+  position: absolute;
+  font-size: 18px;
+  top: 35%;
+  left: 4%;
+}
+
+/* Position */
+
+.no-of-person-position {
+  position: relative;
+  bottom: 200px;
+  left: 18px;
+}
+
+.hotel-category-position {
+  position: relative;
+  bottom: 244px;
+  left: 255px;
+}
+
+.room-type-position {
+  position: relative;
+  bottom: 288px;
+  left: 490px;
+}
+
+.Included-meals-position {
+  position: relative;
+  bottom: 259px;
+  left: 255px;
+}
+
+.no-of-rooms-position {
+  position: relative;
+  bottom: 303px;
+  left: 490px;
+}
+
+.Extra-bed-position {
+  position: relative;
+  bottom: 347px;
+  left: 18px;
+}
+
+/* Section 4 */
+
+.price-section-state {
+  position: relative;
+  bottom: 7em;
+  left: 32em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  text-align: center;
+  justify-content: center;
+  padding: 5px 0px 5px 0px;
+  width: 11em;
+  color: black;
+  font-size: 9px;
+}
+
+.price-section-state i {
+  display: flex;
+  align-items: center;
+  padding-right: 5px;
+  font-size: 12px;
+}
+
+.price-section-total {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 50px;
+  margin: 0 auto;
+  font-family: "Arial", sans-serif;
+  font-weight: 100;
+  text-align: center;
+  justify-content: center;
+  padding: 10px 0px 10px 0px;
+  width: 200px;
+  color: #ff6f00;
+  font-size: 20px;
+}
+
+/* section 5 */
+
+.transportation-section {
+  margin: 15px auto 40px auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+  padding: 20px;
+  border-radius: 15px;
+  height: 140px;
+}
+
+.pickup-location-position {
+  position: relative;
+  bottom: 116px;
+  left: 18px;
+}
+
+.drop-location-position {
+  position: relative;
+  bottom: 160px;
+  left: 255px;
+}
+
+.vehicle-type-position {
+  position: relative;
+  bottom: 204px;
+  left: 490px;
+}
+
+/* Section 6 */
+
+.itinerary-title {
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  letter-spacing: 2pt;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.itinerary-section {
+  margin: 40px auto 40px auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+  padding: 10px;
+  border-radius: 15px;
+  /* height: 40px; */
+}
+
+.travel-inclusive {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  /* text-align: center; */
+  justify-content: space-evenly;
+  padding: 15px 15px 15px 15px;
+  /* width: 47%; */
+  color: white;
+}
+
+.travel-inclusive i {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  font-size: 17px;
+}
+
+.hotel-name-position {
+  position: relative;
+  bottom: 500px;
+  left: 375px;
+}
+
+.checkin-checkout-date-position {
+  position: relative;
+  bottom: 480px;
+  left: 375px;
+}
+
+.days-section {
+  margin: 40px auto 40px auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+  padding: 30px;
+  border-radius: 15px;
+  /* height: 40px; */
+}
+
+.day-description {
+  text-align: left;
+  font-family: "Montserrat", sans-serif;
+  /* letter-spacing: 1pt; */
+  font-weight: 300;
+  /* text-transform: uppercase; */
+  line-height: 1.5em;
+  color: #ffffff;
+}
+
+.day-attraction-dexcription {
+  text-align: left;
+  font-family: "Montserrat", sans-serif;
+  letter-spacing: 0.5pt;
+  font-weight: 300;
+  /* text-transform: uppercase; */
+  font-size: 15px;
+  /* line-height: 1.5em; */
+  color: #ffffff;
+  margin: 0px 0px 0px 0px;
+}

@@ -77,6 +77,7 @@ const LocationAutocomplete = ({ label, name, value, cities, onChange, error, the
       noOptionsText='No locations'
       onChange={(event, newValue) => {
         setOptions(newValue ? [newValue, ...options] : options)
+        // console.log(newValue)
         onChange(newValue)
       }}
       onInputChange={(event, newInputValue) => {

@@ -323,7 +323,8 @@ const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
       setActiveStep(activeStep + 1)
     } else {
       localStorage.setItem('transport', JSON.stringify(data))
-      router.push('/quotations/preview')
+      // router.push('/quotations/preview')
+      window.open("/quotations/preview", "_blank");
       return
       // const { from, to, additionalStops, departureReturnDate } = data
       // const date1 = new Date(departureReturnDate[0])
