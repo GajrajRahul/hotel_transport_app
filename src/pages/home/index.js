@@ -319,6 +319,7 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
                   localStorage.removeItem('travel')
                   localStorage.removeItem('citiesHotels')
                   localStorage.removeItem('transport')
+                  localStorage.removeItem('selectedStates')
                 }
               }}
             >

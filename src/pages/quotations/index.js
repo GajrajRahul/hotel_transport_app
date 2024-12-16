@@ -91,9 +91,20 @@ const transformHotelData = data => {
     })
   )
 
+  const stateList = []
+
   data.slice(1).forEach(row => {
     if (row.length > 0) {
       const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
+
+      const stateKey = `${
+        rowData.destination
+          ? rowData.destination
+              .split(' ')
+              .map(c => c.toLowerCase())
+              .join('_')
+          : rowData.destination
+      }`
 
       const cityKey = `${
         rowData.city
@@ -108,7 +119,16 @@ const transformHotelData = data => {
 
       const hotelNameKey = `${rowData.hotel_name}`
 
-      if (!result[cityKey]) result[cityKey] = {}
+      if (!result[cityKey]) {
+        const existingState = stateList.find(state => state.name == stateKey)
+        if (existingState) {
+          existingState.cities.push({ name: cityKey })
+        } else {
+          stateList.push({ name: stateKey, cities: [{ name: cityKey }] })
+        }
+        result[cityKey] = {}
+      }
+
       if (!result[cityKey][hotelTypeKey]) result[cityKey][hotelTypeKey] = {}
       if (!result[cityKey][hotelTypeKey][hotelNameKey]) {
         result[cityKey][hotelTypeKey][hotelNameKey] = {}
@@ -146,7 +166,7 @@ const transformHotelData = data => {
     }
   })
 
-  return { roomsList, hotelsRate: result }
+  return { roomsList, hotelsRate: result, stateList }
 }
 
 const transformTransportData = data => {
@@ -171,7 +191,7 @@ const transformTransportData = data => {
   return result
 }
 
-const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
+const Quotations = ({ hotel_response, rooms_list, transport_response, state_list }) => {
   const [isAmountDialogOpen, setIsAmountDialogOpen] = useState(false)
   const [calculatedAmount, setCalculatedAmount] = useState(null)
   const [quotationNameError, setQuotationNameError] = useState('')
@@ -324,7 +344,7 @@ const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
     } else {
       localStorage.setItem('transport', JSON.stringify(data))
       // router.push('/quotations/preview')
-      window.open("/quotations/preview", "_blank");
+      window.open('/quotations/preview', '_blank')
       return
       // const { from, to, additionalStops, departureReturnDate } = data
       // const date1 = new Date(departureReturnDate[0])
@@ -478,6 +498,7 @@ const Quotations = ({ hotel_response, rooms_list, transport_response }) => {
             roomsList={rooms_list}
             handleBack={handleBack}
             onSubmit={onSubmit}
+            statesList={state_list}
           />
         )
       case 2:
@@ -601,12 +622,14 @@ export async function getServerSideProps() {
   let hotel_response = null
   let rooms_list = []
   let transport_response = null
+  let state_list = []
 
   try {
     const response = await axios.get(HOTEL_URL)
     const finalData = transformHotelData(response.data.values ?? [])
     hotel_response = finalData.hotelsRate
     rooms_list = finalData.roomsList
+    state_list = finalData.stateList
     // setHotelData(finalData.hotelsRate)
     // setRoomsList(finalData.roomsList)
   } catch (error) {
@@ -628,7 +651,8 @@ export async function getServerSideProps() {
     props: {
       hotel_response,
       rooms_list,
-      transport_response
+      transport_response,
+      state_list
     }
   }
 }

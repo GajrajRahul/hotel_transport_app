@@ -25,13 +25,7 @@ const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(2)
 }))
 
-const CitiesDialog = ({
-  open,
-  handleClose,
-  hotelRate,
-  selectedCitiesHotels,
-  setSelectedCitiesHotels
-}) => {
+const CitiesDialog = ({ open, handleClose, hotelRate, selectedCitiesHotels, setSelectedCitiesHotels, statesList }) => {
   const hotelInfoReduxData = useSelector(state => state.hotelInfo)
   const dispatch = useDispatch()
 
@@ -89,6 +83,19 @@ const CitiesDialog = ({
   }
 
   const onFinalSubmit = () => {
+    const cityLabels = chipData.map(item => item.label)
+
+    const finalState = statesList
+      .map(state => {
+        const filteredCities = state.cities.filter(city => cityLabels.includes(city.name))
+        return {
+          ...state,
+          cities: filteredCities
+        }
+      })
+      .filter(state => state.cities.length > 0)
+
+    localStorage.setItem('selectedStates', JSON.stringify(finalState))
     setSelectedCitiesHotels(chipData)
     resetValues()
   }

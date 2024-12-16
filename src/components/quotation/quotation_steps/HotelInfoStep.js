@@ -56,7 +56,7 @@ let defaultHotelInfoValues = {
 }
 
 const HotelInfoStep = props => {
-  const { onSubmit, handleBack, hotelRate, roomsList } = props
+  const { onSubmit, handleBack, hotelRate, roomsList, statesList } = props
 
   const hotelInfoReduxData = useSelector(state => state.hotelsInfo)
   const dispatch = useDispatch()
@@ -93,6 +93,21 @@ const HotelInfoStep = props => {
 
   const handleDeleteCity = cityIdToDelete => {
     const remainingSelectedCitiesHotels = selectedCitiesHotels.filter(city => city.id != cityIdToDelete)
+    const selectedStates = localStorage.getItem('selectedStates')
+      ? JSON.parse(localStorage.getItem('selectedStates'))
+      : []
+    const validCityLabels = remainingSelectedCitiesHotels.map(item => item.label)
+
+    const updatedSelectedStates = selectedStates
+      .map(state => {
+        const filteredCities = state.cities.filter(city => validCityLabels.includes(city.name))
+        return {
+          ...state,
+          cities: filteredCities
+        }
+      })
+      .filter(state => state.cities.length > 0)
+    localStorage.setItem('selectedStates', JSON.stringify(updatedSelectedStates))
     setSelectedCitiesHotels(remainingSelectedCitiesHotels)
   }
 
@@ -497,6 +512,7 @@ const HotelInfoStep = props => {
         hotelRate={hotelRate}
         selectedCitiesHotels={selectedCitiesHotels}
         setSelectedCitiesHotels={setSelectedCitiesHotels}
+        statesList={statesList}
       />
 
       <HotelDialog
