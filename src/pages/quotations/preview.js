@@ -19,8 +19,6 @@ import Card from '@mui/material/Card'
 import Icon from 'src/@core/components/icon'
 import Loader from 'src/components/common/Loader'
 
-// import PreviewCard from 'src/components/quotation/preview/PreviewCard'
-// import PreviewActions from 'src/components/quotation/preview/PreviewActions'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 import { postRequest, putRequest } from 'src/api-main-file/APIServices'
@@ -43,12 +41,30 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
     const city = cities[i]
     const cityName = city.label
     const hotels = city.info
+    let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
+
+    const totalAttractions = attractions.length
+
+    let totalDaysInCity = 0
+    for (const hotel of hotels) {
+      const [checkIn, checkOut] = hotel.checkInCheckOut.map(date => new Date(date))
+      totalDaysInCity += Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
+    }
+
+    let attractionsPerDay = Math.floor(totalAttractions / totalDaysInCity)
+    let remainingAttractions = totalAttractions % totalDaysInCity
+
+    let currentAttractionIndex = 0
 
     for (let j = 0; j < hotels.length; j++) {
       const hotel = hotels[j]
       const hotelName = hotel.hotel.name
-      const { hotelType, extraBed, roomType, image } = hotel.hotel
+      const { type, extraBed, roomType, image } = hotel.hotel
       const [checkIn, checkOut] = hotel.checkInCheckOut.map(date => new Date(date))
+      const checkInCheckOut = `${format(new Date(hotel.checkInCheckOut[0]), 'dd MMM yyyy')} to ${format(
+        new Date(hotel.checkInCheckOut[1]),
+        'dd MMM yyyy'
+      )}`
 
       if (!currentDate) currentDate = new Date(checkIn)
 
@@ -58,20 +74,25 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
           currentCity = cityName
         }
 
-        let hotelInfo = { hotelType, roomType, extraBed }
+        let dailyAttractionsCount = attractionsPerDay + (remainingAttractions > 0 ? 1 : 0)
+        if (remainingAttractions > 0) remainingAttractions--
+
+        const dayAttractions = attractions.slice(currentAttractionIndex, currentAttractionIndex + dailyAttractionsCount)
+        currentAttractionIndex += dailyAttractionsCount
+
+        let hotelInfo = { hotelType: type, roomType, extraBed }
         let meals = []
         // First day in the city
         if (day == 1) {
           let description = `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
           if (transportData.vehicleType) {
-            description += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle`
+            description += `you will be transferred to your hotel in a comfortable ${transportData.vehicleType} Vehicle`
           }
-          description += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
+          description += `Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
           if (hotel.lunch) {
             meals.push('Lunch')
             description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
           }
-          let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
 
           let footer = ''
           if (hotel.dinner) {
@@ -83,12 +104,13 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
           itinerary.push({
             head: `Day ${day} | Arrival in ${cityName}`,
             hotelInfo: { ...hotelInfo, meals },
-            hotelImage: image,
+            hotelImage: image != 'singapore' ? image : '',
             hotelName,
             date: '',
             description,
-            attractions,
-            footer
+            attractions: dayAttractions,
+            footer,
+            checkInCheckOut
           })
           currentCity = cityName
           currentHotel = hotelName
@@ -104,14 +126,13 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             }
             description += 'complete the check-out formalities and proceed to your next hotel.'
             if (transportData.vehicleType) {
-              description += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle.`
+              description += `you will be transferred to your hotel in a comfortable ${transportData.vehicleType} Vehicle.`
             }
-            description += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}. Dive deeper into the city's charm`
+            description += `Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}. Dive deeper into the city's charm`
             if (hotel.lunch) {
               meals.push('Lunch')
               description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
             }
-            let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
             let footer = ''
             if (hotel.dinner) {
               meals.push('Dinner')
@@ -122,12 +143,13 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             itinerary.push({
               head: `Day ${day} | From ${currentHotel} to ${hotelName} in ${cityName}`,
               hotelInfo: { ...hotelInfo, meals },
-              hotelImage: image,
+              hotelImage: image != 'singapore' ? image : '',
               hotelName,
               date: '',
               description,
-              attractions,
-              footer
+              attractions: dayAttractions,
+              footer,
+              checkInCheckOut
             })
             currentHotel = hotelName
           } else {
@@ -140,7 +162,6 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
               meals.push('Lunch')
               description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
             }
-            let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
 
             let footer = ''
             if (hotel.dinner) {
@@ -152,12 +173,13 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             itinerary.push({
               head: `Day ${day} | Continue exploring ${cityName}`,
               hotelInfo: { ...hotelInfo, meals },
-              hotelImage: image,
+              hotelImage: image != 'singapore' ? image : '',
               hotelName,
               date: '',
               description,
-              attractions,
-              footer
+              attractions: dayAttractions,
+              footer,
+              checkInCheckOut
             })
           }
         }
@@ -171,14 +193,13 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
           description += 'complete the check-out formalities and proceed to your onward journey.'
           description += `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
           if (transportData.vehicleType) {
-            description += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle`
+            description += `you will be transferred to your hotel in a comfortable ${transportData.vehicleType} Vehicle`
           }
-          description += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
+          description += `Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
           if (hotel.lunch) {
             meals.push('Lunch')
             description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
           }
-          let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
           let footer = ''
           if (hotel.dinner) {
             meals.push('Dinner')
@@ -189,12 +210,13 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
           itinerary.push({
             head: `Day ${day} | ${currentCity} to ${cityName}`,
             hotelInfo: { ...hotelInfo, meals },
-            hotelImage: image,
+            hotelImage: image != 'singapore' ? image : '',
             hotelName,
             date: '',
             description,
-            attractions,
-            footer
+            attractions: dayAttractions,
+            footer,
+            checkInCheckOut
           })
           currentCity = cityName
           currentHotel = hotelName
@@ -219,7 +241,6 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   // const lastCity = cities[cities.length - 1].label
   // itinerary.push(`Day ${itinerary.length + 1} | Departure from ${lastCity}`)
 
-  // console.log(itinerary)
   return itinerary
 }
 
@@ -265,7 +286,8 @@ const generateMonumentsData = data => {
 }
 
 const getHotelFare = (cities, totalNights) => {
-  const hotelRate = JSON.stringify(localStorage.getItem('hotelRates'))
+  const hotelRate = JSON.parse(localStorage.getItem('hotelRates'))
+  const roomsList = JSON.parse(localStorage.getItem('roomsList'))
   let hotelAmount = 0
   cities.map(city => {
     const { label, info } = city
@@ -307,14 +329,14 @@ const getHotelFare = (cities, totalNights) => {
   return hotelAmount
 }
 
-const getTransportFare = data => {
+const getTransportFare = (data, cities) => {
   const { totalDays, totalDistance, vehicleType, additionalStops } = data
-  const transportRate = JSON.stringify(localStorage.getItem('transportRates'))
+  const transportRate = JSON.parse(localStorage.getItem('transportRates'))
   const vehicleRates = transportRate[vehicleType]
 
   if (cities.length == 1) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
-    // console.log('totalAmount: ', totalAmount)
+    // console.log('city_local_fare: ', city_local_fare)
     if (additionalStops.length > 0) {
       const remainingAmount =
         totalDistance * Number(vehicleRates['amount_per_km']) +
@@ -354,6 +376,18 @@ const getTransportFare = data => {
   }
 }
 
+function loadScript(src, position, id) {
+  if (!position) {
+    return
+  }
+
+  const script = document.createElement('script')
+  script.setAttribute('async', '')
+  script.setAttribute('id', id)
+  script.src = src
+  position.appendChild(script)
+}
+
 const QutationPreview = ({ id }) => {
   let totalNights = ''
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
@@ -372,11 +406,12 @@ const QutationPreview = ({ id }) => {
   )
   const [monuments, setMonuments] = useState(null)
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    // libraries: ['places']
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries: ['places']
   })
 
   const [error, setError] = useState(false)
+  const [totalAmount, setTotalAmount] = useState(0)
   const [data, setData] = useState(null)
 
   const [isLoading, setIsLoading] = useState(false)
@@ -385,6 +420,14 @@ const QutationPreview = ({ id }) => {
   useEffect(() => {
     fetchMonumentsData()
   }, [])
+
+  useEffect(() => {
+    if (isLoaded) {
+      getTotalAmount()
+    }
+  }, [isLoaded])
+
+  // console.log(totalAmount)
 
   const fetchMonumentsData = async () => {
     const MONUMENTS_SHEET_ID = process.env.NEXT_PUBLIC_MONUMENTS_SHEET_ID
@@ -403,7 +446,7 @@ const QutationPreview = ({ id }) => {
     }
   }
 
-  const saveQuotation = async () => {
+  const saveQuotation = async totalAmount => {
     // const quotationId = localStorage.getItem('quotationId')
     // const travelInfoData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
     // const cities = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
@@ -471,7 +514,8 @@ const QutationPreview = ({ id }) => {
                 : transportData.current.from,
             checkpoints: transportData.current.additionalStops.map(stop => stop.description)
           }
-        : null
+        : null,
+      totalAmount: `${totalAmount}`
     }
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
@@ -493,8 +537,8 @@ const QutationPreview = ({ id }) => {
     }
   }
 
-  const getTotalDistance = () => {
-    const { from, to, additionalStops, departureReturnDate } = transportData
+  const getTotalAmount = () => {
+    const { from, to, additionalStops, departureReturnDate } = transportData.current
     const date1 = new Date(departureReturnDate[0])
     const date2 = new Date(departureReturnDate[1])
 
@@ -535,23 +579,26 @@ const QutationPreview = ({ id }) => {
           const totalDistance = (totalDist / 1000).toFixed(2)
           // const totalTransportAmount = 0
           const totalTransportAmount =
-            getTransportFare({
-              ...data,
-              totalDistance,
-              totalDays: totalDays + 1,
-              additionalStops
-            }) ?? 0
-          const totalHotelAmount = getHotelFare(cities, totalNights) ?? 0
+            getTransportFare(
+              {
+                ...transportData.current,
+                totalDistance,
+                totalDays: totalDays + 1,
+                additionalStops
+              },
+              cities
+            ) ?? 0
+          const totalHotelAmount = getHotelFare(cities.current, totalNights) ?? 0
           // setCalculatedAmount({
           //   transport: Number(totalTransportAmount),
           //   hotel: Number(totalHotelAmount),
           //   total: Number(totalTransportAmount) + Number(totalHotelAmount)
           // })
           // setIsAmountDialogOpen(true)
-          return Number(totalTransportAmount) + Number(totalHotelAmount)
+          setTotalAmount(Number(totalTransportAmount) + Number(totalHotelAmount))
         } else {
           toast.error(`error fetching distance: ${result?.status}`)
-          return 0
+          setTotalAmount(0)
         }
       }
     )
@@ -573,7 +620,7 @@ const QutationPreview = ({ id }) => {
             <CardContent ref={targetRef}>
               <div className='a4-background'>
                 <div className='Header'>
-                  <img className='logo' src='adventure-richa-holidays.png' />
+                  <img className='logo' src='/images/logo_full.png' />
                   <div className='days-nights'>
                     {' '}
                     <span>{travelInfoData.current['days-nights']}</span>
@@ -668,17 +715,19 @@ const QutationPreview = ({ id }) => {
                     <label htmlFor='outlined-input'>No of Rooms</label>
                   </div>
 
-                  <div className='textfield-container Extra-bed-position'>
-                    <input type='text' id='outlined-input' value={cities.current[0].info[0].extraBed} disabled />
-                    <label htmlFor='outlined-input'>Extra Bed</label>
-                  </div>
+                  {cities.current[0].info[0].extraBed && (
+                    <div className='textfield-container Extra-bed-position'>
+                      <input type='text' id='outlined-input' value={cities.current[0].info[0].extraBed} disabled />
+                      <label htmlFor='outlined-input'>Extra Bed</label>
+                    </div>
+                  )}
                 </div>
 
                 <div className='price-section' style={{ marginRight: 'auto', marginLeft: 'auto', width: '100%' }}>
                   <div className='price-section-total'>
                     {' '}
                     {/* <span className='total-amount'>Total : ₹56,700</span> */}
-                    <span className='total-amount'>Total : ₹{getTotalDistance()}</span>
+                    <span className='total-amount'>Total : ₹{totalAmount}</span>
                   </div>
 
                   <div className='price-section-state'>
@@ -749,62 +798,90 @@ const QutationPreview = ({ id }) => {
                   <h3 className='itinerary-title'>Day Wise Itinerary</h3>
                 </div>
 
-                {/* {monuments && console.log(generateDayWiseItinerary(cities.current, transportData.current, monuments))} */}
                 {monuments &&
                   generateDayWiseItinerary(cities.current, transportData.current, monuments).map((itinerary, index) => (
-                    <div key={index} className='days-section'>
-                      <h3 className='itinerary-title'>{itinerary.head}</h3>
-                      <div className='travel-inclusive'>
-                        <span>{itinerary.hotelInfo.hotelType}</span> <span>&#20;|&#20;</span>{' '}
-                        <i className='fi fi-ts-door-closed'></i>
-                        <span>{itinerary.hotelInfo.roomType}</span> <span>&#20;|&#20;</span>{' '}
-                        <i className='fi fi-ts-binoculars'></i>
-                        <span>Sightseeing</span>
-                        {/* <span>1 Basic Room</span> */}
-                        <span>&#20;|&#20;</span>
-                        {itinerary.hotelInfo.extraBed && (
-                          <>
-                            <span>{itinerary.hotelInfo.extraBed}</span>
-                            <span>&#20;|&#20;</span>
-                          </>
-                        )}
-                        {itinerary.hotelInfo.meals.length > 0 && (
-                          <>
-                            <i className='fi fi-ts-plate-eating'></i>
-                            <span>{itinerary.hotelInfo.meals.join(', ')}</span>
-                          </>
-                        )}
-                        {/* <span>Breakfast, Dinner</span> */}
+                    <Fragment key={index}>
+                      <div className='days-section'>
+                        <h3 className='itinerary-title'>{itinerary.head}</h3>
+                        <div className='travel-inclusive'>
+                          <span>{itinerary.hotelInfo.hotelType}</span> <span>|</span>{' '}
+                          {/* <i className='fi fi-ts-door-closed'></i> */}
+                          {/* <span>{itinerary.hotelInfo.roomType}</span> <span>|</span>{' '} */}
+                          <span>Base Catagory</span> <span>|</span> {/* <i className='fi fi-ts-binoculars'></i> */}
+                          <span>Sightseeing</span>
+                          {/* <span>1 Basic Room</span> */}
+                          <span>|</span>
+                          {itinerary.hotelInfo.extraBed && (
+                            <>
+                              <span>{itinerary.hotelInfo.extraBed}</span>
+                              <span>|</span>
+                            </>
+                          )}
+                          {itinerary.hotelInfo.meals.length > 0 && (
+                            <>
+                              {/* <i className='fi fi-ts-plate-eating'></i> */}
+                              <span>{itinerary.hotelInfo.meals.join(', ')}</span>
+                            </>
+                          )}
+                          {/* <span>Breakfast, Dinner</span> */}
+                        </div>
+                        <img
+                          src={itinerary.hotelImage.length > 0 ? itinerary.hotelImage : '/images/hotels/jaipur.jpg'}
+                          width='320px'
+                          height='150px'
+                          style={{
+                            textAlign: 'left',
+                            textAlign: 'left',
+                            display: 'flex',
+                            margin: '20px 0 0 0px',
+                            borderRadius: '10px'
+                          }}
+                        />
+                        <div>
+                          <p className='day-description'>{itinerary.description}</p>
+                          {itinerary.attractions.map((place, idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
+                              <img src='/sightseeing-icon.png' width='20px' style={{ marginRight: '10px' }} />
+                              <p className='day-attraction-dexcription'>
+                                <b>{place.split(':')[0]} : </b> {place.split(':')[1]}
+                              </p>
+                            </div>
+                          ))}
+                          <p className='day-description'>{itinerary.footer}</p>
+                        </div>
                       </div>
-                      <img
-                        src={itinerary.hotelImage}
-                        width='320px'
-                        height='150px'
-                        style={{
-                          textAlign: 'left',
-                          textAlign: 'left',
-                          display: 'flex',
-                          margin: '20px 0 0 0px',
-                          borderRadius: '10px'
-                        }}
-                      />
                       <div>
-                        <p className='day-description'>{itinerary.description}</p>
-                        {itinerary.attractions.map((place, idx) => (
-                          <div key={idx} style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
-                            <img src='/sightseeing-icon.png' width='20px' style={{ marginRight: '10px' }} />
-                            <p className='day-attraction-dexcription'>
-                              <b>{place.split(':')[0]}</b> {place.split(':')[1]}
-                            </p>
+                        <div style={{ height: '0px' }}>
+                          <div className='textfield-container hotel-name-position'>
+                            {/* <i className='fi fi-ts-marker icon-input'></i> */}
+                            <input
+                              type='text'
+                              id='outlined-input'
+                              value={itinerary.hotelName}
+                              disabled
+                              style={{ width: '93%' }}
+                            />
+                            <label htmlFor='outlined-input'>Hotel Name</label>
                           </div>
-                        ))}
-                        <p className='day-description'>{itinerary.footer}</p>
+
+                          <div className='textfield-container checkin-checkout-date-position'>
+                            {/* <i className='fi fi-ts-marker icon-input'></i> */}
+                            <input
+                              type='text'
+                              id='outlined-input'
+                              value={itinerary.checkInCheckOut}
+                              disabled
+                              style={{ width: '93%' }}
+                            />
+                            <label htmlFor='outlined-input'>Date range of hotel stay</label>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    </Fragment>
                   ))}
 
                 {/* need to discuss */}
-                <div>
+                {/* <div>
                   <div style={{ height: '0px' }}>
                     <div className='textfield-container hotel-name-position'>
                       <input
@@ -828,7 +905,7 @@ const QutationPreview = ({ id }) => {
                       <label htmlFor='outlined-input'>Drop Location</label>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -886,7 +963,7 @@ const QutationPreview = ({ id }) => {
               </Button>
               <Button
                 fullWidth
-                onClick={saveQuotation}
+                onClick={() => saveQuotation()}
                 variant='outlined'
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-save-quote' />}

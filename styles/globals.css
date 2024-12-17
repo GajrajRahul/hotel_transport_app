@@ -98,7 +98,7 @@ code[class*='language-'] {
 } */
 
 .a4-background {
-  background: url('/background-image.jpg');
+  background: url('/images/background-image.jpg');
   background-repeat: no-repeat;
   background-size: cover;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -112,7 +112,7 @@ code[class*='language-'] {
 }
 
 .triangle {
-  background-image: url(/corner.png);
+  background-image: url('/corner.png');
   background-repeat: no-repeat;
   background-size: contain;
   background-position: top left;

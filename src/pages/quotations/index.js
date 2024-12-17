@@ -184,6 +184,10 @@ const transformTransportData = data => {
 }
 
 const Quotations = ({ hotel_response, rooms_list, transport_response, state_list }) => {
+  localStorage.setItem('hotelRates', JSON.stringify(hotel_response))
+  localStorage.setItem('transportRates', JSON.stringify(transport_response))
+  localStorage.setItem('roomsList', JSON.stringify(rooms_list))
+
   const [isAmountDialogOpen, setIsAmountDialogOpen] = useState(false)
   const [calculatedAmount, setCalculatedAmount] = useState(null)
   const [quotationNameError, setQuotationNameError] = useState('')
@@ -379,8 +383,7 @@ export async function getServerSideProps() {
 
   try {
     const response = await axios.get(HOTEL_URL)
-    const finalData = transformHotelData(response.data.values ?? [])
-    localStorage.setItem('hotelRates', JSON.stringify(finalData.hotelsRate))
+    const finalData = transformHotelData(response.data.values)
     hotel_response = finalData.hotelsRate
     rooms_list = finalData.roomsList
     state_list = finalData.stateList
@@ -393,8 +396,7 @@ export async function getServerSideProps() {
 
   try {
     const response = await axios.get(TRANSPORT_URL)
-    const finalData = transformTransportData(response.data.values ?? [])
-    localStorage.setItem('transportRates', JSON.stringify(finalData))
+    const finalData = transformTransportData(response.data.values)
     transport_response = finalData
     // setTransportRate(finalData)
   } catch (error) {
