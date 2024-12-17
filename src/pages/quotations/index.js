@@ -48,20 +48,6 @@ const steps = [
   }
 ]
 
-let defaultHotelInfoValues = {
-  checkInCheckOut: [new Date(), addDays(new Date(), 45)],
-  breakfast: true,
-  lunch: true,
-  dinner: true,
-  rooms: '',
-  child: '0',
-  daysNights: '45 Days & 44 Nights',
-  extraBed: '',
-  hotel: null,
-  persons: '',
-  adult: '0'
-}
-
 function loadScript(src, position, id) {
   if (!position) {
     return
@@ -144,6 +130,12 @@ const transformHotelData = data => {
         [`${rowData.room_type_2_tag}`]: rowData.room_type_2 || '',
         [`${rowData.room_type_3_tag}`]: rowData.room_type_3 || '',
         [`${rowData.room_type_4_tag}`]: rowData.room_type_4 || '',
+        // roomsType: [
+        //   { roomType: rowData.room_type_1_tag, price: room_type_1 || '' },
+        //   { roomType: rowData.room_type_2_tag, price: room_type_2 || '' },
+        //   { roomType: rowData.room_type_3_tag, price: room_type_3 || '' },
+        //   { roomType: rowData.room_type_4_tag, price: room_type_4 || '' }
+        // ],
         minPrice: rowData.room_type_1
           ? rowData.room_type_1
           : rowData.room_type_2
@@ -196,10 +188,6 @@ const Quotations = ({ hotel_response, rooms_list, transport_response, state_list
   const [calculatedAmount, setCalculatedAmount] = useState(null)
   const [quotationNameError, setQuotationNameError] = useState('')
   const [activeStep, setActiveStep] = useState(0)
-  // const { isLoaded } = useJsApiLoader({
-  //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  //   // libraries: ['places']
-  // })
 
   const loaded = useRef(false)
   const router = useRouter()
@@ -232,93 +220,6 @@ const Quotations = ({ hotel_response, rooms_list, transport_response, state_list
     setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
-  // const getHotelFare = () => {
-  //   let hotelAmount = 0
-  //   cities.map(city => {
-  //     const { label, info } = city
-  //     info.map(currHotel => {
-  //       const { breakfast, lunch, dinner, rooms, extraBed, hotel, checkInCheckOut } = currHotel
-  //       const { type, name } = hotel
-  //       const totalDayNight = Number(getDayNightCount(checkInCheckOut))
-  //       const hotelInfo =
-  //         hotelRate[
-  //           label
-  //             ? label
-  //                 .split(' ')
-  //                 .map(c => c.toLowerCase())
-  //                 .join('_')
-  //             : ''
-  //         ][type][name]
-
-  //       Object.keys(hotel).map(data => {
-  //         if (roomsList.includes(data)) {
-  //           hotelAmount += Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight
-  //         }
-  //       })
-
-  //       if (breakfast) {
-  //         hotelAmount += Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight
-  //       }
-  //       if (lunch) {
-  //         hotelAmount += Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight
-  //       }
-  //       if (dinner) {
-  //         hotelAmount += Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight
-  //       }
-  //       if (extraBed) {
-  //         hotelAmount += Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight
-  //       }
-  //     })
-  //   })
-  //   return hotelAmount
-  // }
-
-  // const getTransportFare = data => {
-  //   const { totalDays, totalDistance, vehicleType, additionalStops } = data
-  //   const vehicleRates = transportRate[vehicleType]
-
-  //   if (cities.length == 1) {
-  //     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
-  //     // console.log('totalAmount: ', totalAmount)
-  //     if (additionalStops.length > 0) {
-  //       const remainingAmount =
-  //         totalDistance * Number(vehicleRates['amount_per_km']) +
-  //         Number(vehicleRates['toll_charges_per_day']) +
-  //         Number(vehicleRates['driver_charges_per_day']) +
-  //         Number(vehicleRates['parking_charges_per_day']) +
-  //         Number(vehicleRates['service_cleaning_charge_one_time'])
-  //       // console.log('remainingAmount: ', remainingAmount)
-  //       totalAmount += remainingAmount
-  //     }
-  //     return totalAmount
-  //   } else {
-  //     const distanceAmount =
-  //       Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
-  //     // console.log('distanceAmount: ', distanceAmount)
-
-  //     const distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
-  //     // console.log('distanceAmount2: ', distanceAmount2)
-
-  //     const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
-  //     // console.log('tollAmount: ', tollAmount)
-  //     const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
-  //     // console.log('driverAmount: ', driverAmount)
-  //     const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
-  //     // console.log('parkingCharges: ', parkingCharges)
-  //     const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
-  //     // console.log('cleaningAmount: ', cleaningAmount)
-
-  //     const totalAmount =
-  //       (distanceAmount > distanceAmount2 ? distanceAmount : distanceAmount2) +
-  //       Number(tollAmount) +
-  //       Number(driverAmount) +
-  //       Number(parkingCharges) +
-  //       Number(cleaningAmount)
-
-  //     return totalAmount
-  //   }
-  // }
-
   const onSubmit = data => {
     if (activeStep == 0) {
       const quotation_name = getValues('quotationName')
@@ -331,160 +232,12 @@ const Quotations = ({ hotel_response, rooms_list, transport_response, state_list
       }
     }
     if (activeStep != steps.length - 1) {
-      // const dayNightCount = getDayNightCount(dates) + 1
-      // defaultHotelInfoValues = {
-      //   ...defaultHotelInfoValues,
-      //   checkInCheckOut: dates,
-      //   daysNights: `${dayNightCount} ${dayNightCount < 2 ? 'Day' : 'Days'} & ${dayNightCount - 1} ${
-      //     dayNightCount < 3 ? 'Night' : 'Nights'
-      //   }`
-      // }
-      // setTransportValue('depatureReturnDate', dates)
       setActiveStep(activeStep + 1)
     } else {
       localStorage.setItem('transport', JSON.stringify(data))
       // router.push('/quotations/preview')
       window.open('/quotations/preview', '_blank')
-      return
-      // const { from, to, additionalStops, departureReturnDate } = data
-      // const date1 = new Date(departureReturnDate[0])
-      // const date2 = new Date(departureReturnDate[1])
-
-      // const diffInMs = date2 - date1
-
-      // const totalDays = diffInMs / (1000 * 60 * 60 * 24)
-
-      // const directionsService = new window.google.maps.DirectionsService()
-
-      // let waypoints =
-      //   additionalStops.length > 0
-      //     ? additionalStops.map((item, index) => {
-      //         return { location: item.description, stopover: true }
-      //       })
-      //     : []
-
-      // let distanceObj = {
-      //   origin: from.description,
-      //   destination: to.description,
-      //   travelMode: window.google.maps.TravelMode.DRIVING
-      // }
-
-      // if (to.description != from.description) {
-      //   waypoints = [...waypoints, { location: to.description, stopover: true }]
-      //   distanceObj = { ...distanceObj, destination: from.description }
-      // }
-
-      // directionsService.route(
-      //   waypoints.length > 0
-      //     ? {
-      //         ...distanceObj,
-      //         waypoints
-      //       }
-      //     : distanceObj,
-      //   (result, status) => {
-      //     if (status === window.google.maps.DirectionsStatus.OK) {
-      //       const totalDist = result.routes[0].legs.reduce((acc, leg) => acc + leg.distance.value, 0)
-      //       const totalDistance = (totalDist / 1000).toFixed(2)
-      //       const totalTransportAmount = 0
-      //       // const totalTransportAmount = getTransportFare({
-      //       //   ...data,
-      //       //   totalDistance,
-      //       //   totalDays: totalDays + 1,
-      //       //   additionalStops
-      //       // })
-      //       // const totalHotelAmount = getHotelFare()
-      //       setCalculatedAmount({
-      //         transport: Number(totalTransportAmount)
-      //         // hotel: Number(totalHotelAmount),
-      //         // total: Number(totalTransportAmount) + Number(totalHotelAmount)
-      //       })
-      //       setIsAmountDialogOpen(true)
-      //     } else {
-      //       toast.error(`error fetching distance: ${result?.status}`)
-      //     }
-      //   }
-      // )
     }
-
-    // if (activeStep != steps.length - 1) {
-    //   if (data.cities) {
-    //     const isHotelEmpty = data.cities.find(c => c.info.length == 0)
-    //     if (isHotelEmpty) {
-    //       toast.error('Add atleast 1 Hotel in all selected cities')
-    //       return
-    //     }
-
-    //     if (data.cities.length == 1) {
-    //       const citySelected = data.cities[0].label
-    //         ? data.cities[0].label
-    //             .split('_')
-    //             .map(c => `${c[0].toUpperCase()}${c.slice(1)}`)
-    //             .join(' ')
-    //         : ''
-    //       setTransportValue('to', { description: citySelected })
-    //       setTransportValue('from', { description: citySelected })
-    //     }
-    //   }
-    //   setActiveStep(activeStep + 1)
-    // } else {
-    //   const { from, to, additionalStops, depatureReturnDate } = data
-    //   const date1 = new Date(depatureReturnDate[0])
-    //   const date2 = new Date(depatureReturnDate[1])
-
-    //   const diffInMs = date2 - date1
-
-    //   const totalDays = diffInMs / (1000 * 60 * 60 * 24)
-
-    //   const directionsService = new window.google.maps.DirectionsService()
-
-    //   let waypoints =
-    //     additionalStops.length > 0
-    //       ? additionalStops.map((item, index) => {
-    //           return { location: item.description, stopover: true }
-    //         })
-    //       : []
-
-    //   let distanceObj = {
-    //     origin: from.description,
-    //     destination: to.description,
-    //     travelMode: window.google.maps.TravelMode.DRIVING
-    //   }
-
-    //   if (to.description != from.description) {
-    //     waypoints = [...waypoints, { location: to.description, stopover: true }]
-    //     distanceObj = { ...distanceObj, destination: from.description }
-    //   }
-
-    //   directionsService.route(
-    //     waypoints.length > 0
-    //       ? {
-    //           ...distanceObj,
-    //           waypoints
-    //         }
-    //       : distanceObj,
-    //     (result, status) => {
-    //       if (status === window.google.maps.DirectionsStatus.OK) {
-    //         const totalDist = result.routes[0].legs.reduce((acc, leg) => acc + leg.distance.value, 0)
-    //         const totalDistance = (totalDist / 1000).toFixed(2)
-    //         const totalTransportAmount = getTransportFare({
-    //           ...data,
-    //           totalDistance,
-    //           totalDays: totalDays + 1,
-    //           additionalStops
-    //         })
-    //         const totalHotelAmount = getHotelFare()
-    //         setCalculatedAmount({
-    //           transport: Number(totalTransportAmount),
-    //           hotel: Number(totalHotelAmount),
-    //           total: Number(totalTransportAmount) + Number(totalHotelAmount)
-    //         })
-    //         setIsAmountDialogOpen(true)
-    //       } else {
-    //         toast.error(`error fetching distance: ${result?.status}`)
-    //       }
-    //     }
-    //   )
-    // }
   }
 
   const getStepContent = step => {
@@ -627,6 +380,7 @@ export async function getServerSideProps() {
   try {
     const response = await axios.get(HOTEL_URL)
     const finalData = transformHotelData(response.data.values ?? [])
+    localStorage.setItem('hotelRates', JSON.stringify(finalData.hotelsRate))
     hotel_response = finalData.hotelsRate
     rooms_list = finalData.roomsList
     state_list = finalData.stateList
@@ -640,6 +394,7 @@ export async function getServerSideProps() {
   try {
     const response = await axios.get(TRANSPORT_URL)
     const finalData = transformTransportData(response.data.values ?? [])
+    localStorage.setItem('transportRates', JSON.stringify(finalData))
     transport_response = finalData
     // setTransportRate(finalData)
   } catch (error) {

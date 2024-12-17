@@ -5,6 +5,8 @@ import { usePDF } from 'react-to-pdf'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 
+import { useJsApiLoader } from '@react-google-maps/api'
+
 import { format } from 'date-fns'
 import axios from 'axios'
 
@@ -22,6 +24,9 @@ import Loader from 'src/components/common/Loader'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 import { postRequest, putRequest } from 'src/api-main-file/APIServices'
+import { getDayNightCount } from 'src/utils/function'
+
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
 const getUniqueHotelTypes = cities => {
   const hotelTypes = cities.flatMap(city => city.info.map(info => info.hotel.type))
@@ -42,6 +47,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
     for (let j = 0; j < hotels.length; j++) {
       const hotel = hotels[j]
       const hotelName = hotel.hotel.name
+      const { hotelType, extraBed, roomType, image } = hotel.hotel
       const [checkIn, checkOut] = hotel.checkInCheckOut.map(date => new Date(date))
 
       if (!currentDate) currentDate = new Date(checkIn)
@@ -52,25 +58,37 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
           currentCity = cityName
         }
 
+        let hotelInfo = { hotelType, roomType, extraBed }
+        let meals = []
         // First day in the city
         if (day == 1) {
-          let body = `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
+          let description = `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
           if (transportData.vehicleType) {
-            body += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle`
+            description += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle`
           }
-          body += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
+          description += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
           if (hotel.lunch) {
-            body += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
+            meals.push('Lunch')
+            description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
           }
-          body += `${monuments[cityName] ? monuments[cityName].cityAttractions.split('|').join('\n') : ''}`
+          let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
+
+          let footer = ''
           if (hotel.dinner) {
-            body += 'Return to the hotel in the evening and enjoy a sumptuous dinner, specially prepared for you.'
+            meals.push('Dinner')
+            footer += 'Return to the hotel in the evening and enjoy a sumptuous dinner, specially prepared for you.'
           } else {
-            body += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
+            footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
           }
           itinerary.push({
             head: `Day ${day} | Arrival in ${cityName}`,
-            body
+            hotelInfo: { ...hotelInfo, meals },
+            hotelImage: image,
+            hotelName,
+            date: '',
+            description,
+            attractions,
+            footer
           })
           currentCity = cityName
           currentHotel = hotelName
@@ -79,65 +97,105 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
         else if (currentCity === cityName) {
           // If the hotel changes
           if (currentHotel !== hotelName) {
-            let body = ''
+            let description = ''
             if (hotel.breakfast) {
-              body += 'Enjoy a delicious breakfast at the hotel.'
+              meals.push('Breakfast')
+              description += 'Enjoy a delicious breakfast at the hotel.'
             }
-            body += 'complete the check-out formalities and proceed to your next hotel.'
+            description += 'complete the check-out formalities and proceed to your next hotel.'
             if (transportData.vehicleType) {
-              body += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle.`
+              description += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle.`
             }
-            body += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}. Dive deeper into the city's charm`
+            description += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}. Dive deeper into the city's charm`
             if (hotel.lunch) {
-              body += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
+              meals.push('Lunch')
+              description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
             }
-            body += `${monuments[cityName] ? monuments[cityName].cityAttractions.split('|').join('\n') : ''}`
+            let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
+            let footer = ''
             if (hotel.dinner) {
-              body += 'Return to the hotel in the evening and enjoy a sumptuous dinner, specially prepared for you.'
+              meals.push('Dinner')
+              footer += 'Return to the hotel in the evening and enjoy a sumptuous dinner, specially prepared for you.'
             } else {
-              body += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
+              footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
             }
-            itinerary.push({ head: `Day ${day} | From ${currentHotel} to ${hotelName} in ${cityName}`, body })
+            itinerary.push({
+              head: `Day ${day} | From ${currentHotel} to ${hotelName} in ${cityName}`,
+              hotelInfo: { ...hotelInfo, meals },
+              hotelImage: image,
+              hotelName,
+              date: '',
+              description,
+              attractions,
+              footer
+            })
             currentHotel = hotelName
           } else {
-            let body = "Dive deeper into the city's charm"
+            let description = "Dive deeper into the city's charm"
             if (hotel.breakfast) {
-              body += 'Enjoy a delicious breakfast at the hotel.'
+              meals.push('Breakfast')
+              description += 'Enjoy a delicious breakfast at the hotel.'
             }
             if (hotel.lunch) {
-              body += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
+              meals.push('Lunch')
+              description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
             }
-            body += `${monuments[cityName] ? monuments[cityName].cityAttractions.split('|').join('\n') : ''}`
+            let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
+
+            let footer = ''
             if (hotel.dinner) {
-              body += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
+              meals.push('Dinner')
+              footer += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
             } else {
-              body += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
+              footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
             }
-            itinerary.push({ head: `Day ${day} | Continue exploring ${cityName}`, body })
+            itinerary.push({
+              head: `Day ${day} | Continue exploring ${cityName}`,
+              hotelInfo: { ...hotelInfo, meals },
+              hotelImage: image,
+              hotelName,
+              date: '',
+              description,
+              attractions,
+              footer
+            })
           }
         }
         // If the city changes
         else {
-          let body = ''
+          let description = ''
           if (hotel.breakfast) {
-            body += 'Enjoy a delicious breakfast at the hotel.'
+            meals.push('Breakfast')
+            description += 'Enjoy a delicious breakfast at the hotel.'
           }
-          body += 'complete the check-out formalities and proceed to your onward journey.'
-          body += `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
+          description += 'complete the check-out formalities and proceed to your onward journey.'
+          description += `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
           if (transportData.vehicleType) {
-            body += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle`
+            description += `you will be transferred to your ${hotelName} in a comfortable ${transportData.vehicleType} Vehicle`
           }
-          body += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
+          description += `Once at the ${hotelName}, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
           if (hotel.lunch) {
-            body += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
+            meals.push('Lunch')
+            description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
           }
-          body += `${monuments[cityName] ? monuments[cityName].cityAttractions.split('|').join('\n') : ''}`
+          let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
+          let footer = ''
           if (hotel.dinner) {
-            body += 'Return to the hotel in the evening and enjoy a sumptuous dinner, specially prepared for you.'
+            meals.push('Dinner')
+            footer += 'Return to the hotel in the evening and enjoy a sumptuous dinner, specially prepared for you.'
           } else {
-            body += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
+            footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
           }
-          itinerary.push({ head: `Day ${day} | ${currentCity} to ${cityName}`, body })
+          itinerary.push({
+            head: `Day ${day} | ${currentCity} to ${cityName}`,
+            hotelInfo: { ...hotelInfo, meals },
+            hotelImage: image,
+            hotelName,
+            date: '',
+            description,
+            attractions,
+            footer
+          })
           currentCity = cityName
           currentHotel = hotelName
         }
@@ -206,7 +264,98 @@ const generateMonumentsData = data => {
   return { result }
 }
 
+const getHotelFare = (cities, totalNights) => {
+  const hotelRate = JSON.stringify(localStorage.getItem('hotelRates'))
+  let hotelAmount = 0
+  cities.map(city => {
+    const { label, info } = city
+    info.map(currHotel => {
+      const { breakfast, lunch, dinner, rooms, extraBed, hotel, checkInCheckOut, adult, child } = currHotel
+      const { type, name } = hotel
+      const totalDayNight = Number(getDayNightCount(checkInCheckOut))
+      totalNights += totalDayNight
+      const hotelInfo =
+        hotelRate[
+          label
+            ? label
+                .split(' ')
+                .map(c => c.toLowerCase())
+                .join('_')
+            : ''
+        ][type][name]
+
+      Object.keys(hotel).map(data => {
+        if (roomsList.includes(data)) {
+          hotelAmount += Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight
+        }
+      })
+
+      if (breakfast) {
+        hotelAmount += Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight
+      }
+      if (lunch) {
+        hotelAmount += Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight
+      }
+      if (dinner) {
+        hotelAmount += Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight
+      }
+      if (extraBed) {
+        hotelAmount += Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight
+      }
+    })
+  })
+  return hotelAmount
+}
+
+const getTransportFare = data => {
+  const { totalDays, totalDistance, vehicleType, additionalStops } = data
+  const transportRate = JSON.stringify(localStorage.getItem('transportRates'))
+  const vehicleRates = transportRate[vehicleType]
+
+  if (cities.length == 1) {
+    let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
+    // console.log('totalAmount: ', totalAmount)
+    if (additionalStops.length > 0) {
+      const remainingAmount =
+        totalDistance * Number(vehicleRates['amount_per_km']) +
+        Number(vehicleRates['toll_charges_per_day']) +
+        Number(vehicleRates['driver_charges_per_day']) +
+        Number(vehicleRates['parking_charges_per_day']) +
+        Number(vehicleRates['service_cleaning_charge_one_time'])
+      // console.log('remainingAmount: ', remainingAmount)
+      totalAmount += remainingAmount
+    }
+    return totalAmount
+  } else {
+    const distanceAmount =
+      Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
+    // console.log('distanceAmount: ', distanceAmount)
+
+    const distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
+    // console.log('distanceAmount2: ', distanceAmount2)
+
+    const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
+    // console.log('tollAmount: ', tollAmount)
+    const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
+    // console.log('driverAmount: ', driverAmount)
+    const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
+    // console.log('parkingCharges: ', parkingCharges)
+    const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
+    // console.log('cleaningAmount: ', cleaningAmount)
+
+    const totalAmount =
+      (distanceAmount > distanceAmount2 ? distanceAmount : distanceAmount2) +
+      Number(tollAmount) +
+      Number(driverAmount) +
+      Number(parkingCharges) +
+      Number(cleaningAmount)
+
+    return totalAmount
+  }
+}
+
 const QutationPreview = ({ id }) => {
+  let totalNights = ''
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
   const quotationId = useRef(localStorage.getItem('quotationId') ?? '')
   const travelInfoData = useRef(localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null)
@@ -222,6 +371,10 @@ const QutationPreview = ({ id }) => {
     localStorage.getItem('selectedStates') ? JSON.parse(localStorage.getItem('selectedStates')) : []
   )
   const [monuments, setMonuments] = useState(null)
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    // libraries: ['places']
+  })
 
   const [error, setError] = useState(false)
   const [data, setData] = useState(null)
@@ -338,6 +491,70 @@ const QutationPreview = ({ id }) => {
     } else {
       toast.error(response.error)
     }
+  }
+
+  const getTotalDistance = () => {
+    const { from, to, additionalStops, departureReturnDate } = transportData
+    const date1 = new Date(departureReturnDate[0])
+    const date2 = new Date(departureReturnDate[1])
+
+    const diffInMs = date2 - date1
+
+    const totalDays = diffInMs / (1000 * 60 * 60 * 24)
+
+    const directionsService = new window.google.maps.DirectionsService()
+
+    let waypoints =
+      additionalStops.length > 0
+        ? additionalStops.map((item, index) => {
+            return { location: item.description, stopover: true }
+          })
+        : []
+
+    let distanceObj = {
+      origin: from.description,
+      destination: to.description,
+      travelMode: window.google.maps.TravelMode.DRIVING
+    }
+
+    if (to.description != from.description) {
+      waypoints = [...waypoints, { location: to.description, stopover: true }]
+      distanceObj = { ...distanceObj, destination: from.description }
+    }
+
+    directionsService.route(
+      waypoints.length > 0
+        ? {
+            ...distanceObj,
+            waypoints
+          }
+        : distanceObj,
+      (result, status) => {
+        if (status === window.google.maps.DirectionsStatus.OK) {
+          const totalDist = result.routes[0].legs.reduce((acc, leg) => acc + leg.distance.value, 0)
+          const totalDistance = (totalDist / 1000).toFixed(2)
+          // const totalTransportAmount = 0
+          const totalTransportAmount =
+            getTransportFare({
+              ...data,
+              totalDistance,
+              totalDays: totalDays + 1,
+              additionalStops
+            }) ?? 0
+          const totalHotelAmount = getHotelFare(cities, totalNights) ?? 0
+          // setCalculatedAmount({
+          //   transport: Number(totalTransportAmount),
+          //   hotel: Number(totalHotelAmount),
+          //   total: Number(totalTransportAmount) + Number(totalHotelAmount)
+          // })
+          // setIsAmountDialogOpen(true)
+          return Number(totalTransportAmount) + Number(totalHotelAmount)
+        } else {
+          toast.error(`error fetching distance: ${result?.status}`)
+          return 0
+        }
+      }
+    )
   }
 
   return (
@@ -460,7 +677,8 @@ const QutationPreview = ({ id }) => {
                 <div className='price-section' style={{ marginRight: 'auto', marginLeft: 'auto', width: '100%' }}>
                   <div className='price-section-total'>
                     {' '}
-                    <span className='total-amount'>Total : ₹56,700</span>
+                    {/* <span className='total-amount'>Total : ₹56,700</span> */}
+                    <span className='total-amount'>Total : ₹{getTotalDistance()}</span>
                   </div>
 
                   <div className='price-section-state'>
@@ -473,7 +691,8 @@ const QutationPreview = ({ id }) => {
                         </span>
                       ))}
                     </div>
-                    <span className='no-of-nights'> 5 N</span>
+                    {/* <span className='no-of-nights'> 5 N</span> */}
+                    <span className='no-of-nights'> {totalNights} N</span>
                   </div>
                 </div>
 
@@ -531,66 +750,60 @@ const QutationPreview = ({ id }) => {
                 </div>
 
                 {/* {monuments && console.log(generateDayWiseItinerary(cities.current, transportData.current, monuments))} */}
-                {monuments && (
-                  <div className='days-section'>
-                    {generateDayWiseItinerary(cities.current, transportData.current, monuments).map(
-                      (itinerary, index) => (
-                        <Fragment key={index}>
-                          <h3 className='itinerary-title'>{itinerary.head}</h3>
-                        </Fragment>
-                      )
-                    )}
-                    <div className='travel-inclusive'>
-                      <span>3 Star Hotel</span> <span>&#20;|&#20;</span> <i className='fi fi-ts-door-closed'></i>
-                      <span>1 Basic Room</span> <span>&#20;|&#20;</span> <i className='fi fi-ts-binoculars'></i>
-                      <span>1 Basic Room</span>
-                      <span>&#20;|&#20;</span> <i className='fi fi-ts-plate-eating'></i>
-                      <span>Breakfast, Dinner</span>
+                {monuments &&
+                  generateDayWiseItinerary(cities.current, transportData.current, monuments).map((itinerary, index) => (
+                    <div key={index} className='days-section'>
+                      <h3 className='itinerary-title'>{itinerary.head}</h3>
+                      <div className='travel-inclusive'>
+                        <span>{itinerary.hotelInfo.hotelType}</span> <span>&#20;|&#20;</span>{' '}
+                        <i className='fi fi-ts-door-closed'></i>
+                        <span>{itinerary.hotelInfo.roomType}</span> <span>&#20;|&#20;</span>{' '}
+                        <i className='fi fi-ts-binoculars'></i>
+                        <span>Sightseeing</span>
+                        {/* <span>1 Basic Room</span> */}
+                        <span>&#20;|&#20;</span>
+                        {itinerary.hotelInfo.extraBed && (
+                          <>
+                            <span>{itinerary.hotelInfo.extraBed}</span>
+                            <span>&#20;|&#20;</span>
+                          </>
+                        )}
+                        {itinerary.hotelInfo.meals.length > 0 && (
+                          <>
+                            <i className='fi fi-ts-plate-eating'></i>
+                            <span>{itinerary.hotelInfo.meals.join(', ')}</span>
+                          </>
+                        )}
+                        {/* <span>Breakfast, Dinner</span> */}
+                      </div>
+                      <img
+                        src={itinerary.hotelImage}
+                        width='320px'
+                        height='150px'
+                        style={{
+                          textAlign: 'left',
+                          textAlign: 'left',
+                          display: 'flex',
+                          margin: '20px 0 0 0px',
+                          borderRadius: '10px'
+                        }}
+                      />
+                      <div>
+                        <p className='day-description'>{itinerary.description}</p>
+                        {itinerary.attractions.map((place, idx) => (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
+                            <img src='/sightseeing-icon.png' width='20px' style={{ marginRight: '10px' }} />
+                            <p className='day-attraction-dexcription'>
+                              <b>{place.split(':')[0]}</b> {place.split(':')[1]}
+                            </p>
+                          </div>
+                        ))}
+                        <p className='day-description'>{itinerary.footer}</p>
+                      </div>
                     </div>
-                    <img
-                      src='/hotel-image.jpg'
-                      width='320px'
-                      height='150px'
-                      style={{
-                        textAlign: 'left',
-                        textAlign: 'left',
-                        display: 'flex',
-                        margin: '20px 0 0 0px',
-                        borderRadius: '10px'
-                      }}
-                    />
-                    <div>
-                      <p className='day-description'>
-                        Welcome to Jaipur, the vibrant "Pink City" known for its rich heritage and grand palaces. Upon
-                        arrival, check in at Hotel Shyam. Complete the check-in process, rest for two hours, and then
-                        head out to explore:
-                      </p>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src='/sightseeing-icon.png' width='20px' style={{ marginRight: '10px' }} />
-                        <p className='day-attraction-dexcription'>
-                          <b>City Palace :</b> A magnificent blend of Rajasthani and Mughal architecture.
-                        </p>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
-                        <img src='/sightseeing-icon.png' width='20px' style={{ marginRight: '10px' }} />
-                        <p className='day-attraction-dexcription'>
-                          <b>City Palace :</b> A magnificent blend of Rajasthani and Mughal architecture.
-                        </p>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
-                        <img src='/sightseeing-icon.png' width='20px' style={{ marginRight: '10px' }} />
-                        <p className='day-attraction-dexcription'>
-                          <b>Jantar Mantar : </b>A UNESCO World Heritage Site showcasing ancient astronomical
-                          instruments.{' '}
-                        </p>
-                      </div>
-                      <p className='day-description'>
-                        End your day with a delicious dinner at a famous local restaurant before returning to the hotel
-                        for an overnight stay.
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  ))}
+
+                {/* need to discuss */}
                 <div>
                   <div style={{ height: '0px' }}>
                     <div className='textfield-container hotel-name-position'>
