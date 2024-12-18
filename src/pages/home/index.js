@@ -445,7 +445,7 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
               </CardContent>
             </Card>
           </Grid> */}
-        <SideDrawer open={openDrawer} toggle={handleCloseDrawer} />
+        {/* <SideDrawer open={openDrawer} toggle={handleCloseDrawer} /> */}
       </Grid>
       {/* </KeenSliderWrapper> */}
     </>

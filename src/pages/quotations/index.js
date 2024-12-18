@@ -60,7 +60,7 @@ function loadScript(src, position, id) {
   position.appendChild(script)
 }
 
-const transformHotelData = data => {
+export const transformHotelData = data => {
   const headers = data[0]
   const result = {}
 

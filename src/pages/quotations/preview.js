@@ -23,6 +23,7 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 import { postRequest, putRequest } from 'src/api-main-file/APIServices'
 import { getDayNightCount } from 'src/utils/function'
+import { transformHotelData } from '.'
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
@@ -38,10 +39,12 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   let currentCity = null
 
   for (let i = 0; i < cities.length; i++) {
+    console.log(cities[i])
     const city = cities[i]
     const cityName = city.label
     const hotels = city.info
     let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
+    console.log(monuments[cityName].cityImage)
 
     const totalAttractions = attractions.length
 
@@ -110,7 +113,8 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             description,
             attractions: dayAttractions,
             footer,
-            checkInCheckOut
+            checkInCheckOut,
+            cityImage: monuments[cityName].cityImage
           })
           currentCity = cityName
           currentHotel = hotelName
@@ -149,7 +153,8 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
               description,
               attractions: dayAttractions,
               footer,
-              checkInCheckOut
+              checkInCheckOut,
+              cityImage: monuments[cityName].cityImage
             })
             currentHotel = hotelName
           } else {
@@ -179,7 +184,8 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
               description,
               attractions: dayAttractions,
               footer,
-              checkInCheckOut
+              checkInCheckOut,
+              cityImage: monuments[cityName].cityImage
             })
           }
         }
@@ -216,7 +222,8 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             description,
             attractions: dayAttractions,
             footer,
-            checkInCheckOut
+            checkInCheckOut,
+            cityImage: monuments[cityName].cityImage
           })
           currentCity = cityName
           currentHotel = hotelName
@@ -262,7 +269,7 @@ const generateMonumentsData = data => {
       }`
 
       const cityIntro = `${rowData.city_intro}`
-      const cityImage = `${rowData.cityImage}`
+      const cityImage = `${rowData.city_image}`
       const cityAttractions = `${rowData.attractions}`
       const cityInclusion = `${rowData.inclusion}`
       const cityExclusion = `${rowData.exclusion}`
@@ -285,10 +292,11 @@ const generateMonumentsData = data => {
   return { result }
 }
 
-const getHotelFare = (cities, totalNights) => {
+const getHotelFare = cities => {
   const hotelRate = JSON.parse(localStorage.getItem('hotelRates'))
   const roomsList = JSON.parse(localStorage.getItem('roomsList'))
   let hotelAmount = 0
+  let totalNights = 0
   cities.map(city => {
     const { label, info } = city
     info.map(currHotel => {
@@ -326,7 +334,7 @@ const getHotelFare = (cities, totalNights) => {
       }
     })
   })
-  return hotelAmount
+  return { hotelAmount, totalNights }
 }
 
 const getTransportFare = (data, cities) => {
@@ -389,7 +397,6 @@ function loadScript(src, position, id) {
 }
 
 const QutationPreview = ({ id }) => {
-  let totalNights = ''
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
   const quotationId = useRef(localStorage.getItem('quotationId') ?? '')
   const travelInfoData = useRef(localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null)
@@ -401,10 +408,9 @@ const QutationPreview = ({ id }) => {
       : 'admin'
   )
   const quotationName = useRef(localStorage.getItem('quotationName') ? localStorage.getItem('quotationName') : '')
-  const states = useRef(
-    localStorage.getItem('selectedStates') ? JSON.parse(localStorage.getItem('selectedStates')) : []
-  )
+  const [states, setStates] = useState([])
   const [monuments, setMonuments] = useState(null)
+  const [totalNights, setTotalNights] = useState('')
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries: ['places']
@@ -419,6 +425,7 @@ const QutationPreview = ({ id }) => {
 
   useEffect(() => {
     fetchMonumentsData()
+    fetchHotelData()
   }, [])
 
   useEffect(() => {
@@ -428,6 +435,34 @@ const QutationPreview = ({ id }) => {
   }, [isLoaded])
 
   // console.log(totalAmount)
+
+  const fetchHotelData = async () => {
+    const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
+    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const HOTEL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${HOTEL_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+
+    setIsLoading(true)
+    try {
+      const response = await axios.get(HOTEL_URL)
+      setIsLoading(false)
+      const finalData = transformHotelData(response.data.values).stateList
+      const cityLabels = cities.current.map(item => item.label)
+      const selectedStates = finalData
+        .map(state => {
+          const filteredCities = state.cities.filter(city => cityLabels.includes(city.name))
+          return {
+            ...state,
+            cities: filteredCities
+          }
+        })
+        .filter(state => state.cities.length > 0)
+      setStates(selectedStates)
+      localStorage.setItem('selectedStates', JSON.stringify(selectedStates))
+    } catch (error) {
+      setIsLoading(false)
+      toast.error('Failded fetching quotation data')
+    }
+  }
 
   const fetchMonumentsData = async () => {
     const MONUMENTS_SHEET_ID = process.env.NEXT_PUBLIC_MONUMENTS_SHEET_ID
@@ -446,7 +481,7 @@ const QutationPreview = ({ id }) => {
     }
   }
 
-  const saveQuotation = async totalAmount => {
+  const saveQuotation = async () => {
     // const quotationId = localStorage.getItem('quotationId')
     // const travelInfoData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
     // const cities = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
@@ -512,14 +547,16 @@ const QutationPreview = ({ id }) => {
               typeof transportData.current.to == 'object'
                 ? transportData.current.to.description
                 : transportData.current.from,
-            checkpoints: transportData.current.additionalStops.map(stop => stop.description)
+            checkpoints: transportData.current.additionalStops.map(stop => stop.description),
+            transportStartDate: transportData.current.departureReturnDate[0],
+            transportEndDate: transportData.current.departureReturnDate[1]
           }
         : null,
       totalAmount: `${totalAmount}`
     }
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-    const api_url = `${BASE_URL}/${clientType}`
+    const api_url = `${BASE_URL}/${clientType.current}`
     setIsLoading(true)
     let response
     if (quotationId.current.length > 0) {
@@ -531,6 +568,7 @@ const QutationPreview = ({ id }) => {
 
     if (response.status) {
       toast.success(typeof response.data == 'object' ? 'Success' : response.data)
+      resetLocalStorage()
       router.push('/')
     } else {
       toast.error(response.error)
@@ -539,6 +577,9 @@ const QutationPreview = ({ id }) => {
 
   const getTotalAmount = () => {
     const { from, to, additionalStops, departureReturnDate } = transportData.current
+    const origin = typeof from == 'object' ? from.description : from
+    const destination = typeof from == 'object' ? to.description : to
+
     const date1 = new Date(departureReturnDate[0])
     const date2 = new Date(departureReturnDate[1])
 
@@ -556,14 +597,14 @@ const QutationPreview = ({ id }) => {
         : []
 
     let distanceObj = {
-      origin: from.description,
-      destination: to.description,
+      origin,
+      destination,
       travelMode: window.google.maps.TravelMode.DRIVING
     }
 
-    if (to.description != from.description) {
-      waypoints = [...waypoints, { location: to.description, stopover: true }]
-      distanceObj = { ...distanceObj, destination: from.description }
+    if (origin != destination) {
+      waypoints = [...waypoints, { location: origin, stopover: true }]
+      distanceObj = { ...distanceObj, destination: destination }
     }
 
     directionsService.route(
@@ -588,7 +629,7 @@ const QutationPreview = ({ id }) => {
               },
               cities
             ) ?? 0
-          const totalHotelAmount = getHotelFare(cities.current, totalNights) ?? 0
+          const { hotelAmount: totalHotelAmount, totalNights: totalNightCount } = getHotelFare(cities.current)
           // setCalculatedAmount({
           //   transport: Number(totalTransportAmount),
           //   hotel: Number(totalHotelAmount),
@@ -596,12 +637,22 @@ const QutationPreview = ({ id }) => {
           // })
           // setIsAmountDialogOpen(true)
           setTotalAmount(Number(totalTransportAmount) + Number(totalHotelAmount))
+          setTotalNights(totalNightCount)
         } else {
           toast.error(`error fetching distance: ${result?.status}`)
           setTotalAmount(0)
         }
       }
     )
+  }
+
+  const resetLocalStorage = () => {
+    localStorage.removeItem('selectedStates')
+    localStorage.removeItem('citiesHotels')
+    localStorage.removeItem('quotationId')
+    localStorage.removeItem('quotationName')
+    localStorage.removeItem('transport')
+    localStorage.removeItem('travel')
   }
 
   return (
@@ -715,7 +766,7 @@ const QutationPreview = ({ id }) => {
                     <label htmlFor='outlined-input'>No of Rooms</label>
                   </div>
 
-                  {cities.current[0].info[0].extraBed && (
+                  {![undefined, null].includes(cities.current[0].info[0].extraBed) && (
                     <div className='textfield-container Extra-bed-position'>
                       <input type='text' id='outlined-input' value={cities.current[0].info[0].extraBed} disabled />
                       <label htmlFor='outlined-input'>Extra Bed</label>
@@ -731,17 +782,16 @@ const QutationPreview = ({ id }) => {
                   </div>
 
                   <div className='price-section-state'>
-                    {' '}
                     <div>
-                      {states.current.map((state, index) => (
+                      {states.map((state, index) => (
                         <span key={index}>
-                          {state ? `${state.name[0].toUpperCase()}${state.name.slice(1)}` : ''}
-                          {index != states.current.length - 1 ? ' | ' : ''}
+                          {state ? `${state.name[0].toUpperCase()}${state.name.slice(1)}` : ' '}
+                          {index != states.length - 1 ? ' | ' : ''}
                         </span>
                       ))}
                     </div>
                     {/* <span className='no-of-nights'> 5 N</span> */}
-                    <span className='no-of-nights'> {totalNights} N</span>
+                    <span className='no-of-nights'>{`${totalNights}N`}</span>
                   </div>
                 </div>
 
@@ -800,7 +850,8 @@ const QutationPreview = ({ id }) => {
 
                 {monuments &&
                   generateDayWiseItinerary(cities.current, transportData.current, monuments).map((itinerary, index) => (
-                    <Fragment key={index}>
+                    <div style={{ background: `url(${itinerary.cityImage.split(",")[0].trim()})` }} key={index}>
+                      {console.log(itinerary)}
                       <div className='days-section'>
                         <h3 className='itinerary-title'>{itinerary.head}</h3>
                         <div className='travel-inclusive'>
@@ -877,7 +928,7 @@ const QutationPreview = ({ id }) => {
                           </div>
                         </div>
                       </div>
-                    </Fragment>
+                    </div>
                   ))}
 
                 {/* need to discuss */}
@@ -919,6 +970,10 @@ const QutationPreview = ({ id }) => {
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 variant='outlined'
                 startIcon={<Icon icon='mdi:custom-file-add' />}
+                onClick={() => {
+                  resetLocalStorage()
+                  router.push('/quotations')
+                }}
               >
                 Create New Quotation
               </Button>
@@ -927,6 +982,7 @@ const QutationPreview = ({ id }) => {
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 variant='outlined'
                 startIcon={<Icon icon='mdi:custom-file-edit' />}
+                onClick={() => router.push('/quotations')}
               >
                 Edit Quote
               </Button>
@@ -958,6 +1014,10 @@ const QutationPreview = ({ id }) => {
                 variant='outlined'
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-cancel-quote' />}
+                onClick={() => {
+                  resetLocalStorage()
+                  router.push('/')
+                }}
               >
                 Cancel
               </Button>

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
+import axios from 'axios'
 
 import { useRouter } from 'next/router'
 
@@ -12,10 +13,13 @@ import { DataGrid } from '@mui/x-data-grid'
 
 import Icon from 'src/@core/components/icon'
 import OptionsMenu from 'src/@core/components/option-menu'
+import CustomChip from 'src/@core/components/mui/chip'
+
 import Loader from 'src/components/common/Loader'
 import { deleteRequest, getRequest } from 'src/api-main-file/APIServices'
 import CommonDialog from 'src/components/common/dialog'
 import { getDayNightCount } from 'src/utils/function'
+import { transformHotelData } from '../quotations'
 
 const defaultColumns = [
   //   {
@@ -77,11 +81,30 @@ const defaultColumns = [
     headerName: 'Destination',
     renderCell: ({ row }) => {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {/* <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-            {row.destination}
-          </Typography> */}
-          <Typography>-</Typography>
+        // <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        //   <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+        //     {row.destination}
+        //   </Typography>
+        // </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CustomChip
+            skin='light'
+            size='small'
+            label={row.destination[0]}
+            color='success'
+            sx={{ textTransform: 'capitalize' }}
+          />
+          {row.destination.length > 1 ? (
+            <CustomChip
+              skin='light'
+              size='small'
+              label={row.destination.length - 1}
+              color='success'
+              sx={{ textTransform: 'capitalize' }}
+            />
+          ) : (
+            ''
+          )}
         </Box>
       )
     }
@@ -95,7 +118,6 @@ const defaultColumns = [
       return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-            {/* {console.log(row)} */}
             {row.persons}
           </Typography>
         </Box>
@@ -138,6 +160,7 @@ const QuotationsHistory = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedQuotation, setSelectedQuotation] = useState(null)
   const [quotationHistory, setQuotationsHisotry] = useState([])
+  const [statesList, setStatesList] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -168,15 +191,6 @@ const QuotationsHistory = () => {
               menuProps={{ sx: { '& .MuiMenuItem-root svg': { mr: 2 } } }}
               options={[
                 {
-                  text: 'Print PDF',
-                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                  menuItemProps: {
-                    onClick: e => {
-                      // fetchCampaignDetail(row.id)
-                    }
-                  }
-                },
-                {
                   text: 'Edit',
                   icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
                   menuItemProps: {
@@ -196,6 +210,33 @@ const QuotationsHistory = () => {
                       openDeleteDialog(row)
                     }
                   }
+                },
+                {
+                  text: 'Download',
+                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      // fetchCampaignDetail(row.id)
+                    }
+                  }
+                },
+                {
+                  text: 'Share',
+                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      // fetchCampaignDetail(row.id)
+                    }
+                  }
+                },
+                {
+                  text: 'Send For Approval',
+                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      // fetchCampaignDetail(row.id)
+                    }
+                  }
                 }
               ]}
             />
@@ -208,6 +249,7 @@ const QuotationsHistory = () => {
 
   useEffect(() => {
     fetchQuotationList()
+    fetchHotelData()
   }, [])
 
   const openDeleteDialog = row => {
@@ -282,6 +324,23 @@ const QuotationsHistory = () => {
     }
   }
 
+  const fetchHotelData = async () => {
+    const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
+    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const HOTEL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${HOTEL_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+
+    setIsLoading(true)
+    try {
+      const response = await axios.get(HOTEL_URL)
+      setIsLoading(false)
+      const finalData = transformHotelData(response.data.values)
+      setStatesList(finalData.stateList)
+    } catch (error) {
+      setIsLoading(false)
+      toast.error('Failded fetching quotation data')
+    }
+  }
+
   const fetchQuotation = data => {
     const { quotationName, travel, citiesHotels, transport, id } = data
     localStorage.setItem('quotationId', id)
@@ -301,6 +360,19 @@ const QuotationsHistory = () => {
       })
     )
 
+    const cityLabels = citiesHotels.cities.map(item => item.cityName)
+    const selectedStates = statesList
+      .map(state => {
+        const filteredCities = state.cities.filter(city => cityLabels.includes(city.name))
+        return {
+          ...state,
+          cities: filteredCities
+        }
+      })
+      .filter(state => state.cities.length > 0)
+
+    localStorage.setItem('selectedStates', JSON.stringify(selectedStates))
+
     const citiesData = citiesHotels.cities.map(city => {
       const { id, cityName, hotelInfo } = city
       return {
@@ -318,7 +390,6 @@ const QuotationsHistory = () => {
             roomType,
             checkIn,
             checkOut,
-            persons,
             hotelName,
             hotelType,
             price
@@ -348,14 +419,21 @@ const QuotationsHistory = () => {
               'Base Catagory': roomType[0]
             },
             adult,
-            persons: '0'
+            persons:
+              Number(adult) == 0 && Number(child) == 0
+                ? ''
+                : Number(adult) != 0 && Number(child) != 0
+                ? `${adult} Adults & ${child} Childs`
+                : Number(adult) == 0
+                ? `${child} Childs`
+                : `${adult} Adults`
           }
         })
       }
     })
     localStorage.setItem('citiesHotels', JSON.stringify(citiesData))
 
-    const { vehicleType, from, to, checkpoints } = transport
+    const { vehicleType, from, to, checkpoints, transportStartDate, transportEndDate } = transport
     localStorage.setItem(
       'transport',
       JSON.stringify({
@@ -367,7 +445,7 @@ const QuotationsHistory = () => {
             description: checkpoint
           }
         }),
-        departureReturnDate: [new Date(), new Date()]
+        departureReturnDate: [new Date(transportStartDate), new Date(transportEndDate)]
       })
     )
 
