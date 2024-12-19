@@ -38,6 +38,8 @@ const UserViewRight = () => {
                 <TextField
                   disabled={isDescriptionDisabled}
                   value={description}
+                  multiline
+                  rows={4}
                   onChange={e => setDescription(e.target.value)}
                 />
                 <Icon
@@ -50,7 +52,13 @@ const UserViewRight = () => {
             <Box sx={{ display: 'flex', mb: 2, alignItems: 'center' }}>
               <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Tag Line:</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <TextField disabled={isTagLineDisabled} value={tagLine} onChange={e => setTagLine(e.target.value)} />
+                <TextField
+                  multiline
+                  rows={2}
+                  disabled={isTagLineDisabled}
+                  value={tagLine}
+                  onChange={e => setTagLine(e.target.value)}
+                />
                 <Icon
                   fontSize='small'
                   icon={`mdi:${isTagLineDisabled ? 'pencil' : 'content-save'}`}
