@@ -7,6 +7,7 @@ import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 
 import Icon from 'src/@core/components/icon'
+import { Typography } from '@mui/material'
 
 const UserViewRight = () => {
   const [isTitleDisabled, setIsTitleDisabled] = useState(true)
