@@ -74,6 +74,7 @@ const LoginRight = () => {
   const {
     control,
     setError,
+    reset,
     handleSubmit,
     formState: { errors }
   } = useForm({
@@ -84,6 +85,7 @@ const LoginRight = () => {
   })
 
   const handleTabValue = (event, newValue) => {
+    reset()
     setTabValue(newValue)
   }
 

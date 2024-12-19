@@ -39,12 +39,10 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   let currentCity = null
 
   for (let i = 0; i < cities.length; i++) {
-    console.log(cities[i])
     const city = cities[i]
     const cityName = city.label
     const hotels = city.info
     let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
-    console.log(monuments[cityName].cityImage)
 
     const totalAttractions = attractions.length
 
@@ -317,24 +315,30 @@ const getHotelFare = cities => {
       Object.keys(hotel).map(data => {
         if (roomsList.includes(data)) {
           hotelAmount += Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight
+          // console.log("room: ", Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight)
         }
       })
 
       if (breakfast) {
         hotelAmount += Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight
+        // console.log('breakfast: ', Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (lunch) {
         hotelAmount += Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight
+        // console.log('lunch: ', Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (dinner) {
         hotelAmount += Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight
+        // console.log('dinner: ', Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (extraBed) {
         hotelAmount += Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight
+        // console.log('extrabed: ', Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight)
       }
     })
   })
-  return { hotelAmount, totalNights }
+
+  return { hotelAmount: hotelAmount, totalNights }
 }
 
 const getTransportFare = (data, cities) => {
@@ -342,9 +346,8 @@ const getTransportFare = (data, cities) => {
   const transportRate = JSON.parse(localStorage.getItem('transportRates'))
   const vehicleRates = transportRate[vehicleType]
 
-  if (cities.length == 1) {
+  if (cities.current.length == 1) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
-    // console.log('city_local_fare: ', city_local_fare)
     if (additionalStops.length > 0) {
       const remainingAmount =
         totalDistance * Number(vehicleRates['amount_per_km']) +
@@ -352,26 +355,19 @@ const getTransportFare = (data, cities) => {
         Number(vehicleRates['driver_charges_per_day']) +
         Number(vehicleRates['parking_charges_per_day']) +
         Number(vehicleRates['service_cleaning_charge_one_time'])
-      // console.log('remainingAmount: ', remainingAmount)
       totalAmount += remainingAmount
     }
     return totalAmount
   } else {
     const distanceAmount =
       Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
-    // console.log('distanceAmount: ', distanceAmount)
 
     const distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
-    // console.log('distanceAmount2: ', distanceAmount2)
 
     const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
-    // console.log('tollAmount: ', tollAmount)
     const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
-    // console.log('driverAmount: ', driverAmount)
     const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
-    // console.log('parkingCharges: ', parkingCharges)
     const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
-    // console.log('cleaningAmount: ', cleaningAmount)
 
     const totalAmount =
       (distanceAmount > distanceAmount2 ? distanceAmount : distanceAmount2) +
@@ -433,8 +429,6 @@ const QutationPreview = ({ id }) => {
       getTotalAmount()
     }
   }, [isLoaded])
-
-  // console.log(totalAmount)
 
   const fetchHotelData = async () => {
     const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
@@ -630,13 +624,20 @@ const QutationPreview = ({ id }) => {
               cities
             ) ?? 0
           const { hotelAmount: totalHotelAmount, totalNights: totalNightCount } = getHotelFare(cities.current)
-          // setCalculatedAmount({
-          //   transport: Number(totalTransportAmount),
-          //   hotel: Number(totalHotelAmount),
-          //   total: Number(totalTransportAmount) + Number(totalHotelAmount)
-          // })
-          // setIsAmountDialogOpen(true)
-          setTotalAmount(Number(totalTransportAmount) + Number(totalHotelAmount))
+          const hotelFinalAmount =
+            clientType.current == 'admin'
+              ? Number(totalHotelAmount)
+              : clientType.current == 'employee'
+              ? Number(totalHotelAmount) * 1.265
+              : Number(totalHotelAmount) * 0.95
+
+          const transportFinalAmount =
+            clientType.current == 'admin'
+              ? Number(totalTransportAmount)
+              : clientType.current == 'employee'
+              ? Number(totalTransportAmount) * 1.265
+              : Number(totalTransportAmount) * 0.95
+          setTotalAmount(Number(hotelFinalAmount) + Number(transportFinalAmount))
           setTotalNights(totalNightCount)
         } else {
           toast.error(`error fetching distance: ${result?.status}`)
@@ -850,8 +851,7 @@ const QutationPreview = ({ id }) => {
 
                 {monuments &&
                   generateDayWiseItinerary(cities.current, transportData.current, monuments).map((itinerary, index) => (
-                    <div style={{ background: `url(${itinerary.cityImage.split(",")[0].trim()})` }} key={index}>
-                      {console.log(itinerary)}
+                    <div style={{ background: `url(${itinerary.cityImage.split(',')[0].trim()})` }} key={index}>
                       <div className='days-section'>
                         <h3 className='itinerary-title'>{itinerary.head}</h3>
                         <div className='travel-inclusive'>

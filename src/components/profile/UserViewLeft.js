@@ -1,5 +1,5 @@
-// ** React Imports
 import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -25,6 +25,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import LinearProgress from '@mui/material/LinearProgress'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import DialogContentText from '@mui/material/DialogContentText'
+import FormHelperText from '@mui/material/FormHelperText'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -62,7 +63,6 @@ const roleColors = {
   subscriber: 'primary'
 }
 
-// ** Styled <sup> component
 const Sup = styled('sup')(({ theme }) => ({
   top: '0.2rem',
   left: '-0.6rem',
@@ -70,7 +70,6 @@ const Sup = styled('sup')(({ theme }) => ({
   color: theme.palette.primary.main
 }))
 
-// ** Styled <sub> component
 const Sub = styled('sub')({
   fontWeight: 300,
   fontSize: '1rem',
@@ -78,172 +77,255 @@ const Sub = styled('sub')({
 })
 
 const UserViewLeft = () => {
-  // ** States
   const [openEdit, setOpenEdit] = useState(false)
   const [openPlans, setOpenPlans] = useState(false)
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false)
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
 
   const { logout, user } = useAuth()
+  const { name, email, address, mobile } = user
 
-  // Handle Edit dialog
+  const {
+    control,
+    setError,
+    reset,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      username: name,
+      email,
+      mobile,
+      address
+    }
+  })
 
-  const updateProfile = async (data) => {
-    
-  }
+  const updateProfile = async data => {}
 
   const handleEditClickOpen = () => setOpenEdit(true)
   const handleEditClose = () => setOpenEdit(false)
 
-  // Handle Upgrade Plan dialog
   const handlePlansClickOpen = () => setOpenPlans(true)
   const handlePlansClose = () => setOpenPlans(false)
-  if (data) {
-    return (
-      <Grid container spacing={6}>
-        <Grid item xs={12}>
-          <Card>
-            <CardContent sx={{ pt: 15, display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-              {data.avatar ? (
-                <CustomAvatar
-                  src={data.avatar}
-                  variant='rounded'
-                  alt={data.fullName}
-                  sx={{ width: 120, height: 120, fontWeight: 600, mb: 4 }}
-                >
-                  {getInitials(user.name)}
-                </CustomAvatar>
-              ) : (
-                <CustomAvatar
-                  skin='light'
-                  variant='rounded'
-                  color={data.avatarColor}
-                  sx={{ width: 120, height: 120, fontWeight: 600, mb: 4, fontSize: '3rem' }}
-                >
-                  {getInitials(user.name)}
-                </CustomAvatar>
-              )}
-              <Typography variant='h6' sx={{ mb: 4 }}>
-                {user.name}
-              </Typography>
-              <CustomChip
+
+  return (
+    <Grid container spacing={6}>
+      <Grid item xs={12}>
+        <Card>
+          <CardContent sx={{ pt: 15, display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+            {data.avatar ? (
+              <CustomAvatar
+                src={data.avatar}
+                variant='rounded'
+                alt={data.fullName}
+                sx={{ width: 120, height: 120, fontWeight: 600, mb: 4 }}
+              >
+                {getInitials(user.name)}
+              </CustomAvatar>
+            ) : (
+              <CustomAvatar
                 skin='light'
-                size='small'
-                label={data.role}
-                color={roleColors[data.role]}
-                sx={{ textTransform: 'capitalize' }}
-              />
-            </CardContent>
+                variant='rounded'
+                color={data.avatarColor}
+                sx={{ width: 120, height: 120, fontWeight: 600, mb: 4, fontSize: '3rem' }}
+              >
+                {getInitials(user.name)}
+              </CustomAvatar>
+            )}
+            <Typography variant='h6' sx={{ mb: 4 }}>
+              {user.name}
+            </Typography>
+            <CustomChip
+              skin='light'
+              size='small'
+              label={data.role}
+              color={roleColors[data.role]}
+              sx={{ textTransform: 'capitalize' }}
+            />
+          </CardContent>
 
-            <CardContent>
-              <Typography variant='h6'>Details</Typography>
-              <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }} />
-              <Box sx={{ pb: 1 }}>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Username:</Typography>
-                  <Typography variant='body2'>{user.name}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Email:</Typography>
-                  <Typography variant='body2'>{user.email}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Role:</Typography>
-                  <Typography variant='body2' sx={{ textTransform: 'capitalize' }}>
-                    {data.role}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', mb: 2 }}>
-                  <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Contact:</Typography>
-                  <Typography variant='body2'>{user.mobile}</Typography>
-                </Box>
+          <CardContent>
+            {/* <Typography variant='h6'>Details</Typography> */}
+            <Divider sx={{ my: theme => `${theme.spacing(4)} !important` }} />
+            <Box sx={{ pb: 1 }}>
+              <Box sx={{ display: 'flex', mb: 2 }}>
+                <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Username:</Typography>
+                <Typography variant='body2'>{user.name}</Typography>
               </Box>
-            </CardContent>
+              <Box sx={{ display: 'flex', mb: 2 }}>
+                <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Email:</Typography>
+                <Typography variant='body2'>{user.email}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', mb: 2 }}>
+                <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Role:</Typography>
+                <Typography variant='body2' sx={{ textTransform: 'capitalize' }}>
+                  {data.role}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', mb: 2 }}>
+                <Typography sx={{ mr: 2, fontWeight: 500, fontSize: '0.875rem' }}>Contact:</Typography>
+                <Typography variant='body2'>{user.mobile}</Typography>
+              </Box>
+            </Box>
+          </CardContent>
 
-            <CardActions sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Button variant='contained' sx={{ mr: 2 }} onClick={handleEditClickOpen}>
-                Edit
-              </Button>
-              <Button color='error' variant='outlined' onClick={() => setSuspendDialogOpen(true)}>
-                Suspend
-              </Button>
-            </CardActions>
+          <CardActions sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Button variant='contained' sx={{ mr: 2 }} onClick={handleEditClickOpen}>
+              Edit
+            </Button>
+            <Button color='error' variant='outlined' onClick={() => setSuspendDialogOpen(true)}>
+              Suspend
+            </Button>
+          </CardActions>
 
-            <Dialog
-              open={openEdit}
-              onClose={handleEditClose}
-              aria-labelledby='user-view-edit'
-              aria-describedby='user-view-edit-description'
-              sx={{ '& .MuiPaper-root': { width: '100%', maxWidth: 650 } }}
+          <Dialog
+            open={openEdit}
+            onClose={handleEditClose}
+            aria-labelledby='user-view-edit'
+            aria-describedby='user-view-edit-description'
+            sx={{ '& .MuiPaper-root': { width: '100%', maxWidth: 650 } }}
+          >
+            <DialogTitle
+              id='user-view-edit'
+              sx={{
+                textAlign: 'center',
+                fontSize: '1.5rem !important',
+                px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
+                pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
+              }}
             >
-              <DialogTitle
-                id='user-view-edit'
-                sx={{
-                  textAlign: 'center',
-                  fontSize: '1.5rem !important',
-                  px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
-                  pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
-                }}
-              >
-                Edit User Information
-              </DialogTitle>
-              <DialogContent
-                sx={{
-                  pb: theme => `${theme.spacing(8)} !important`,
-                  px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`]
-                }}
-              >
-                <DialogContentText variant='body2' id='user-view-edit-description' sx={{ textAlign: 'center', mb: 7 }}>
-                  Updating user details will receive a privacy audit.
-                </DialogContentText>
-                <form>
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label='Username'
-                        defaultValue={user.name}
-                        // InputProps={{ startAdornment: <InputAdornment position='start'>@</InputAdornment> }}
+              Edit User Information
+            </DialogTitle>
+            <DialogContent
+              sx={{
+                pb: theme => `${theme.spacing(8)} !important`,
+                px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`]
+              }}
+            >
+              <DialogContentText variant='body2' id='user-view-edit-description' sx={{ textAlign: 'center', mb: 7 }}>
+                Updating user details will receive a privacy audit.
+              </DialogContentText>
+              <form>
+                <Grid container spacing={6}>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <Controller
+                        name='username'
+                        control={control}
+                        rules={{ required: 'Username is required' }}
+                        render={({ field: { value, onChange, onBlur } }) => (
+                          <TextField
+                            fullWidth
+                            label='Username'
+                            value={value}
+                            onBlur={onBlur}
+                            onChange={onChange}
+                            id='username-id'
+                            error={Boolean(errors.username)}
+                          />
+                        )}
                       />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField fullWidth type='email' label='Email' defaultValue={user.email} />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField fullWidth label='Contact' defaultValue={user.mobile} />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField fullWidth label='Address' defaultValue={user.address} />
-                    </Grid>
+                      {errors.username && (
+                        <FormHelperText sx={{ color: 'error.main' }}>{errors.username.message}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Grid>
-                </form>
-              </DialogContent>
-              <DialogActions
-                sx={{
-                  justifyContent: 'center',
-                  px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
-                  pb: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
-                }}
-              >
-                <Button variant='contained' sx={{ mr: 2 }} onClick={handleEditClose}>
-                  Submit
-                </Button>
-                <Button variant='outlined' color='secondary' onClick={handleEditClose}>
-                  Cancel
-                </Button>
-              </DialogActions>
-            </Dialog>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <Controller
+                        name='email'
+                        control={control}
+                        rules={{ required: 'Email is required' }}
+                        render={({ field: { value, onChange, onBlur } }) => (
+                          <TextField
+                            fullWidth
+                            type='email'
+                            label='Email'
+                            value={value}
+                            onBlur={onBlur}
+                            onChange={onChange}
+                            id='email-id'
+                            error={Boolean(errors.email)}
+                          />
+                        )}
+                      />
+                      {errors.email && (
+                        <FormHelperText sx={{ color: 'error.main' }}>{errors.email.message}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <Controller
+                        name='mobile'
+                        control={control}
+                        rules={{ required: 'Contact is required' }}
+                        render={({ field: { value, onChange, onBlur } }) => (
+                          <TextField
+                            fullWidth
+                            label='Contact'
+                            value={value}
+                            onBlur={onBlur}
+                            onChange={onChange}
+                            id='mobile-id'
+                            error={Boolean(errors.mobile)}
+                          />
+                        )}
+                      />
+                      {errors.mobile && (
+                        <FormHelperText sx={{ color: 'error.main' }}>{errors.mobile.message}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <Controller
+                        name='address'
+                        control={control}
+                        rules={{ required: 'Address is required' }}
+                        render={({ field: { value, onChange, onBlur } }) => (
+                          <TextField
+                            fullWidth
+                            label='Address'
+                            value={value}
+                            onBlur={onBlur}
+                            onChange={onChange}
+                            id='address-id'
+                            error={Boolean(errors.address)}
+                          />
+                        )}
+                      />
+                      {errors.address && (
+                        <FormHelperText sx={{ color: 'error.main' }}>{errors.address.message}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              </form>
+            </DialogContent>
+            <DialogActions
+              sx={{
+                justifyContent: 'center',
+                px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
+                pb: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
+              }}
+            >
+              <Button variant='contained' sx={{ mr: 2 }} onClick={handleEditClose}>
+                Submit
+              </Button>
+              <Button variant='outlined' color='secondary' onClick={handleEditClose}>
+                Cancel
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-            {/* <UserSuspendDialog open={suspendDialogOpen} setOpen={setSuspendDialogOpen} />
-            <UserSubscriptionDialog open={subscriptionDialogOpen} setOpen={setSubscriptionDialogOpen} /> */}
-          </Card>
-        </Grid>
+          {/* <UserSuspendDialog open={suspendDialogOpen} setOpen={setSuspendDialogOpen} />
+          <UserSubscriptionDialog open={subscriptionDialogOpen} setOpen={setSubscriptionDialogOpen} /> */}
+        </Card>
       </Grid>
-    )
-  } else {
-    return null
-  }
+    </Grid>
+  )
 }
 
 export default UserViewLeft
