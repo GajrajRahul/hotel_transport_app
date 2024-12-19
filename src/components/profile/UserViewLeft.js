@@ -83,10 +83,16 @@ const UserViewLeft = () => {
   const [openPlans, setOpenPlans] = useState(false)
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false)
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const { logout, user } = useAuth()
 
   // Handle Edit dialog
+
+  const updateProfile = async (data) => {
+    
+  }
+
   const handleEditClickOpen = () => setOpenEdit(true)
   const handleEditClose = () => setOpenEdit(false)
 
