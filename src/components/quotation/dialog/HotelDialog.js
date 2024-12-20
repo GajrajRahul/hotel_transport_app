@@ -44,6 +44,7 @@ import RoomDialog from './RoomDialog'
 import CustomInput from 'src/components/common/CustomInput'
 import { getDayNightCount } from 'src/utils/function'
 import CusomInputWithButttons from 'src/components/common/CusomInputWithButttons'
+import { useMediaQuery } from '@mui/material'
 
 const TabList = styled(MuiTabList)(({ theme }) => ({
   '& .MuiTabs-indicator': {
@@ -75,10 +76,7 @@ const HotelDialog = ({
   // console.log('selectedCitiesHotels: ', selectedCitiesHotels)
   // console.log(selectedHotelInfo)
 
-  const dayCount = useMemo(() => {
-    // return getDayNightCount(quotationsData.travelInfo['dates']) + 1
-    return 0
-  }, [])
+  const isBelowTablet = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
   const [tabValue, setTabValue] = useState('0')
   const [hotelList, setHotelList] = useState([])
@@ -472,16 +470,20 @@ const HotelDialog = ({
                   <FormGroup
                     sx={{
                       display: 'flex',
-                      flexWrap: 'wrap',
+                      // flexWrap: 'wrap',
                       flexDirection: 'row',
+                      // justifyContent: { xs: 'space-between', mobileMd: 'space-evenly' },
                       justifyContent: 'space-evenly',
                       height: '100%',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      '&.MuiFormGroup-root': {
+                        flexWrap: 'nowrap'
+                      },
                       // gap: 3,
-                      // pl: 3
+                      pl: 2
                     }}
                   >
-                    <Icon icon='mdi:plate-eating' color={theme.palette.primary.main} />
+                    {!isBelowTablet && <Icon icon='mdi:plate-eating' color={theme.palette.primary.main} />}
                     <Controller
                       name='breakfast'
                       control={hotelControl}
@@ -493,6 +495,15 @@ const HotelDialog = ({
                           onChange={onChange}
                           control={<Checkbox size='small' />}
                           label='Breakfast'
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
+                              fontSize: { xs: '13px', mobileMd: '1 rem' }
+                            },
+                            '& .MuiFormControlLabel-root': {
+                              ml: 0,
+                              mr: 0
+                            }
+                          }}
                         />
                       )}
                     />
@@ -507,6 +518,15 @@ const HotelDialog = ({
                           onChange={onChange}
                           control={<Checkbox size='small' />}
                           label='Lunch'
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
+                              fontSize: { xs: '13px', mobileMd: '1 rem' }
+                            },
+                            '& .MuiFormControlLabel-root': {
+                              ml: 0,
+                              mr: 0
+                            }
+                          }}
                         />
                       )}
                     />
@@ -521,6 +541,15 @@ const HotelDialog = ({
                           onChange={onChange}
                           control={<Checkbox size='small' />}
                           label='Dinner'
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
+                              fontSize: { xs: '13px', mobileMd: '1 rem' }
+                            },
+                            '& .MuiFormControlLabel-root': {
+                              ml: 0,
+                              mr: 0
+                            }
+                          }}
                         />
                       )}
                     />
@@ -823,7 +852,9 @@ const HotelDialog = ({
                                         ? true
                                         : selectedHotelDetail
                                         ? selectedHotelDetail.name != hotel.name
-                                        : selectedHotelDetail ? selectedHotelDetail.id != hotel.id : false
+                                        : selectedHotelDetail
+                                        ? selectedHotelDetail.id != hotel.id
+                                        : false
                                     }
                                     variant='contained'
                                     sx={{ mt: 1, width: '100%', textTransform: 'none' }}

@@ -11,6 +11,7 @@ import { format } from 'date-fns'
 import axios from 'axios'
 
 import CardContent from '@mui/material/CardContent'
+import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Alert from '@mui/material/Alert'
 import Grid from '@mui/material/Grid'
@@ -349,8 +350,9 @@ const getTransportFare = (data, cities) => {
   if (cities.current.length == 1) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
     if (additionalStops.length > 0) {
+      const tempTotalDistance = totalDistance < 280 ? 280 : totalDistance
       const remainingAmount =
-        totalDistance * Number(vehicleRates['amount_per_km']) +
+        tempTotalDistance * Number(vehicleRates['amount_per_km']) +
         Number(vehicleRates['toll_charges_per_day']) +
         Number(vehicleRates['driver_charges_per_day']) +
         Number(vehicleRates['parking_charges_per_day']) +
@@ -362,7 +364,11 @@ const getTransportFare = (data, cities) => {
     const distanceAmount =
       Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
 
-    const distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
+    let distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
+
+    if(totalDistance >= 1500) {
+      distanceAmount2 = distanceAmount2 * 1.32
+    }
 
     const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
     const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
@@ -370,7 +376,7 @@ const getTransportFare = (data, cities) => {
     const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
 
     const totalAmount =
-      (distanceAmount > distanceAmount2 ? distanceAmount : distanceAmount2) +
+      (distanceAmount > distanceAmount2 ? distanceAmount : Math.floor(distanceAmount2)) +
       Number(tollAmount) +
       Number(driverAmount) +
       Number(parkingCharges) +
@@ -414,6 +420,7 @@ const QutationPreview = ({ id }) => {
 
   const [error, setError] = useState(false)
   const [totalAmount, setTotalAmount] = useState(0)
+  const [offerPrice, setOfferPrice] = useState('')
   const [data, setData] = useState(null)
 
   const [isLoading, setIsLoading] = useState(false)
@@ -660,7 +667,7 @@ const QutationPreview = ({ id }) => {
     <>
       <Loader open={isLoading} />
       <Grid container spacing={6} sx={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Grid>
+        <Grid sx={{ mt: 10 }}>
           {/* <PreviewCard data={data} /> */}
           <Card
             sx={{
@@ -779,7 +786,7 @@ const QutationPreview = ({ id }) => {
                   <div className='price-section-total'>
                     {' '}
                     {/* <span className='total-amount'>Total : ₹56,700</span> */}
-                    <span className='total-amount'>Total : ₹{totalAmount}</span>
+                    <span className='total-amount'>Total : ₹{offerPrice.length > 0 ? offerPrice : totalAmount}</span>
                   </div>
 
                   <div className='price-section-state'>
@@ -961,9 +968,26 @@ const QutationPreview = ({ id }) => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid sx={{ '&.MuiGrid-item': { pt: 0 } }} item xl={3} md={4} xs={12}>
+        <Grid sx={{ '&.MuiGrid-item': { pt: 0 }, mt: 10 }} item xl={3} md={4} xs={12}>
           {/* <PreviewActions /> */}
           <Card>
+            <CardContent>
+              <TextField disabled fullWidth label='ARH Price' value={totalAmount} InputLabelProps={{ shrink: true }} />
+
+              <TextField
+                fullWidth
+                label='Offer Price'
+                sx={{ mt: 5 }}
+                value={offerPrice}
+                onChange={e => {
+                  const value = e.target.value.replace(/[^0-9]/g, '')
+                  setOfferPrice(value)
+                }}
+                // InputLabelProps={{ shrink: true }}
+              />
+            </CardContent>
+          </Card>
+          <Card sx={{ mt: 5 }}>
             <CardContent>
               <Button
                 fullWidth

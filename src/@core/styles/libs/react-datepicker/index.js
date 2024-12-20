@@ -19,7 +19,8 @@ const DatePickerWrapper = styled(Box)(({ theme }) => {
 
   return {
     '& .react-datepicker-popper': {
-      zIndex: 20
+      zIndex: 20,
+      width: '70%'
     },
     '& .react-datepicker-wrapper': {
       width: '100%'

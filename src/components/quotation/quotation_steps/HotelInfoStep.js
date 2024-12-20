@@ -308,7 +308,7 @@ const HotelInfoStep = props => {
                             </Box>
                           </Box>
                           <Divider sx={{ mt: 2, color: 'black' }} />
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', mt: 3 }}>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', mt: 3, gap: 3 }}>
                             <Box
                               sx={{
                                 pl: 1,
@@ -336,7 +336,7 @@ const HotelInfoStep = props => {
                             </Box>
                             <Box
                               sx={{
-                                borderLeft: '1px solid #9A9A9A',
+                                // borderLeft: '1px solid #9A9A9A',
                                 pl: 3,
                                 display: 'flex',
                                 flexDirection: 'column',
@@ -377,8 +377,8 @@ const HotelInfoStep = props => {
                             </Box>
                             <Box
                               sx={{
-                                borderLeft: '1px solid #9A9A9A',
-                                pl: 3,
+                                // borderLeft: '1px solid #9A9A9A',
+                                pl: 1,
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: 3,
@@ -421,7 +421,9 @@ const HotelInfoStep = props => {
                               display: 'flex',
                               justifyContent: 'space-between',
                               backgroundColor: 'rgba(251, 118, 1, 0.15)',
-                              px: 3
+                              p: 3,
+                              flexWrap: 'wrap',
+                              gap: 3
                             }}
                           >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -431,11 +433,6 @@ const HotelInfoStep = props => {
                                 {format(new Date(data.checkInCheckOut[1]), 'dd MMM yyyy')}{' '}
                               </Typography>
                             </Box>
-                            <Divider
-                              orientation='vertical'
-                              variant='middle'
-                              sx={{ height: '25px', backgroundColor: '#9A9A9A' }}
-                            />
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                               <Icon fontSize='20px' icon='mdi:night-day' />
                               {/* {console.log(data)} */}
