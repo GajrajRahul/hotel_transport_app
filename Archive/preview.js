@@ -11,7 +11,6 @@ import { format } from 'date-fns'
 import axios from 'axios'
 
 import CardContent from '@mui/material/CardContent'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Alert from '@mui/material/Alert'
 import Grid from '@mui/material/Grid'
@@ -26,24 +25,24 @@ import { postRequest, putRequest } from 'src/api-main-file/APIServices'
 import { getDayNightCount } from 'src/utils/function'
 import { transformHotelData } from '.'
 import {
-  BedCount,
-  DayNight,
-  DropLocation,
-  HotelCategory,
-  HotelName,
   InclusionIcon,
   KnowBeforeYouGo,
-  MealIcon,
-  MonumentBullets,
-  PersonCount,
-  PickupLocation,
-  RoomCategory,
-  RoomCount,
-  RouteMap,
-  SeightSeeing,
-  TravelDate,
+  DayNight,
   TravellerName,
-  vehicleType
+  TravelDate,
+  MonumentBullets,
+  RouteMap,
+  PersonCount,
+  vehicleType,
+  SeightSeeing,
+  HotelName,
+  PickupLocation,
+  DropLocation,
+  BedCount,
+  RoomCategory,
+  MealIcon,
+  RoomCount,
+  HotelCategory
 } from 'src/utils/icons'
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
@@ -67,10 +66,12 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   let currentCity = null
 
   for (let i = 0; i < cities.length; i++) {
+    console.log(cities[i])
     const city = cities[i]
     const cityName = city.label
     const hotels = city.info
     let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
+    console.log(monuments[cityName].cityImage)
 
     const totalAttractions = attractions.length
 
@@ -140,8 +141,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             attractions: dayAttractions,
             footer,
             checkInCheckOut,
-            cityImage: monuments[cityName].cityImage,
-            cityName
+            cityImage: monuments[cityName].cityImage
           })
           currentCity = cityName
           currentHotel = hotelName
@@ -181,8 +181,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
               attractions: dayAttractions,
               footer,
               checkInCheckOut,
-              cityImage: monuments[cityName].cityImage,
-              cityName
+              cityImage: monuments[cityName].cityImage
             })
             currentHotel = hotelName
           } else {
@@ -213,8 +212,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
               attractions: dayAttractions,
               footer,
               checkInCheckOut,
-              cityImage: monuments[cityName].cityImage,
-              cityName
+              cityImage: monuments[cityName].cityImage
             })
           }
         }
@@ -252,8 +250,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             attractions: dayAttractions,
             footer,
             checkInCheckOut,
-            cityImage: monuments[cityName].cityImage,
-            cityName
+            cityImage: monuments[cityName].cityImage
           })
           currentCity = cityName
           currentHotel = hotelName
@@ -347,30 +344,24 @@ const getHotelFare = cities => {
       Object.keys(hotel).map(data => {
         if (roomsList.includes(data)) {
           hotelAmount += Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight
-          // console.log("room: ", Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight)
         }
       })
 
       if (breakfast) {
         hotelAmount += Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight
-        // console.log('breakfast: ', Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (lunch) {
         hotelAmount += Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight
-        // console.log('lunch: ', Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (dinner) {
         hotelAmount += Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight
-        // console.log('dinner: ', Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (extraBed) {
         hotelAmount += Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight
-        // console.log('extrabed: ', Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight)
       }
     })
   })
-
-  return { hotelAmount: hotelAmount, totalNights }
+  return { hotelAmount, totalNights }
 }
 
 const getTransportFare = (data, cities) => {
@@ -380,34 +371,37 @@ const getTransportFare = (data, cities) => {
 
   if (cities.current.length == 1) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
+    // console.log('city_local_fare: ', city_local_fare)
     if (additionalStops.length > 0) {
-      const tempTotalDistance = totalDistance < 280 ? 280 : totalDistance
       const remainingAmount =
-        tempTotalDistance * Number(vehicleRates['amount_per_km']) +
+        totalDistance * Number(vehicleRates['amount_per_km']) +
         Number(vehicleRates['toll_charges_per_day']) +
         Number(vehicleRates['driver_charges_per_day']) +
         Number(vehicleRates['parking_charges_per_day']) +
         Number(vehicleRates['service_cleaning_charge_one_time'])
+      // console.log('remainingAmount: ', remainingAmount)
       totalAmount += remainingAmount
     }
     return totalAmount
   } else {
     const distanceAmount =
       Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
+    // console.log('distanceAmount: ', distanceAmount)
 
-    let distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
-
-    if (totalDistance >= 1500) {
-      distanceAmount2 = distanceAmount2 * 1.32
-    }
+    const distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
+    // console.log('distanceAmount2: ', distanceAmount2)
 
     const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
+    // console.log('tollAmount: ', tollAmount)
     const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
+    // console.log('driverAmount: ', driverAmount)
     const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
+    // console.log('parkingCharges: ', parkingCharges)
     const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
+    // console.log('cleaningAmount: ', cleaningAmount)
 
     const totalAmount =
-      (distanceAmount > distanceAmount2 ? distanceAmount : Math.floor(distanceAmount2)) +
+      (distanceAmount > distanceAmount2 ? distanceAmount : distanceAmount2) +
       Number(tollAmount) +
       Number(driverAmount) +
       Number(parkingCharges) +
@@ -417,34 +411,17 @@ const getTransportFare = (data, cities) => {
   }
 }
 
-const inclusionItems = [
-  { text: 'Refresh yourself with a delightful welcome drink upon arrival.', icon: InclusionIcon },
-  {
-    text: 'Enjoy carefully curated meals as per the itinerary, featuring local flavors and international favorites.',
-    icon: InclusionIcon
-  },
-  {
-    text: 'Rest easy in well-chosen, comfortable hotels for the nights specified in your package.',
-    icon: InclusionIcon
-  },
-  {
-    text: 'Explore the best of the destination with private vehicle transfers for sightseeing, ensuring a smooth and personalized experience.',
-    icon: InclusionIcon
-  },
-  {
-    text: 'All toll taxes, parking fees, and driver charges are fully covered within the package for your peace of mind.',
-    icon: InclusionIcon
+function loadScript(src, position, id) {
+  if (!position) {
+    return
   }
-]
 
-const knowBeforeItems = [
-  { text: 'Welcome drink on arrival.', icon: KnowBeforeYouGo },
-  { text: 'Daily Delicious Buffet Breakfast in Every Hotel.', icon: KnowBeforeYouGo },
-  { text: 'Breakfast + dinner in desert camp & camel ride at camp.', icon: KnowBeforeYouGo },
-  { text: 'Accommodation in 3 star Hotels & camp for 05 Nights.', icon: KnowBeforeYouGo },
-  { text: 'All applicable transportation and Hotel Taxes.', icon: KnowBeforeYouGo },
-  { text: 'Cultural shows & dances at Camp.', icon: KnowBeforeYouGo }
-]
+  const script = document.createElement('script')
+  script.setAttribute('async', '')
+  script.setAttribute('id', id)
+  script.src = src
+  position.appendChild(script)
+}
 
 const QutationPreview = ({ id }) => {
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
@@ -458,12 +435,6 @@ const QutationPreview = ({ id }) => {
       : 'admin'
   )
   const quotationName = useRef(localStorage.getItem('quotationName') ? localStorage.getItem('quotationName') : '')
-  const [dayWiseItinerary, setDayWiseItinerary] = useState([])
-  const [dayWiseItineryStyle, setDayWiseItineryStyle] = useState({
-    background: '',
-    backgroundSize: '',
-    backgroundPosition: ''
-  })
   const [states, setStates] = useState([])
   const [monuments, setMonuments] = useState(null)
   const [totalNights, setTotalNights] = useState('')
@@ -474,7 +445,6 @@ const QutationPreview = ({ id }) => {
 
   const [error, setError] = useState(false)
   const [totalAmount, setTotalAmount] = useState(0)
-  const [offerPrice, setOfferPrice] = useState('')
   const [data, setData] = useState(null)
 
   const [isLoading, setIsLoading] = useState(false)
@@ -490,6 +460,8 @@ const QutationPreview = ({ id }) => {
       getTotalAmount()
     }
   }, [isLoaded])
+
+  // console.log(totalAmount)
 
   const fetchHotelData = async () => {
     const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
@@ -529,44 +501,11 @@ const QutationPreview = ({ id }) => {
       const response = await axios.get(MONUMENTS_URL)
       setIsLoading(false)
       const finalData = generateMonumentsData(response.data.values ?? [])
-      const itineraryDayWiseData = generateDayWiseItinerary(cities.current, transportData.current, finalData.result)
-      getDayWiseItineryStyle(itineraryDayWiseData)
-      setDayWiseItinerary(itineraryDayWiseData)
-
       setMonuments(finalData.result)
     } catch (error) {
       toast.error('Failed fetching monuments data')
       console.error('Error fetching data:', error)
     }
-  }
-
-  const getDayWiseItineryStyle = itineraryDayWiseData => {
-    let background = ['url(/images/background-image.jpg)']
-    let backgroundPosition = ['0vh 0vh']
-    let backgroundSize = ['100%']
-    let prevCity = ''
-    let currIndex = 0
-    itineraryDayWiseData.map((itinerary, index) => {
-      if (prevCity.length == 0 || prevCity != itinerary.cityName) {
-        prevCity = itinerary.cityName
-        currIndex = 0
-      } else {
-        currIndex += 1
-      }
-      background.push(`url('/images/pdf-image/${itinerary.cityName}/${itinerary.cityName}00${currIndex + 1}.jpg')`)
-      backgroundPosition.push(`0vh ${(index + 1) * 136}vh`)
-      backgroundSize.push('100%')
-    })
-
-    background.push('url(/images/background-image.jpg)')
-    backgroundPosition.push(`0vh ${(itineraryDayWiseData.length + 1) * 136}vh`)
-    backgroundSize.push('100%')
-
-    setDayWiseItineryStyle({
-      background: background.join(', '),
-      backgroundPosition: backgroundPosition.join(', '),
-      backgroundSize: backgroundSize.join(', ')
-    })
   }
 
   const saveQuotation = async () => {
@@ -718,20 +657,13 @@ const QutationPreview = ({ id }) => {
               cities
             ) ?? 0
           const { hotelAmount: totalHotelAmount, totalNights: totalNightCount } = getHotelFare(cities.current)
-          const hotelFinalAmount =
-            clientType.current == 'admin'
-              ? Number(totalHotelAmount)
-              : clientType.current == 'employee'
-              ? Number(totalHotelAmount) * 1.265
-              : Number(totalHotelAmount) * 0.95
-
-          const transportFinalAmount =
-            clientType.current == 'admin'
-              ? Number(totalTransportAmount)
-              : clientType.current == 'employee'
-              ? Number(totalTransportAmount) * 1.265
-              : Number(totalTransportAmount) * 0.95
-          setTotalAmount(Number(hotelFinalAmount) + Number(transportFinalAmount))
+          // setCalculatedAmount({
+          //   transport: Number(totalTransportAmount),
+          //   hotel: Number(totalHotelAmount),
+          //   total: Number(totalTransportAmount) + Number(totalHotelAmount)
+          // })
+          // setIsAmountDialogOpen(true)
+          setTotalAmount(Number(totalTransportAmount) + Number(totalHotelAmount))
           setTotalNights(totalNightCount)
         } else {
           toast.error(`error fetching distance: ${result?.status}`)
@@ -750,34 +682,93 @@ const QutationPreview = ({ id }) => {
     localStorage.removeItem('travel')
   }
 
+  const inclusionItems = [
+    { text: 'Refresh yourself with a delightful welcome drink upon arrival.', icon: InclusionIcon },
+    {
+      text: 'Enjoy carefully curated meals as per the itinerary, featuring local flavors and international favorites.',
+      icon: InclusionIcon
+    },
+    {
+      text: 'Rest easy in well-chosen, comfortable hotels for the nights specified in your package.',
+      icon: InclusionIcon
+    },
+    {
+      text: 'Explore the best of the destination with private vehicle transfers for sightseeing, ensuring a smooth and personalized experience.',
+      icon: InclusionIcon
+    },
+    {
+      text: 'All toll taxes, parking fees, and driver charges are fully covered within the package for your peace of mind.',
+      icon: InclusionIcon
+    }
+  ]
+
+  const exclusionItems = [
+    {
+      text: 'Refresh yourself with a delightful welcome drink upon arrival',
+      icon: (
+        <svg className='svg-icon' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+          <path d='m12 0a12 12 0 1 0 12 12 12.013 12.013 0 0 0 -12-12zm0 22a10 10 0 1 1 10-10 10.011 10.011 0 0 1 -10 10zm5-10a1 1 0 0 1 -1 1h-3v3a1 1 0 0 1 -2 0v-3h-3a1 1 0 0 1 0-2h3v-3a1 1 0 0 1 2 0v3h3a1 1 0 0 1 1 1z' />
+        </svg>
+      )
+    },
+    {
+      text: 'Enjoy carefully curated meals as per the itinerary, featuring local flavors and international favorites.',
+      icon: (
+        <svg className='svg-icon' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+          <path d='m12 0a12 12 0 1 0 12 12 12.013 12.013 0 0 0 -12-12zm0 22a10 10 0 1 1 10-10 10.011 10.011 0 0 1 -10 10zm5-10a1 1 0 0 1 -1 1h-3v3a1 1 0 0 1 -2 0v-3h-3a1 1 0 0 1 0-2h3v-3a1 1 0 0 1 2 0v3h3a1 1 0 0 1 1 1z' />
+        </svg>
+      )
+    },
+    {
+      text: 'Rest easy in well-chosen, comfortable hotels for the nights specified in your package.',
+      icon: (
+        <svg className='svg-icon' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+          <path d='m12 0a12 12 0 1 0 12 12 12.013 12.013 0 0 0 -12-12zm0 22a10 10 0 1 1 10-10 10.011 10.011 0 0 1 -10 10zm5-10a1 1 0 0 1 -1 1h-3v3a1 1 0 0 1 -2 0v-3h-3a1 1 0 0 1 0-2h3v-3a1 1 0 0 1 2 0v3h3a1 1 0 0 1 1 1z' />
+        </svg>
+      )
+    },
+    {
+      text: 'Explore the best of the destination with private vehicle transfers for sightseeing, ensuring a smooth and personalized experience.',
+      icon: (
+        <svg className='svg-icon' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+          <path d='m12 0a12 12 0 1 0 12 12 12.013 12.013 0 0 0 -12-12zm0 22a10 10 0 1 1 10-10 10.011 10.011 0 0 1 -10 10zm5-10a1 1 0 0 1 -1 1h-3v3a1 1 0 0 1 -2 0v-3h-3a1 1 0 0 1 0-2h3v-3a1 1 0 0 1 2 0v3h3a1 1 0 0 1 1 1z' />
+        </svg>
+      )
+    },
+    {
+      text: 'All toll taxes, parking fees, and driver charges are fully covered within the package for your peace of mind.',
+      icon: (
+        <svg className='svg-icon' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+          <path d='m12 0a12 12 0 1 0 12 12 12.013 12.013 0 0 0 -12-12zm0 22a10 10 0 1 1 10-10 10.011 10.011 0 0 1 -10 10zm5-10a1 1 0 0 1 -1 1h-3v3a1 1 0 0 1 -2 0v-3h-3a1 1 0 0 1 0-2h3v-3a1 1 0 0 1 2 0v3h3a1 1 0 0 1 1 1z' />
+        </svg>
+      )
+    }
+  ]
+
+  const knowBeforeItems = [
+    { text: 'Welcome drink on arrival.', icon: KnowBeforeYouGo },
+    { text: 'Daily Delicious Buffet Breakfast in Every Hotel.', icon: KnowBeforeYouGo },
+    { text: 'Breakfast + dinner in desert camp & camel ride at camp.', icon: KnowBeforeYouGo },
+    { text: 'Accommodation in 3 star Hotels & camp for 05 Nights.', icon: KnowBeforeYouGo },
+    { text: 'All applicable transportation and Hotel Taxes.', icon: KnowBeforeYouGo },
+    { text: 'Cultural shows & dances at Camp.', icon: KnowBeforeYouGo }
+  ]
+
   return (
     <>
       <Loader open={isLoading} />
       <Grid container spacing={6} sx={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Grid sx={{ mt: 10 }}>
+        <Grid>
+          {/* <PreviewCard data={data} /> */}
           <Card
             sx={{
+              // width: '595px',
               height: '842px',
               overflow: 'auto'
             }}
           >
             <CardContent ref={targetRef}>
-              <div
-                style={{
-                  backgroundImage: `${dayWiseItineryStyle.background}`,
-                  backgroundPosition: `${dayWiseItineryStyle.backgroundPosition}`,
-                  backgroundSize: `${dayWiseItineryStyle.backgroundSize}`,
-                  backgroundRepeat: 'no-repeat',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                  width: '210mm',
-                  height: '100%',
-                  margin: '0 auto',
-                  border: '1px solid #000',
-                  padding: '30px',
-                  boxSizing: 'border-box',
-                  overflow: 'auto'
-                }}
-              >
+              <div className='a4-background'>
                 <div className='Header'>
                   <img className='logo' src='/images/logo_full.png' />
                   <div className='days-nights'>
@@ -808,7 +799,6 @@ const QutationPreview = ({ id }) => {
                     </span>
                   </div>
                 </div>
-
                 <div className='route'>
                   {RouteMap}
                   {cities.current.map((city, index) => (
@@ -817,11 +807,15 @@ const QutationPreview = ({ id }) => {
                       {index != cities.current.length - 1 ? ' - ' : ''}
                     </span>
                   ))}
+                  {/* Jaipur - Pushkar - Jodhpur - Jaisalmer */}
                 </div>
 
                 <div>
+                  {' '}
+                  {/* height: '300px' */}
                   <div className='accommodation-section'>
                     <h3 className='accommodation-title'>Accommodation Overview</h3>
+
                     <div className='travel-basic-details'>
                       <div className='no-of-traveller'>
                         {PersonCount}
@@ -866,19 +860,19 @@ const QutationPreview = ({ id }) => {
                         </span>
                       </div>
 
-                      {![undefined, null].includes(cities.current[0].info[0].extraBed) && (
-                        <div className='no-of-rooms'>
-                          {BedCount}
-                          <span>{cities.current[0].info[0].extraBed}</span>
-                        </div>
-                      )}
+                      <div className='no-of-rooms'>
+                        {BedCount}
+                        <span>{cities.current[0].info[0].extraBed}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className='price-section' style={{ marginRight: 'auto', marginLeft: 'auto', width: '100%' }}>
                   <div className='price-section-total'>
-                    <span className='total-amount'>Total : ₹{offerPrice.length > 0 ? offerPrice : totalAmount}</span>
+                    {' '}
+                    {/* <span className='total-amount'>Total : ₹56,700</span> */}
+                    <span className='total-amount'>Total : ₹{totalAmount}</span>
                   </div>
 
                   <div className='price-section-state'>
@@ -890,6 +884,7 @@ const QutationPreview = ({ id }) => {
                         </span>
                       ))}
                     </div>
+                    {/* <span className='no-of-nights'> 5 N</span> */}
                     <span className='no-of-nights'>{` | ${totalNights}N`}</span>
                   </div>
                 </div>
@@ -935,39 +930,42 @@ const QutationPreview = ({ id }) => {
                 </div>
 
                 {monuments &&
-                  dayWiseItinerary.map((itinerary, index) => (
-                    <div key={index}>
+                  generateDayWiseItinerary(cities.current, transportData.current, monuments).map((itinerary, index) => (
+                    <div style={{ background: `url(${itinerary.cityImage.split(',')[0].trim()})` }} key={index}>
+                      {console.log(itinerary)}
                       <div className='days-section'>
                         <h3 className='itinerary-title'>{itinerary.head}</h3>
                         <div className='travel-inclusive'>
                           {HotelCategory}
-                          <span>{itinerary.hotelInfo.hotelType}</span> <span>|</span>
-                          {RoomCategory}
-                          <span>Base Catagory</span>
-                          <span>|</span>
+                          <span>{itinerary.hotelInfo.hotelType}</span> <span>|</span> {RoomCategory}
+                          <span>Base Catagory</span> <span>|</span>
                           {SeightSeeing}
                           <span>Sightseeing</span>
+                          {/* <span>1 Basic Room</span> */}
                           <span>|</span>
+                          {MealIcon}
                           {itinerary.hotelInfo.extraBed && (
                             <>
-                              {BedCount}
                               <span>{itinerary.hotelInfo.extraBed}</span>
                               <span>|</span>
                             </>
                           )}
                           {itinerary.hotelInfo.meals.length > 0 && (
                             <>
-                              {MealIcon}
+                              {/* <i className='fi fi-ts-plate-eating'></i> */}
                               <span>{itinerary.hotelInfo.meals.join(', ')}</span>
                             </>
                           )}
+                          {/* <span>Breakfast, Dinner</span> */}
                         </div>
+
                         <div className='daywise-itinerary'>
                           <img
                             src={itinerary.hotelImage.length > 0 ? itinerary.hotelImage : '/images/hotels/jaipur.jpg'}
                             width='320px'
                             height='150px'
                           />
+
                           <div style={{ marginLeft: '20px', width: '50%' }}>
                             <div className='hotel-name'>
                               {HotelName}
@@ -984,6 +982,7 @@ const QutationPreview = ({ id }) => {
                           <p className='day-description'>{itinerary.description}</p>
                           {itinerary.attractions.map((place, idx) => (
                             <div key={idx} style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
+                              {/* <img src='/sightseeing-icon.png' width='20px' style={{ marginRight: '10px' }} /> */}
                               {MonumentBullets}
                               <p className='day-attraction-dexcription'>
                                 <b>{place.split(':')[0]} : </b> {place.split(':')[1]}
@@ -996,6 +995,34 @@ const QutationPreview = ({ id }) => {
                     </div>
                   ))}
 
+                {/* need to discuss */}
+                {/* <div>
+                  <div style={{ height: '0px' }}>
+                    <div className='textfield-container hotel-name-position'>
+                      <input
+                        type='text'
+                        id='outlined-input'
+                        value='Jodhpur, Rajasthan'
+                        disabled
+                        style={{ width: '93%' }}
+                      />
+                      <label htmlFor='outlined-input'>Drop Location</label>
+                    </div>
+
+                    <div className='textfield-container checkin-checkout-date-position'>
+                      <input
+                        type='text'
+                        id='outlined-input'
+                        value='Jodhpur, Rajasthan'
+                        disabled
+                        style={{ width: '93%' }}
+                      />
+                      <label htmlFor='outlined-input'>Drop Location</label>
+                    </div>
+                  </div>
+                </div> */}
+                {/* Inclusion Section */}
+
                 <div className='bullet-points'>
                   <h6 className='bullet-title'>Inclusion</h6>
                   {inclusionItems.map((item, index) => (
@@ -1003,13 +1030,15 @@ const QutationPreview = ({ id }) => {
                   ))}
                 </div>
 
-                {/* <div className='bullet-points'>
+                {/* Exclusion Section */}
+                <div className='bullet-points'>
                   <h6 className='bullet-title'>Exclusion</h6>
                   {exclusionItems.map((item, index) => (
                     <BulletPoint key={`exclusion-${index}`} text={item.text} icon={item.icon} />
                   ))}
-                </div> */}
+                </div>
 
+                {/* Know Before You Go Section */}
                 <div className='bullet-points'>
                   <h6 className='bullet-title'>Know Before You Go</h6>
                   {knowBeforeItems.map((item, index) => (
@@ -1020,24 +1049,9 @@ const QutationPreview = ({ id }) => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid sx={{ '&.MuiGrid-item': { pt: 0 }, mt: 10 }} item xl={3} md={4} xs={12}>
+        <Grid sx={{ '&.MuiGrid-item': { pt: 0 } }} item xl={3} md={4} xs={12}>
+          {/* <PreviewActions /> */}
           <Card>
-            <CardContent>
-              <TextField disabled fullWidth label='ARH Price' value={totalAmount} InputLabelProps={{ shrink: true }} />
-
-              <TextField
-                fullWidth
-                label='Offer Price'
-                sx={{ mt: 5 }}
-                value={offerPrice}
-                onChange={e => {
-                  const value = e.target.value.replace(/[^0-9]/g, '')
-                  setOfferPrice(value)
-                }}
-              />
-            </CardContent>
-          </Card>
-          <Card sx={{ mt: 5 }}>
             <CardContent>
               <Button
                 fullWidth
@@ -1062,18 +1076,24 @@ const QutationPreview = ({ id }) => {
               </Button>
               <Button
                 fullWidth
+                //   target='_blank'
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-file-download' />}
+                //   component={Link}
                 onClick={() => toPDF()}
                 variant='outlined'
+
+                //   href={'/'}
               >
                 Download Pdf
               </Button>
               <Button
                 fullWidth
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
+                //   component={Link}
                 variant='outlined'
                 startIcon={<Icon icon='mdi:custom-send-quote' />}
+                //   href={'/'}
               >
                 Send Quote For Approval
               </Button>

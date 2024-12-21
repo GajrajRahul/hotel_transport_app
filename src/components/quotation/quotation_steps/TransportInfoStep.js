@@ -70,7 +70,7 @@ const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Grid container spacing={5} sx={{ width: '600px' }}>
             <Grid item xs={12}>
-              <FormControl fullWidth>
+              {transportRate && <FormControl fullWidth>
                 <InputLabel htmlFor='stepper-linear-account-name' error={Boolean(transportErrors.vehicleType)}>
                   Select type of vehicle
                 </InputLabel>
@@ -104,7 +104,7 @@ const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
                     {transportErrors.vehicleType?.message}
                   </FormHelperText>
                 )}
-              </FormControl>
+              </FormControl>}
             </Grid>
             <Grid item xs={12}>
               <Controller
