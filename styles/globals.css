@@ -748,3 +748,60 @@ code[class*='language-'] {
   height: 1em;
   fill: white;
 }
+
+.contact-info-last {
+  margin: 40px auto 40px auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+  padding: 20px 20px 10px 20px;
+  border-radius: 15px;
+}
+
+.contact-info-title {
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 2pt;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #ffffff;
+  font-size: 18px;
+  margin: 0px 0px 0px 0px;
+}
+
+.contact-info-designation {
+  margin: 0px 0px 10px 0px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.contact-info-designation {
+  text-align: center;
+  color: #ffffff;
+}
+
+.contact-info-address {
+  color: #ffffff;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px 0px 10px 0px;
+}
+
+.contact-info-address span {
+  padding-left: 5px;
+}
+
+.contact-info-emailphone {
+  margin: 0px 0px 10px 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.contact-info-emailphone p {
+  margin: 0px 0px 0px 0px;
+}

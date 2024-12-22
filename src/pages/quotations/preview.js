@@ -29,6 +29,7 @@ import {
   BedCount,
   DayNight,
   DropLocation,
+  ExclusionIcon,
   HotelCategory,
   HotelName,
   InclusionIcon,
@@ -446,6 +447,34 @@ const knowBeforeItems = [
   { text: 'Cultural shows & dances at Camp.', icon: KnowBeforeYouGo }
 ]
 
+const exclusionItems = [
+  {
+    text: 'Any costs associated with airfare or train travel are not included in the package price.',
+    icon: ExclusionIcon
+  },
+  {
+    text: 'Expenses of a personal nature such as laundry, extra services, table bills, and tips or guide fees are not covered.',
+    icon: ExclusionIcon
+  },
+  {
+    text: 'Any personal adventure activities or excursions not mentioned in the inclusions are excluded from the package.',
+    icon: ExclusionIcon
+  },
+  {
+    text: 'Any medical costs arising from accidents or mishaps during the trip will be the responsibility of the traveler.',
+    icon: ExclusionIcon
+  },
+  { text: 'Room heaters, if requested, will be provided at an additional cost.', icon: ExclusionIcon },
+  {
+    text: 'Goods and Services Tax (GST) is not included in the quoted price and will be charged separately.',
+    icon: ExclusionIcon
+  },
+  {
+    text: 'Any items or services not specifically mentioned under the package inclusions are excluded.',
+    icon: ExclusionIcon
+  }
+]
+
 const QutationPreview = ({ id }) => {
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
   const quotationId = useRef(localStorage.getItem('quotationId') ?? '')
@@ -542,8 +571,8 @@ const QutationPreview = ({ id }) => {
 
   const getDayWiseItineryStyle = itineraryDayWiseData => {
     let background = ['url(/images/background-image.jpg)']
-    let backgroundPosition = ['0vh 0vh']
-    // let backgroundPosition = ['0px 0px']
+    // let backgroundPosition = ['0vh 0vh']
+    let backgroundPosition = ['0px 0px']
     let backgroundSize = ['100%']
     let prevCity = ''
     let currIndex = 0
@@ -555,14 +584,14 @@ const QutationPreview = ({ id }) => {
         currIndex += 1
       }
       background.push(`url('/images/pdf-image/${itinerary.cityName}/${itinerary.cityName}00${currIndex + 1}.jpg')`)
-      backgroundPosition.push(`0vh ${(index + 1) * 136}vh`)
-      // backgroundPosition.push(`0px ${(index + 1) * 1693}px`)
+      // backgroundPosition.push(`0vh ${(index + 1) * 136}vh`)
+      backgroundPosition.push(`0px ${(index + 1) * 1149.2}px`)
       backgroundSize.push('100%')
     })
 
     background.push('url(/images/background-image.jpg)')
-    backgroundPosition.push(`0vh ${(itineraryDayWiseData.length + 1) * 136}vh`)
-    // backgroundPosition.push(`0px ${(itineraryDayWiseData.length + 1) * 1693}px`)
+    // backgroundPosition.push(`0vh ${(itineraryDayWiseData.length + 1) * 136}vh`)
+    backgroundPosition.push(`0px ${(itineraryDayWiseData.length + 1) * 1149.2}px`)
     backgroundSize.push('100%')
 
     setDayWiseItineryStyle({
@@ -1013,18 +1042,29 @@ const QutationPreview = ({ id }) => {
                   ))}
                 </div>
 
-                {/* <div className='bullet-points'>
+                <div className='bullet-points'>
                   <h6 className='bullet-title'>Exclusion</h6>
                   {exclusionItems.map((item, index) => (
                     <BulletPoint key={`exclusion-${index}`} text={item.text} icon={item.icon} />
                   ))}
-                </div> */}
+                </div>
 
                 <div className='bullet-points'>
                   <h6 className='bullet-title'>Know Before You Go</h6>
                   {knowBeforeItems.map((item, index) => (
                     <BulletPoint key={`knowBefore-${index}`} text={item.text} icon={item.icon} />
                   ))}
+                </div>
+
+                <div className='contact-info-last'>
+                  <h6 className='contact-info-title'>Name of Employee here</h6>
+                  <p className='contact-info-designation'>Designation of Employee</p>
+                  <div className='contact-info-emailphone'>
+                    <p>+91 88888 66666 </p> <span style={{ margin: '0 10px' }}> | </span> <p> myemail@domain.com</p>
+                  </div>
+                  <p className='contact-info-address'>
+                    <span>Jagdamba Colony, Vidhyadhar Nagar, Jaipur - 302023</span>
+                  </p>
                 </div>
               </div>
             </CardContent>
