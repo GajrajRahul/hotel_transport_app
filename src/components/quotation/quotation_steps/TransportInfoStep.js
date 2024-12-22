@@ -26,6 +26,7 @@ import CustomInput from 'src/components/common/CustomInput'
 const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
   const cities = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
   const transportData = localStorage.getItem('transport') ? JSON.parse(localStorage.getItem('transport')) : null
+  const travelBasicData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
 
   const {
     reset: transportReset,
@@ -45,7 +46,9 @@ const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
         }
       : {
           vehicleType: '',
-          departureReturnDate: [new Date(), addDays(new Date(), 45)],
+          departureReturnDate: travelBasicData
+            ? [new Date(travelBasicData.dates[0]), new Date(travelBasicData.dates[1])]
+            : [new Date(), addDays(new Date(), 45)],
           from:
             cities.length > 1 || cities.length == 0
               ? ''
@@ -70,41 +73,43 @@ const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Grid container spacing={5} sx={{ width: '600px' }}>
             <Grid item xs={12}>
-              {transportRate && <FormControl fullWidth>
-                <InputLabel htmlFor='stepper-linear-account-name' error={Boolean(transportErrors.vehicleType)}>
-                  Select type of vehicle
-                </InputLabel>
-                <Controller
-                  name='vehicleType'
-                  control={transportControl}
-                  rules={{ required: 'This field is required' }}
-                  render={({ field: { value, onChange } }) => (
-                    <Select
-                      labelId='demo-simple-select-label'
-                      id='demo-simple-select'
-                      value={value}
-                      label='Select type of vehicle'
-                      startAdornment={
-                        <InputAdornment position='start'>
-                          <Icon icon='mdi:car-outline' color={theme.palette.primary.main} />
-                        </InputAdornment>
-                      }
-                      onChange={onChange}
-                    >
-                      {Object.keys(transportRate).map(transport => (
-                        <MenuItem key={transport} value={transport}>
-                          {transport.split('_').join(' ')}
-                        </MenuItem>
-                      ))}
-                    </Select>
+              {transportRate && (
+                <FormControl fullWidth>
+                  <InputLabel htmlFor='stepper-linear-account-name' error={Boolean(transportErrors.vehicleType)}>
+                    Select type of vehicle
+                  </InputLabel>
+                  <Controller
+                    name='vehicleType'
+                    control={transportControl}
+                    rules={{ required: 'This field is required' }}
+                    render={({ field: { value, onChange } }) => (
+                      <Select
+                        labelId='demo-simple-select-label'
+                        id='demo-simple-select'
+                        value={value}
+                        label='Select type of vehicle'
+                        startAdornment={
+                          <InputAdornment position='start'>
+                            <Icon icon='mdi:car-outline' color={theme.palette.primary.main} />
+                          </InputAdornment>
+                        }
+                        onChange={onChange}
+                      >
+                        {Object.keys(transportRate).map(transport => (
+                          <MenuItem key={transport} value={transport}>
+                            {transport.split('_').join(' ')}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                  {transportErrors.vehicleType && (
+                    <FormHelperText sx={{ color: 'error.main' }} id='checkpoints-error'>
+                      {transportErrors.vehicleType?.message}
+                    </FormHelperText>
                   )}
-                />
-                {transportErrors.vehicleType && (
-                  <FormHelperText sx={{ color: 'error.main' }} id='checkpoints-error'>
-                    {transportErrors.vehicleType?.message}
-                  </FormHelperText>
-                )}
-              </FormControl>}
+                </FormControl>
+              )}
             </Grid>
             <Grid item xs={12}>
               <Controller

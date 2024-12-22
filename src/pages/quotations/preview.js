@@ -585,13 +585,13 @@ const QutationPreview = ({ id }) => {
       }
       background.push(`url('/images/pdf-image/${itinerary.cityName}/${itinerary.cityName}00${currIndex + 1}.jpg')`)
       // backgroundPosition.push(`0vh ${(index + 1) * 136}vh`)
-      backgroundPosition.push(`0px ${(index + 1) * 1149.2}px`)
+      backgroundPosition.push(`0px ${(index + 1) * 1120}px`)
       backgroundSize.push('100%')
     })
 
     background.push('url(/images/background-image.jpg)')
     // backgroundPosition.push(`0vh ${(itineraryDayWiseData.length + 1) * 136}vh`)
-    backgroundPosition.push(`0px ${(itineraryDayWiseData.length + 1) * 1149.2}px`)
+    backgroundPosition.push(`0px ${(itineraryDayWiseData.length + 1) * 1120}px`)
     backgroundSize.push('100%')
 
     setDayWiseItineryStyle({

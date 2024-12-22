@@ -50,20 +50,20 @@ code[class*='language-'] {
 }
 
 .common-card {
-  background-color: rgba(217, 217, 217, 0.5) !important;
+  background-color: rgba(217, 217, 217, 0.8) !important;
   border-radius: 15px !important;
   backdrop-filter: blur(10px);
 }
 
 .inner-card {
   height: 500px;
-  background-color: rgba(217, 217, 217, 0.2) !important;
+  background-color: rgba(217, 217, 217, 0.8) !important;
   border-radius: 15px !important;
   backdrop-filter: blur(10px);
 }
 
 .footer-card {
-  background-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
   border-radius: 100px !important;
   backdrop-filter: blur(10px);
   margin-bottom: 25px;
@@ -127,7 +127,7 @@ code[class*='language-'] {
 .days-nights {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -150,7 +150,7 @@ code[class*='language-'] {
   margin: 40px auto 40px auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
   padding: 20px;
   border-radius: 15px;
@@ -196,7 +196,7 @@ code[class*='language-'] {
 .traveller-name {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -216,7 +216,7 @@ code[class*='language-'] {
 .date {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -237,7 +237,7 @@ code[class*='language-'] {
   margin-top: 2%;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -259,7 +259,7 @@ code[class*='language-'] {
   margin: 40px auto 40px auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
   padding: 20px;
   border-radius: 15px;
@@ -541,7 +541,7 @@ code[class*='language-'] {
   left: 32em;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 5px;
   display: flex;
   align-items: center;
@@ -565,7 +565,7 @@ code[class*='language-'] {
 .price-section-total {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   border-radius: 50px;
   margin: 0 auto;
   font-family: 'Arial', sans-serif;
@@ -584,7 +584,7 @@ code[class*='language-'] {
   margin: 15px auto 40px auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
   padding: 20px;
   border-radius: 15px;
@@ -624,7 +624,7 @@ code[class*='language-'] {
   margin: 40px auto 40px auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
   padding: 10px;
   border-radius: 15px;
@@ -634,7 +634,7 @@ code[class*='language-'] {
 .travel-inclusive {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -670,7 +670,7 @@ code[class*='language-'] {
   margin: 40px auto 40px auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
   padding: 30px;
   border-radius: 15px;
@@ -701,7 +701,7 @@ code[class*='language-'] {
   margin: 40px auto 40px auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
   padding: 20px 20px 10px 20px;
   border-radius: 15px;
@@ -753,7 +753,7 @@ code[class*='language-'] {
   margin: 40px auto 40px auto;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
   padding: 20px 20px 10px 20px;
   border-radius: 15px;
