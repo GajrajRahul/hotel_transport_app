@@ -634,7 +634,7 @@ code[class*='language-'] {
 .travel-inclusive {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(50px);
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.4);
   border-radius: 10px;
   display: flex;
   align-items: center;

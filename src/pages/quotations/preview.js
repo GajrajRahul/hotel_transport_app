@@ -571,8 +571,8 @@ const QutationPreview = ({ id }) => {
 
   const getDayWiseItineryStyle = itineraryDayWiseData => {
     let background = ['url(/images/background-image.jpg)']
-    // let backgroundPosition = ['0vh 0vh']
-    let backgroundPosition = ['0px 0px']
+    let backgroundPosition = ['0vh 0vh']
+    // let backgroundPosition = ['0px 0px']
     let backgroundSize = ['100%']
     let prevCity = ''
     let currIndex = 0
@@ -584,14 +584,14 @@ const QutationPreview = ({ id }) => {
         currIndex += 1
       }
       background.push(`url('/images/pdf-image/${itinerary.cityName}/${itinerary.cityName}00${currIndex + 1}.jpg')`)
-      // backgroundPosition.push(`0vh ${(index + 1) * 136}vh`)
-      backgroundPosition.push(`0px ${(index + 1) * 1120}px`)
+      backgroundPosition.push(`0vh ${(index + 1) * 136}vh`)
+      // backgroundPosition.push(`0px ${(index + 1) * 1693}px`)
       backgroundSize.push('100%')
     })
 
     background.push('url(/images/background-image.jpg)')
-    // backgroundPosition.push(`0vh ${(itineraryDayWiseData.length + 1) * 136}vh`)
-    backgroundPosition.push(`0px ${(itineraryDayWiseData.length + 1) * 1120}px`)
+    backgroundPosition.push(`0vh ${(itineraryDayWiseData.length + 1) * 136}vh`)
+    // backgroundPosition.push(`0px ${(itineraryDayWiseData.length + 1) * 1693}px`)
     backgroundSize.push('100%')
 
     setDayWiseItineryStyle({
