@@ -973,67 +973,80 @@ const QutationPreview = ({ id }) => {
                   <h3 className='itinerary-title'>Day Wise Itinerary</h3>
                 </div>
 
-                {monuments &&
-                  dayWiseItinerary.map((itinerary, index) => (
-                    <div key={index}>
-                      <div className='days-section'>
-                        <h3 className='itinerary-title'>{itinerary.head}</h3>
-                        <div className='travel-inclusive'>
-                          {HotelCategory}
-                          <span>{itinerary.hotelInfo.hotelType}</span> <span>|</span>
-                          {RoomCategory}
-                          <span>Base Catagory</span>
-                          <span>|</span>
-                          {SeightSeeing}
-                          <span>Sightseeing</span>
-                          <span>|</span>
-                          {itinerary.hotelInfo.extraBed && (
-                            <>
-                              {BedCount}
-                              <span>{itinerary.hotelInfo.extraBed}</span>
-                              <span>|</span>
-                            </>
-                          )}
-                          {itinerary.hotelInfo.meals.length > 0 && (
-                            <>
-                              {MealIcon}
-                              <span>{itinerary.hotelInfo.meals.join(', ')}</span>
-                            </>
-                          )}
-                        </div>
-                        <div className='daywise-itinerary'>
-                          <img
-                            src={itinerary.hotelImage.length > 0 ? itinerary.hotelImage : '/images/hotels/jaipur.jpg'}
-                            width='320px'
-                            height='150px'
-                          />
-                          <div style={{ marginLeft: '20px', width: '50%' }}>
-                            <div className='hotel-name'>
-                              {HotelName}
-                              <span>{itinerary.hotelName}</span>
-                            </div>
-                            <div className='checkin-checkout'>
-                              {TravelDate}
-                              <span>{itinerary.checkInCheckOut}</span>
-                            </div>
+                {dayWiseItinerary.map((itinerary, index) => (
+                  <div key={index}>
+                    <div className='days-section'>
+                      <h3 className='itinerary-title'>{itinerary.head}</h3>
+                      <div className='travel-inclusive'>
+                        {HotelCategory}
+                        <span>{itinerary.hotelInfo.hotelType}</span> <span>|</span>
+                        {RoomCategory}
+                        <span>Base Catagory</span>
+                        <span>|</span>
+                        {SeightSeeing}
+                        <span>Sightseeing</span>
+                        <span>|</span>
+                        {itinerary.hotelInfo.extraBed && (
+                          <>
+                            {BedCount}
+                            <span>{itinerary.hotelInfo.extraBed}</span>
+                            <span>|</span>
+                          </>
+                        )}
+                        {itinerary.hotelInfo.meals.length > 0 && (
+                          <>
+                            {MealIcon}
+                            <span>{itinerary.hotelInfo.meals.join(', ')}</span>
+                          </>
+                        )}
+                      </div>
+                      <div className='daywise-itinerary'>
+                        <img
+                          src={itinerary.hotelImage.length > 0 ? itinerary.hotelImage : '/images/hotels/jaipur.jpg'}
+                          width='320px'
+                          height='150px'
+                        />
+                        <div style={{ marginLeft: '20px', width: '50%' }}>
+                          <div className='hotel-name'>
+                            {HotelName}
+                            <span>{itinerary.hotelName}</span>
+                          </div>
+                          <div className='checkin-checkout'>
+                            {TravelDate}
+                            <span>{itinerary.checkInCheckOut}</span>
                           </div>
                         </div>
+                      </div>
 
-                        <div>
-                          <p className='day-description'>{itinerary.description}</p>
-                          {itinerary.attractions.map((place, idx) => (
-                            <div key={idx} style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
-                              {MonumentBullets}
-                              <p className='day-attraction-dexcription'>
-                                <b>{place.split(':')[0]} : </b> {place.split(':')[1]}
-                              </p>
-                            </div>
-                          ))}
-                          <p className='day-description'>{itinerary.footer}</p>
-                        </div>
+                      <div>
+                        <p className='day-description'>{itinerary.description}</p>
+                        {itinerary.attractions.map((place, idx) => (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
+                            {MonumentBullets}
+                            <p className='day-attraction-dexcription'>
+                              <b>{place.split(':')[0]} : </b> {place.split(':')[1]}
+                            </p>
+                          </div>
+                        ))}
+                        <p className='day-description'>{itinerary.footer}</p>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
+
+                {dayWiseItinerary.length > 0 && (
+                  <div>
+                    <div className='days-section'>
+                      <h3 className='itinerary-title'>Departure Day | A Sweet Farewell</h3>
+                      <p className='day-description'>
+                        {dayWiseItinerary[dayWiseItinerary.length - 1].hotelInfo.meals.includes('Breakfast')
+                          ? 'Begin your day with a delightful breakfast at the hotel before checking out. If you’ve hired a vehicle with us, our driver will ensure a smooth and timely transfer to your next destination or departure point. Double-check your belongings and cherish the memories of this incredible adventure.'
+                          : 'Start your day by checking out of the hotel as your journey concludes. Please ensure all your belongings are packed and ready. If you’ve arranged your own transport, we wish you safe and pleasant travels ahead. Thank you for choosing us to be a part of your journey.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {console.log(dayWiseItinerary)}
 
                 <div className='bullet-points'>
                   <h6 className='bullet-title'>Inclusion</h6>

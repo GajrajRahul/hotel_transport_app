@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Controller, useForm } from 'react-hook-form'
+import React, { useEffect, useMemo, useState } from 'react'
 import { addDays, format } from 'date-fns'
+import toast from 'react-hot-toast'
 
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
-import InputLabel from '@mui/material/InputLabel'
-import FormControl from '@mui/material/FormControl'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import FormHelperText from '@mui/material/FormHelperText'
-import InputAdornment from '@mui/material/InputAdornment'
 import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import Autocomplete from '@mui/material/Autocomplete'
 import Card from '@mui/material/Card'
 import Divider from '@mui/material/Divider'
 import CardContent from '@mui/material/CardContent'
@@ -21,25 +17,13 @@ import Chip from '@mui/material/Chip'
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
-import IconButton from '@mui/material/IconButton'
-import MenuItem from '@mui/material/MenuItem'
-import Menu from '@mui/material/Menu'
 import { useTheme } from '@mui/material'
 
 import Icon from 'src/@core/components/icon'
 
 import CitiesDialog from '../dialog/CitiesDialog'
 import HotelDialog from '../dialog/HotelDialog'
-import { updateHotelInfo } from 'src/store/quotations/HotelsInfoSlice'
-import toast from 'react-hot-toast'
-
-const icons = {
-  rooms: 'meeting-room-outline',
-  extraBed: 'bed-double-outline',
-  breakfast: 'free-breakfast-outline',
-  lunch: 'lunch',
-  dinner: 'dinner-outline'
-}
+import CommonDialog from 'src/components/common/dialog'
 
 let defaultHotelInfoValues = {
   checkInCheckOut: [undefined, undefined],
@@ -58,9 +42,6 @@ let defaultHotelInfoValues = {
 const HotelInfoStep = props => {
   const { onSubmit, handleBack, hotelRate, roomsList, statesList } = props
 
-  const hotelInfoReduxData = useSelector(state => state.hotelsInfo)
-  const dispatch = useDispatch()
-
   const [selectedCitiesHotels, setSelectedCitiesHotels] = useState(
     localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
   )
@@ -71,9 +52,16 @@ const HotelInfoStep = props => {
   const [selectedCity, setSelectedCity] = useState(null)
   const [selectedHotelInfo, setSelectedHotelInfo] = useState(defaultHotelInfoValues)
   const [expanded, setExpanded] = useState('panel0')
-  const [anchorEl, setAnchorEl] = useState(null)
-  const isMenuOpen = Boolean(anchorEl)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const theme = useTheme()
+
+  const citiesList = useMemo(() => {
+    return hotelRate
+      ? Object.keys(hotelRate).map((city, index) => {
+          return { id: index, label: city, info: [] }
+        })
+      : []
+  }, [])
 
   const expandIcon = value => (
     <Icon icon={expanded === value ? 'mdi:minus' : 'mdi:plus'} color={theme.palette.primary.main} />
@@ -91,34 +79,30 @@ const HotelInfoStep = props => {
     )
   }
 
-  const handleDeleteCity = cityIdToDelete => {
-    const remainingSelectedCitiesHotels = selectedCitiesHotels.filter(city => city.id != cityIdToDelete)
-    const selectedStates = localStorage.getItem('selectedStates')
-      ? JSON.parse(localStorage.getItem('selectedStates'))
-      : []
-    const validCityLabels = remainingSelectedCitiesHotels.map(item => item.label)
+  const handleDeleteCity = () => {
+    if (selectedCity) {
+      const remainingSelectedCitiesHotels = selectedCitiesHotels.filter(city => city.id != selectedCity.id)
+      const selectedStates = localStorage.getItem('selectedStates')
+        ? JSON.parse(localStorage.getItem('selectedStates'))
+        : []
+      const validCityLabels = remainingSelectedCitiesHotels.map(item => item.label)
 
-    const updatedSelectedStates = selectedStates
-      .map(state => {
-        const filteredCities = state.cities.filter(city => validCityLabels.includes(city.name))
-        return {
-          ...state,
-          cities: filteredCities
-        }
-      })
-      .filter(state => state.cities.length > 0)
-    localStorage.setItem('selectedStates', JSON.stringify(updatedSelectedStates))
-    setSelectedCitiesHotels(remainingSelectedCitiesHotels)
-  }
-
-  const handleOpenMenu = (event, city, hotel) => {
-    setSelectedCity(city)
-    setSelectedHotelInfo(hotel)
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleCloseMenu = () => {
-    setAnchorEl(null)
+      const updatedSelectedStates = selectedStates
+        .map(state => {
+          const filteredCities = state.cities.filter(city => validCityLabels.includes(city.name))
+          return {
+            ...state,
+            cities: filteredCities
+          }
+        })
+        .filter(state => state.cities.length > 0)
+      localStorage.setItem('selectedStates', JSON.stringify(updatedSelectedStates))
+      setSelectedCitiesHotels(remainingSelectedCitiesHotels)
+    } else {
+      localStorage.setItem('selectedState', JSON.stringify([]))
+      setSelectedCitiesHotels([])
+    }
+    handleDeleteDialogClose()
   }
 
   const handleOpenCitiesDialog = () => {
@@ -127,11 +111,6 @@ const HotelInfoStep = props => {
 
   const handleCloseCitiesDialog = () => {
     setOpenCitiesDialog(false)
-  }
-
-  const handleOpenEditHotelDialog = () => {
-    handleCloseMenu()
-    setOpenEditHotelDialog(true)
   }
 
   const handleCloseEditHotelDialog = () => {
@@ -143,6 +122,15 @@ const HotelInfoStep = props => {
   const handleOpenHotelDialog = city => {
     setSelectedCity(city)
     setOpenHotelDialog(true)
+  }
+
+  const handleDeleteDialogOpen = () => {
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleDeleteDialogClose = () => {
+    setSelectedCity(null)
+    setIsDeleteDialogOpen(false)
   }
 
   const handleCloseHotelDialog = () => {
@@ -174,6 +162,37 @@ const HotelInfoStep = props => {
     <>
       <Grid container spacing={5}>
         <Grid item xs={12}>
+          <Autocomplete
+            multiple
+            limitTags={2}
+            id='multiple-limit-cities'
+            isOptionEqualToValue={(option, value) => option.label == value.label}
+            value={selectedCitiesHotels}
+            onChange={(e, option, response, value) => {
+              if (response == 'removeOption' || response == 'clear') {
+                if (response == 'removeOption') {
+                  setSelectedCity(value.option)
+                  handleDeleteDialogOpen()
+                }
+                else {
+                  handleDeleteDialogOpen()
+                }
+              } else {
+                setSelectedCitiesHotels(option)
+              }
+            }}
+            options={citiesList}
+            getOptionLabel={option => (option.label ? `${option.label[0].toUpperCase()}${option.label.slice(1)}` : '')}
+            renderInput={params => <TextField {...params} label='Add Cities' />}
+            fullWidth
+            sx={{
+              '& .MuiChip-root': { backgroundColor: theme => theme.palette.primary.light },
+              '& .MuiSvgIcon-root': { fill: theme => theme.palette.primary.dark }
+            }}
+            disableCloseOnSelect
+          />
+        </Grid>
+        {/* <Grid item xs={12}>
           <Box
             sx={{
               border: '1px solid #9A9A9A',
@@ -217,7 +236,7 @@ const HotelInfoStep = props => {
               style={{ position: 'absolute', right: '10px' }}
             />
           </Box>
-        </Grid>
+        </Grid> */}
         {selectedCitiesHotels.map((city, index) => (
           <Grid item xs={12} key={index}>
             <Accordion
@@ -267,14 +286,14 @@ const HotelInfoStep = props => {
                           .join(' ')
                       : ''}
                   </Typography>
-                  <Icon
+                  {/* <Icon
                     onClick={e => {
                       e.stopPropagation()
                       handleDeleteCity(city.id)
                     }}
                     icon='mdi:delete-outline'
                     color={theme.palette.primary.main}
-                  />
+                  /> */}
                 </Box>
               </AccordionSummary>
               <AccordionDetails>
@@ -308,7 +327,9 @@ const HotelInfoStep = props => {
                             </Box>
                           </Box>
                           <Divider sx={{ mt: 2, color: 'black' }} />
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', mt: 3, gap: 3 }}>
+                          <Box
+                            sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', mt: 3, gap: 3 }}
+                          >
                             <Box
                               sx={{
                                 pl: 1,
@@ -539,8 +560,13 @@ const HotelInfoStep = props => {
         roomsList={roomsList}
         isEdit={true}
       />
-      {/*
-       */}
+      <CommonDialog
+        open={isDeleteDialogOpen}
+        onCancel={handleDeleteDialogClose}
+        onSuccess={handleDeleteCity}
+        title='Confirm Deletion'
+        description='Are you sure you want to delete the selected city(ies)? All related data will be permanently removed.'
+      />
     </>
   )
 }
