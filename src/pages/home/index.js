@@ -82,20 +82,20 @@ const data = [
     href: '/texi'
   },
   {
-    title: 'Travel Packages',
+    title: 'ARH Trust',
     subtitle: '1,288 packages',
     src: '/images/icons/luggage.png',
     color: '#BBBAF6',
     href: '/packages'
   },
-  {
-    title: 'Approval Status ',
-    // subtitle: 'Offer curated travel packages.',
-    subtitle: '325 approvals.',
-    src: '/images/icons/kayak.png',
-    color: '#F9CD90',
-    href: '/approvals'
-  }
+  // {
+  //   title: 'Approval Status ',
+  //   // subtitle: 'Offer curated travel packages.',
+  //   subtitle: '325 approvals.',
+  //   src: '/images/icons/kayak.png',
+  //   color: '#F9CD90',
+  //   href: '/approvals'
+  // }
   // {
   //   title: 'Activities',
   //   subtitle: '74 activities',

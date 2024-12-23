@@ -46,6 +46,7 @@ import {
   TravellerName,
   vehicleType
 } from 'src/utils/icons'
+import { useAuth } from 'src/hooks/useAuth'
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
@@ -54,15 +55,80 @@ const getUniqueHotelTypes = cities => {
   return [...new Set(hotelTypes)]
 }
 
-const BulletPoint = ({ text, icon }) => (
-  <div className='bullet-points-container'>
-    <div className='svg-container'>{icon}</div>
-    <div className='bullet-text'>{text}</div>
-  </div>
-)
+const BulletPoint = ({ text, icon }) =>
+  text &&
+  text.length > 0 && (
+    <div className='bullet-points-container'>
+      <div className='svg-container'>{icon}</div>
+      <div className='bullet-text'>{text}</div>
+    </div>
+  )
+
+const inclusionItems = [
+  { text: 'Refresh yourself with a delightful welcome drink upon arrival.', icon: InclusionIcon },
+  {
+    text: 'Enjoy carefully curated meals as per the itinerary, featuring local flavors and international favorites.',
+    icon: InclusionIcon
+  },
+  {
+    text: 'Rest easy in well-chosen, comfortable hotels for the nights specified in your package.',
+    icon: InclusionIcon
+  },
+  {
+    text: 'Explore the best of the destination with private vehicle transfers for sightseeing, ensuring a smooth and personalized experience.',
+    icon: InclusionIcon
+  },
+  {
+    text: 'All toll taxes, parking fees, and driver charges are fully covered within the package for your peace of mind.',
+    icon: InclusionIcon
+  }
+]
+
+const knowBeforeItems = [
+  { text: 'Welcome drink on arrival.', icon: KnowBeforeYouGo },
+  { text: 'Daily Delicious Buffet Breakfast in Every Hotel.', icon: KnowBeforeYouGo },
+  { text: 'Breakfast + dinner in desert camp & camel ride at camp.', icon: KnowBeforeYouGo },
+  { text: 'Accommodation in 3 star Hotels & camp for 05 Nights.', icon: KnowBeforeYouGo },
+  { text: 'All applicable transportation and Hotel Taxes.', icon: KnowBeforeYouGo },
+  { text: 'Cultural shows & dances at Camp.', icon: KnowBeforeYouGo }
+]
+
+const exclusionItems = [
+  {
+    text: 'Any costs associated with airfare or train travel are not included in the package price.',
+    icon: ExclusionIcon
+  },
+  {
+    text: 'Expenses of a personal nature such as laundry, extra services, table bills, and tips or guide fees are not covered.',
+    icon: ExclusionIcon
+  },
+  {
+    text: 'Any personal adventure activities or excursions not mentioned in the inclusions are excluded from the package.',
+    icon: ExclusionIcon
+  },
+  {
+    text: 'Any medical costs arising from accidents or mishaps during the trip will be the responsibility of the traveler.',
+    icon: ExclusionIcon
+  },
+  { text: 'Room heaters, if requested, will be provided at an additional cost.', icon: ExclusionIcon },
+  {
+    text: 'Goods and Services Tax (GST) is not included in the quoted price and will be charged separately.',
+    icon: ExclusionIcon
+  },
+  {
+    text: 'Any items or services not specifically mentioned under the package inclusions are excluded.',
+    icon: ExclusionIcon
+  }
+]
 
 function generateDayWiseItinerary(cities, transportData, monuments) {
   const itinerary = []
+  let cityInclusions = []
+  let cityInclusionText = ''
+  let cityExclusions = []
+  let cityExclusionText = ''
+  let cityKnowBefores = []
+  let cityKnowBeforeText = ''
   let currentDate = null
   let currentHotel = null
   let currentCity = null
@@ -72,6 +138,10 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
     const cityName = city.label
     const hotels = city.info
     let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
+
+    cityInclusionText += monuments[cityName] ? monuments[cityName].cityInclusion : ''
+    cityExclusionText += monuments[cityName] ? monuments[cityName].cityExclusion : ''
+    cityKnowBeforeText += monuments[cityName] ? monuments[cityName].know_before_you_go : ''
 
     const totalAttractions = attractions.length
 
@@ -279,7 +349,35 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   // const lastCity = cities[cities.length - 1].label
   // itinerary.push(`Day ${itinerary.length + 1} | Departure from ${lastCity}`)
 
-  return itinerary
+  cityInclusions = [
+    ...inclusionItems,
+    ...cityInclusionText.split('|').map(inclusion => {
+      return {
+        text: inclusion,
+        icon: InclusionIcon
+      }
+    })
+  ]
+  cityExclusions = [
+    ...exclusionItems,
+    ...cityExclusionText.split('|').map(exclusion => {
+      return {
+        text: exclusion,
+        icon: ExclusionIcon
+      }
+    })
+  ]
+  cityKnowBefores = [
+    ...knowBeforeItems,
+    ...cityKnowBeforeText.split('|').map(know_before => {
+      return {
+        text: know_before,
+        icon: KnowBeforeYouGo
+      }
+    })
+  ]
+
+  return { itinerary, cityInclusions, cityExclusions, cityKnowBefores }
 }
 
 const generateMonumentsData = data => {
@@ -302,8 +400,9 @@ const generateMonumentsData = data => {
       const cityIntro = `${rowData.city_intro}`
       const cityImage = `${rowData.city_image}`
       const cityAttractions = `${rowData.attractions}`
-      const cityInclusion = `${rowData.inclusion}`
-      const cityExclusion = `${rowData.exclusion}`
+      const cityInclusion = rowData.inclusion ? `${rowData.inclusion}` : ''
+      const cityExclusion = rowData.exclusion ? `${rowData.exclusion}` : ''
+      const know_before_you_go = rowData.know_before_you_go ? `${rowData.know_before_you_go}` : ''
 
       if (!result[cityKey]) {
         result[cityKey] = {}
@@ -315,7 +414,8 @@ const generateMonumentsData = data => {
         cityImage: cityImage || '',
         cityAttractions: cityAttractions || '',
         cityInclusion: cityInclusion || '',
-        cityExclusion: cityExclusion || ''
+        cityExclusion: cityExclusion || '',
+        know_before_you_go: know_before_you_go || ''
       }
     }
   })
@@ -418,63 +518,6 @@ const getTransportFare = (data, cities) => {
   }
 }
 
-const inclusionItems = [
-  { text: 'Refresh yourself with a delightful welcome drink upon arrival.', icon: InclusionIcon },
-  {
-    text: 'Enjoy carefully curated meals as per the itinerary, featuring local flavors and international favorites.',
-    icon: InclusionIcon
-  },
-  {
-    text: 'Rest easy in well-chosen, comfortable hotels for the nights specified in your package.',
-    icon: InclusionIcon
-  },
-  {
-    text: 'Explore the best of the destination with private vehicle transfers for sightseeing, ensuring a smooth and personalized experience.',
-    icon: InclusionIcon
-  },
-  {
-    text: 'All toll taxes, parking fees, and driver charges are fully covered within the package for your peace of mind.',
-    icon: InclusionIcon
-  }
-]
-
-const knowBeforeItems = [
-  { text: 'Welcome drink on arrival.', icon: KnowBeforeYouGo },
-  { text: 'Daily Delicious Buffet Breakfast in Every Hotel.', icon: KnowBeforeYouGo },
-  { text: 'Breakfast + dinner in desert camp & camel ride at camp.', icon: KnowBeforeYouGo },
-  { text: 'Accommodation in 3 star Hotels & camp for 05 Nights.', icon: KnowBeforeYouGo },
-  { text: 'All applicable transportation and Hotel Taxes.', icon: KnowBeforeYouGo },
-  { text: 'Cultural shows & dances at Camp.', icon: KnowBeforeYouGo }
-]
-
-const exclusionItems = [
-  {
-    text: 'Any costs associated with airfare or train travel are not included in the package price.',
-    icon: ExclusionIcon
-  },
-  {
-    text: 'Expenses of a personal nature such as laundry, extra services, table bills, and tips or guide fees are not covered.',
-    icon: ExclusionIcon
-  },
-  {
-    text: 'Any personal adventure activities or excursions not mentioned in the inclusions are excluded from the package.',
-    icon: ExclusionIcon
-  },
-  {
-    text: 'Any medical costs arising from accidents or mishaps during the trip will be the responsibility of the traveler.',
-    icon: ExclusionIcon
-  },
-  { text: 'Room heaters, if requested, will be provided at an additional cost.', icon: ExclusionIcon },
-  {
-    text: 'Goods and Services Tax (GST) is not included in the quoted price and will be charged separately.',
-    icon: ExclusionIcon
-  },
-  {
-    text: 'Any items or services not specifically mentioned under the package inclusions are excluded.',
-    icon: ExclusionIcon
-  }
-]
-
 const QutationPreview = ({ id }) => {
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
   const quotationId = useRef(localStorage.getItem('quotationId') ?? '')
@@ -487,7 +530,7 @@ const QutationPreview = ({ id }) => {
       : 'admin'
   )
   const quotationName = useRef(localStorage.getItem('quotationName') ? localStorage.getItem('quotationName') : '')
-  const [dayWiseItinerary, setDayWiseItinerary] = useState([])
+  const [dayWiseItinerary, setDayWiseItinerary] = useState(null)
   const [dayWiseItineryStyle, setDayWiseItineryStyle] = useState({
     background: '',
     backgroundSize: '',
@@ -508,6 +551,7 @@ const QutationPreview = ({ id }) => {
 
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { user } = useAuth()
 
   useEffect(() => {
     fetchMonumentsData()
@@ -559,7 +603,7 @@ const QutationPreview = ({ id }) => {
       setIsLoading(false)
       const finalData = generateMonumentsData(response.data.values ?? [])
       const itineraryDayWiseData = generateDayWiseItinerary(cities.current, transportData.current, finalData.result)
-      getDayWiseItineryStyle(itineraryDayWiseData)
+      getDayWiseItineryStyle(itineraryDayWiseData.itinerary)
       setDayWiseItinerary(itineraryDayWiseData)
 
       setMonuments(finalData.result)
@@ -577,7 +621,7 @@ const QutationPreview = ({ id }) => {
     let prevCity = ''
     let currIndex = 0
     itineraryDayWiseData.map((itinerary, index) => {
-      if (prevCity.length == 0 || prevCity != itinerary.cityName) {
+      if (prevCity && (prevCity.length == 0 || prevCity != itinerary.cityName)) {
         prevCity = itinerary.cityName
         currIndex = 0
       } else {
@@ -672,7 +716,9 @@ const QutationPreview = ({ id }) => {
             transportEndDate: transportData.current.departureReturnDate[1]
           }
         : null,
-      totalAmount: `${totalAmount}`
+      totalAmount: `${totalAmount}`,
+      companyName: user.companyName,
+      userName: user.name
     }
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
@@ -793,294 +839,298 @@ const QutationPreview = ({ id }) => {
               overflow: 'auto'
             }}
           >
-            <CardContent
-              sx={{
-                '&.MuiCardContent-root': {
-                  padding: 0
-                }
-              }}
-              ref={targetRef}
-            >
-              <div
-                style={{
-                  backgroundImage: `${dayWiseItineryStyle.background}`,
-                  backgroundPosition: `${dayWiseItineryStyle.backgroundPosition}`,
-                  backgroundSize: `${dayWiseItineryStyle.backgroundSize}`,
-                  backgroundRepeat: 'no-repeat',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                  width: '210mm',
-                  height: '100%',
-                  margin: '0 auto',
-                  border: '1px solid #000',
-                  padding: '30px',
-                  boxSizing: 'border-box',
-                  overflow: 'auto'
+            {dayWiseItinerary && (
+              <CardContent
+                sx={{
+                  '&.MuiCardContent-root': {
+                    padding: 0
+                  }
                 }}
+                ref={targetRef}
               >
-                <div className='Header'>
-                  <img className='logo' src='/images/logo_full.png' />
-                  <div className='days-nights'>
-                    {DayNight}
-                    <span>{travelInfoData.current['days-nights']}</span>
-                  </div>
-                </div>
-
-                <div className='title-description'>
-                  <div className='tag-line'>Your Gateway to Memorable Journeys</div>
-                  <h1 className='title'>Adventure Richa Holidays</h1>
-                  <p className='description'>
-                    Explore the world with Adventure Richa Holidays! Offering tailored domestic and international tours
-                    for individuals, groups, and corporate clients. Adventure and relaxation, all perfectly planned.
-                  </p>
-                </div>
-
-                <div className='basic-info'>
-                  <div className='traveller-name'>
-                    {TravellerName}
-                    <span>{travelInfoData.current.name}</span>
-                  </div>
-                  <div className='date'>
-                    {TravelDate}
-                    <span>
-                      {format(new Date(travelInfoData.current.dates[0]), 'dd MMM yyyy')} -{' '}
-                      {format(new Date(new Date(travelInfoData.current.dates[1])), 'dd MMM yyyy')}
-                    </span>
-                  </div>
-                </div>
-
-                <div className='route'>
-                  {RouteMap}
-                  {cities.current.map((city, index) => (
-                    <span key={index}>
-                      {city.label ? `${city.label[0].toUpperCase()}${city.label.slice(1)}` : ''}
-                      {index != cities.current.length - 1 ? ' - ' : ''}
-                    </span>
-                  ))}
-                </div>
-
-                <div>
-                  <div className='accommodation-section'>
-                    <h3 className='accommodation-title'>Accommodation Overview</h3>
-                    <div className='travel-basic-details'>
-                      <div className='no-of-traveller'>
-                        {PersonCount}
-                        <span>{cities.current[0]?.info[0]?.persons ?? ''}</span>
-                      </div>
-
-                      <div className='hotel-category'>
-                        {HotelCategory}
-                        <span>{getUniqueHotelTypes(cities.current).join(', ')}</span>
-                      </div>
-
-                      <div className='no-of-rooms'>
-                        {RoomCount}
-                        <span>{cities.current[0].info[0].rooms}</span>
-                      </div>
-                    </div>
-
-                    <div className='travel-basic-details'>
-                      <div className='no-of-traveller'>
-                        {RoomCategory}
-                        <span>Basic Room</span>
-                      </div>
-
-                      <div className='hotel-category'>
-                        {MealIcon}
-                        <span>
-                          {cities.current[0].info[0].breakfast &&
-                          cities.current[0].info[0].lunch &&
-                          cities.current[0].info[0].dinner
-                            ? 'Breakfast, Lunch, Dinner'
-                            : cities.current[0].info[0].breakfast && cities.current[0].info[0].lunch
-                            ? 'Breakfast, Lunch'
-                            : cities.current[0].info[0].breakfast && cities.current[0].info[0].dinner
-                            ? 'Breakfast, Dinner'
-                            : cities.current[0].info[0].lunch && cities.current[0].info[0].dinner
-                            ? 'Lunch, Dinner'
-                            : cities.current[0].info[0].breakfast
-                            ? 'Breakfast'
-                            : cities.current[0].info[0].lunch
-                            ? 'Lunch'
-                            : 'Dinner'}
-                        </span>
-                      </div>
-
-                      {![undefined, null].includes(cities.current[0].info[0].extraBed) && (
-                        <div className='no-of-rooms'>
-                          {BedCount}
-                          <span>{cities.current[0].info[0].extraBed}</span>
-                        </div>
-                      )}
+                <div
+                  style={{
+                    backgroundImage: `${dayWiseItineryStyle.background}`,
+                    backgroundPosition: `${dayWiseItineryStyle.backgroundPosition}`,
+                    backgroundSize: `${dayWiseItineryStyle.backgroundSize}`,
+                    backgroundRepeat: 'no-repeat',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                    width: '210mm',
+                    height: '100%',
+                    margin: '0 auto',
+                    border: '1px solid #000',
+                    padding: '30px',
+                    boxSizing: 'border-box',
+                    overflow: 'auto'
+                  }}
+                >
+                  <div className='Header'>
+                    <img className='logo' src='/images/logo_full.png' />
+                    <div className='days-nights'>
+                      {DayNight}
+                      <span>{travelInfoData.current['days-nights']}</span>
                     </div>
                   </div>
-                </div>
 
-                <div className='price-section' style={{ marginRight: 'auto', marginLeft: 'auto', width: '100%' }}>
-                  <div className='price-section-total'>
-                    <span className='total-amount'>Total : ₹{offerPrice.length > 0 ? offerPrice : totalAmount}</span>
+                  <div className='title-description'>
+                    <div className='tag-line'>Your Gateway to Memorable Journeys</div>
+                    <h1 className='title'>Adventure Richa Holidays</h1>
+                    <p className='description'>
+                      Explore the world with Adventure Richa Holidays! Offering tailored domestic and international
+                      tours for individuals, groups, and corporate clients. Adventure and relaxation, all perfectly
+                      planned.
+                    </p>
                   </div>
 
-                  <div className='price-section-state'>
-                    <div>
-                      {states.map((state, index) => (
-                        <span key={index}>
-                          {state ? `${state.name[0].toUpperCase()}${state.name.slice(1)}` : ' '}
-                          {index != states.length - 1 ? ' | ' : ''}
-                        </span>
-                      ))}
+                  <div className='basic-info'>
+                    <div className='traveller-name'>
+                      {TravellerName}
+                      <span>{travelInfoData.current.name}</span>
                     </div>
-                    <span className='no-of-nights'>{` | ${totalNights}N`}</span>
-                  </div>
-                </div>
-
-                <div style={{ height: '180px' }}>
-                  <div className='transportation-section'>
-                    <h3 className='accommodation-title'>Transportation Overview</h3>
-                    <div className='travel-basic-details'>
-                      <div className='pick-up-location'>
-                        {PickupLocation}
-                        <span>
-                          {typeof transportData.current.from == 'object'
-                            ? transportData.current.from.description
-                            : transportData.current.from}
-                        </span>
-                      </div>
-
-                      <div className='drop-location'>
-                        {DropLocation}
-                        <span>
-                          {typeof transportData.current.to == 'object'
-                            ? transportData.current.to.description
-                            : transportData.current.to}
-                        </span>
-                      </div>
-
-                      <div className='vehicle-type'>
-                        {vehicleType}
-                        <span>
-                          {transportData.current.vehicleType
-                            ? `${transportData.current.vehicleType[0].toUpperCase()}${transportData.current.vehicleType.slice(
-                                1
-                              )}`
-                            : ''}
-                        </span>
-                      </div>
+                    <div className='date'>
+                      {TravelDate}
+                      <span>
+                        {format(new Date(travelInfoData.current.dates[0]), 'dd MMM yyyy')} -{' '}
+                        {format(new Date(new Date(travelInfoData.current.dates[1])), 'dd MMM yyyy')}
+                      </span>
                     </div>
                   </div>
-                </div>
 
-                <div className='itinerary-section'>
-                  <h3 className='itinerary-title'>Day Wise Itinerary</h3>
-                </div>
-
-                {dayWiseItinerary.map((itinerary, index) => (
-                  <div key={index}>
-                    <div className='days-section'>
-                      <h3 className='itinerary-title'>{itinerary.head}</h3>
-                      <div className='travel-inclusive'>
-                        {HotelCategory}
-                        <span>{itinerary.hotelInfo.hotelType}</span> <span>|</span>
-                        {RoomCategory}
-                        <span>Base Catagory</span>
-                        <span>|</span>
-                        {SeightSeeing}
-                        <span>Sightseeing</span>
-                        <span>|</span>
-                        {itinerary.hotelInfo.extraBed && (
-                          <>
-                            {BedCount}
-                            <span>{itinerary.hotelInfo.extraBed}</span>
-                            <span>|</span>
-                          </>
-                        )}
-                        {itinerary.hotelInfo.meals.length > 0 && (
-                          <>
-                            {MealIcon}
-                            <span>{itinerary.hotelInfo.meals.join(', ')}</span>
-                          </>
-                        )}
-                      </div>
-                      <div className='daywise-itinerary'>
-                        <img
-                          src={itinerary.hotelImage.length > 0 ? itinerary.hotelImage : '/images/hotels/jaipur.jpg'}
-                          width='320px'
-                          height='150px'
-                        />
-                        <div style={{ marginLeft: '20px', width: '50%' }}>
-                          <div className='hotel-name'>
-                            {HotelName}
-                            <span>{itinerary.hotelName}</span>
-                          </div>
-                          <div className='checkin-checkout'>
-                            {TravelDate}
-                            <span>{itinerary.checkInCheckOut}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className='day-description'>{itinerary.description}</p>
-                        {itinerary.attractions.map((place, idx) => (
-                          <div key={idx} style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
-                            {MonumentBullets}
-                            <p className='day-attraction-dexcription'>
-                              <b>{place.split(':')[0]} : </b> {place.split(':')[1]}
-                            </p>
-                          </div>
-                        ))}
-                        <p className='day-description'>{itinerary.footer}</p>
-                      </div>
-                    </div>
+                  <div className='route'>
+                    {RouteMap}
+                    {cities.current.map((city, index) => (
+                      <span key={index}>
+                        {city.label ? `${city.label[0].toUpperCase()}${city.label.slice(1)}` : ''}
+                        {index != cities.current.length - 1 ? ' - ' : ''}
+                      </span>
+                    ))}
                   </div>
-                ))}
 
-                {dayWiseItinerary.length > 0 && (
                   <div>
-                    <div className='days-section'>
-                      <h3 className='itinerary-title'>Departure Day | A Sweet Farewell</h3>
-                      <p className='day-description'>
-                        {dayWiseItinerary[dayWiseItinerary.length - 1].hotelInfo.meals.includes('Breakfast')
-                          ? 'Begin your day with a delightful breakfast at the hotel before checking out. If you’ve hired a vehicle with us, our driver will ensure a smooth and timely transfer to your next destination or departure point. Double-check your belongings and cherish the memories of this incredible adventure.'
-                          : 'Start your day by checking out of the hotel as your journey concludes. Please ensure all your belongings are packed and ready. If you’ve arranged your own transport, we wish you safe and pleasant travels ahead. Thank you for choosing us to be a part of your journey.'}
-                      </p>
+                    <div className='accommodation-section'>
+                      <h3 className='accommodation-title'>Accommodation Overview</h3>
+                      <div className='travel-basic-details'>
+                        <div className='no-of-traveller'>
+                          {PersonCount}
+                          <span>{cities.current[0]?.info[0]?.persons ?? ''}</span>
+                        </div>
+
+                        <div className='hotel-category'>
+                          {HotelCategory}
+                          <span>{getUniqueHotelTypes(cities.current).join(', ')}</span>
+                        </div>
+
+                        <div className='no-of-rooms'>
+                          {RoomCount}
+                          <span>{cities.current[0].info[0].rooms}</span>
+                        </div>
+                      </div>
+
+                      <div className='travel-basic-details'>
+                        <div className='no-of-traveller'>
+                          {RoomCategory}
+                          <span>Basic Room</span>
+                        </div>
+
+                        <div className='hotel-category'>
+                          {MealIcon}
+                          <span>
+                            {cities.current[0].info[0].breakfast &&
+                            cities.current[0].info[0].lunch &&
+                            cities.current[0].info[0].dinner
+                              ? 'Breakfast, Lunch, Dinner'
+                              : cities.current[0].info[0].breakfast && cities.current[0].info[0].lunch
+                              ? 'Breakfast, Lunch'
+                              : cities.current[0].info[0].breakfast && cities.current[0].info[0].dinner
+                              ? 'Breakfast, Dinner'
+                              : cities.current[0].info[0].lunch && cities.current[0].info[0].dinner
+                              ? 'Lunch, Dinner'
+                              : cities.current[0].info[0].breakfast
+                              ? 'Breakfast'
+                              : cities.current[0].info[0].lunch
+                              ? 'Lunch'
+                              : 'Dinner'}
+                          </span>
+                        </div>
+
+                        {![undefined, null].includes(cities.current[0].info[0].extraBed) && (
+                          <div className='no-of-rooms'>
+                            {BedCount}
+                            <span>{cities.current[0].info[0].extraBed}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                )}
-                {console.log(dayWiseItinerary)}
 
-                <div className='bullet-points'>
-                  <h6 className='bullet-title'>Inclusion</h6>
-                  {inclusionItems.map((item, index) => (
-                    <BulletPoint key={`inclusion-${index}`} text={item.text} icon={item.icon} />
-                  ))}
-                </div>
+                  <div className='price-section' style={{ marginRight: 'auto', marginLeft: 'auto', width: '100%' }}>
+                    <div className='price-section-total'>
+                      <span className='total-amount'>Total : ₹{offerPrice.length > 0 ? offerPrice : totalAmount}</span>
+                    </div>
 
-                <div className='bullet-points'>
-                  <h6 className='bullet-title'>Exclusion</h6>
-                  {exclusionItems.map((item, index) => (
-                    <BulletPoint key={`exclusion-${index}`} text={item.text} icon={item.icon} />
-                  ))}
-                </div>
-
-                <div className='bullet-points'>
-                  <h6 className='bullet-title'>Know Before You Go</h6>
-                  {knowBeforeItems.map((item, index) => (
-                    <BulletPoint key={`knowBefore-${index}`} text={item.text} icon={item.icon} />
-                  ))}
-                </div>
-
-                <div className='contact-info-last'>
-                  <h6 className='contact-info-title'>Name of Employee here</h6>
-                  <p className='contact-info-designation'>Designation of Employee</p>
-                  <div className='contact-info-emailphone'>
-                    <p>+91 88888 66666 </p> <span style={{ margin: '0 10px' }}> | </span> <p> myemail@domain.com</p>
+                    <div className='price-section-state'>
+                      <div>
+                        {states.map((state, index) => (
+                          <span key={index}>
+                            {state ? `${state.name[0].toUpperCase()}${state.name.slice(1)}` : ' '}
+                            {index != states.length - 1 ? ' | ' : ''}
+                          </span>
+                        ))}
+                      </div>
+                      <span className='no-of-nights'>{` | ${totalNights}N`}</span>
+                    </div>
                   </div>
-                  <p className='contact-info-address'>
-                    <span>Jagdamba Colony, Vidhyadhar Nagar, Jaipur - 302023</span>
-                  </p>
+
+                  <div style={{ height: '180px' }}>
+                    <div className='transportation-section'>
+                      <h3 className='accommodation-title'>Transportation Overview</h3>
+                      <div className='travel-basic-details'>
+                        <div className='pick-up-location'>
+                          {PickupLocation}
+                          <span>
+                            {typeof transportData.current.from == 'object'
+                              ? transportData.current.from.description
+                              : transportData.current.from}
+                          </span>
+                        </div>
+
+                        <div className='drop-location'>
+                          {DropLocation}
+                          <span>
+                            {typeof transportData.current.to == 'object'
+                              ? transportData.current.to.description
+                              : transportData.current.to}
+                          </span>
+                        </div>
+
+                        <div className='vehicle-type'>
+                          {vehicleType}
+                          <span>
+                            {transportData.current.vehicleType
+                              ? `${transportData.current.vehicleType[0].toUpperCase()}${transportData.current.vehicleType.slice(
+                                  1
+                                )}`
+                              : ''}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='itinerary-section'>
+                    <h3 className='itinerary-title'>Day Wise Itinerary</h3>
+                  </div>
+
+                  {dayWiseItinerary.itinerary.map((itinerary, index) => (
+                    <div key={index}>
+                      <div className='days-section'>\
+                        <h3 className='itinerary-title'>{itinerary.head}</h3>
+                        <div className='travel-inclusive'>
+                          {HotelCategory}
+                          <span>{itinerary.hotelInfo.hotelType}</span> <span>|</span>
+                          {RoomCategory}
+                          <span>Base Catagory</span>
+                          <span>|</span>
+                          {SeightSeeing}
+                          <span>Sightseeing</span>
+                          <span>|</span>
+                          {itinerary.hotelInfo.extraBed && (
+                            <>
+                              {BedCount}
+                              <span>{itinerary.hotelInfo.extraBed}</span>
+                              <span>|</span>
+                            </>
+                          )}
+                          {itinerary.hotelInfo.meals.length > 0 && (
+                            <>
+                              {MealIcon}
+                              <span>{itinerary.hotelInfo.meals.join(', ')}</span>
+                            </>
+                          )}
+                        </div>
+                        <div className='daywise-itinerary'>
+                          <img
+                            src={itinerary.hotelImage.length > 0 ? itinerary.hotelImage : '/images/hotels/jaipur.jpg'}
+                            width='320px'
+                            height='150px'
+                          />
+                          <div style={{ marginLeft: '20px', width: '50%' }}>
+                            <div className='hotel-name'>
+                              {HotelName}
+                              <span>{itinerary.hotelName}</span>
+                            </div>
+                            <div className='checkin-checkout'>
+                              {TravelDate}
+                              <span>{itinerary.checkInCheckOut}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className='day-description'>{itinerary.description}</p>
+                          {itinerary.attractions.map((place, idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
+                              {MonumentBullets}
+                              <p className='day-attraction-dexcription'>
+                                <b>{place.split(':')[0]} : </b> {place.split(':')[1]}
+                              </p>
+                            </div>
+                          ))}
+                          <p className='day-description'>{itinerary.footer}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {dayWiseItinerary.itinerary.length > 0 && (
+                    <div>
+                      <div className='days-section'>
+                        <h3 className='itinerary-title'>Departure Day | A Sweet Farewell</h3>
+                        <p className='day-description'>
+                          {dayWiseItinerary['itinerary'][
+                            dayWiseItinerary['itinerary'].length - 1
+                          ].hotelInfo.meals.includes('Breakfast')
+                            ? 'Begin your day with a delightful breakfast at the hotel before checking out. If you’ve hired a vehicle with us, our driver will ensure a smooth and timely transfer to your next destination or departure point. Double-check your belongings and cherish the memories of this incredible adventure.'
+                            : 'Start your day by checking out of the hotel as your journey concludes. Please ensure all your belongings are packed and ready. If you’ve arranged your own transport, we wish you safe and pleasant travels ahead. Thank you for choosing us to be a part of your journey.'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className='bullet-points'>
+                    <h6 className='bullet-title'>Inclusion</h6>
+                    {dayWiseItinerary.cityInclusions.map((item, index) => (
+                      <BulletPoint key={`inclusion-${index}`} text={item.text} icon={item.icon} />
+                    ))}
+                  </div>
+
+                  <div className='bullet-points'>
+                    <h6 className='bullet-title'>Exclusion</h6>
+                    {dayWiseItinerary.cityExclusions.map((item, index) => (
+                      <BulletPoint key={`exclusion-${index}`} text={item.text} icon={item.icon} />
+                    ))}
+                  </div>
+
+                  <div className='bullet-points'>
+                    <h6 className='bullet-title'>Know Before You Go</h6>
+                    {dayWiseItinerary.cityKnowBefores.map((item, index) => (
+                      <BulletPoint key={`knowBefore-${index}`} text={item.text} icon={item.icon} />
+                    ))}
+                  </div>
+
+                  <div className='contact-info-last'>
+                    <h6 className='contact-info-title'>Name of Employee here</h6>
+                    <p className='contact-info-designation'>Designation of Employee</p>
+                    <div className='contact-info-emailphone'>
+                      <p>+91 88888 66666 </p> <span style={{ margin: '0 10px' }}> | </span> <p> myemail@domain.com</p>
+                    </div>
+                    <p className='contact-info-address'>
+                      <span>Jagdamba Colony, Vidhyadhar Nagar, Jaipur - 302023</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
         </Grid>
         <Grid sx={{ '&.MuiGrid-item': { pt: 0 }, mt: 10 }} item xl={3} md={4} xs={12}>

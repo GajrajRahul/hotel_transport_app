@@ -7,7 +7,14 @@ import { useRouter } from 'next/router'
 
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
+import Button from '@mui/material/Button'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import InputLabel from '@mui/material/InputLabel'
+import FormControl from '@mui/material/FormControl'
+import CardContent from '@mui/material/CardContent'
 
 import { DataGrid } from '@mui/x-data-grid'
 
@@ -22,47 +29,10 @@ import { getDayNightCount } from 'src/utils/function'
 import { transformHotelData } from '../quotations'
 
 const defaultColumns = [
-  //   {
-  //     flex: 0.1,
-  //     field: 'id',
-  //     minWidth: 80,
-  //     headerName: '#',
-  //     renderCell: ({ row }) => <LinkStyled href={`/apps/invoice/preview/${row.id}`}>{`#${row.id}`}</LinkStyled>
-  //   },
   {
-    flex: 0.25,
-    field: 'quotationName',
-    minWidth: 200,
-    headerName: 'Quotation Name',
-    renderCell: ({ row }) => {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-            {row.quotationName ? `${row.quotationName.slice(0, 17)}${row.quotationName.length > 17 ? '...' : ''}` : ''}
-          </Typography>
-        </Box>
-      )
-    }
-  },
-  {
-    flex: 0.25,
-    field: 'travellerName',
-    minWidth: 200,
-    headerName: 'Traveller Name',
-    renderCell: ({ row }) => {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-            {row.travellerName}
-          </Typography>
-        </Box>
-      )
-    }
-  },
-  {
-    flex: 0.15,
+    flex: 0.1,
     field: 'travelDate',
-    minWidth: 200,
+    minWidth: 150,
     headerName: 'Travel Date',
     renderCell: ({ row }) => {
       return (
@@ -75,17 +45,12 @@ const defaultColumns = [
     }
   },
   {
-    flex: 0.15,
+    flex: 0.1,
     field: 'destination',
-    minWidth: 200,
+    minWidth: 150,
     headerName: 'Destination',
     renderCell: ({ row }) => {
       return (
-        // <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        //   <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-        //     {row.destination}
-        //   </Typography>
-        // </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <CustomChip
             skin='light'
@@ -125,9 +90,9 @@ const defaultColumns = [
     }
   },
   {
-    flex: 0.15,
+    flex: 0.1,
     field: 'hotel',
-    minWidth: 150,
+    minWidth: 130,
     headerName: 'Hotel',
     renderCell: ({ row }) => {
       return (
@@ -140,9 +105,9 @@ const defaultColumns = [
     }
   },
   {
-    flex: 0.15,
+    flex: 0.1,
     field: 'transport',
-    minWidth: 150,
+    minWidth: 130,
     headerName: 'Transport',
     renderCell: ({ row }) => {
       return (
@@ -164,27 +129,23 @@ const QuotationsHistory = () => {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const columns = useMemo(
+  const adminColumns = useMemo(
     () => [
-      ...defaultColumns,
       {
         flex: 0.1,
-        minWidth: 130,
+        field: 'id',
+        minWidth: 80,
+        headerName: 'Sr.No.',
+        renderCell: ({ row }) => <Typography>{row.idx}</Typography>
+      },
+      {
+        flex: 0.05,
+        minWidth: 80,
         sortable: false,
         field: 'actions',
         headerName: 'Actions',
         renderCell: ({ row }) => (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {/* <Tooltip title='Delete Invoice'>
-              <IconButton size='small' onClick={() => dispatch(deleteInvoice(row.id))}>
-                <Icon icon='mdi:delete-outline' fontSize={20} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='View'>
-              <IconButton size='small' component={Link} href={`/apps/invoice/preview/${row.id}`}>
-                <Icon icon='mdi:eye-outline' fontSize={20} />
-              </IconButton>
-            </Tooltip> */}
             <OptionsMenu
               iconProps={{ fontSize: 20 }}
               iconButtonProps={{ size: 'small' }}
@@ -195,10 +156,7 @@ const QuotationsHistory = () => {
                   icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      // console.log(row)
-                      // setSelectedQuotation(row)
                       fetchQuotation(row)
-                      // fetchCampaignDetail(row.id)
                     }
                   }
                 },
@@ -210,39 +168,207 @@ const QuotationsHistory = () => {
                       openDeleteDialog(row)
                     }
                   }
-                },
-                {
-                  text: 'Download',
-                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                  menuItemProps: {
-                    onClick: e => {
-                      // fetchCampaignDetail(row.id)
-                    }
-                  }
-                },
-                {
-                  text: 'Share',
-                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                  menuItemProps: {
-                    onClick: e => {
-                      // fetchCampaignDetail(row.id)
-                    }
-                  }
-                },
-                {
-                  text: 'Send For Approval',
-                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                  menuItemProps: {
-                    onClick: e => {
-                      // fetchCampaignDetail(row.id)
-                    }
-                  }
                 }
+                // {
+                //   text: 'Download',
+                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                //   menuItemProps: {
+                //     onClick: e => {
+                //       // fetchCampaignDetail(row.id)
+                //     }
+                //   }
+                // }
+                // {
+                //   text: 'Share',
+                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                //   menuItemProps: {
+                //     onClick: e => {
+                //       // fetchCampaignDetail(row.id)
+                //     }
+                //   }
+                // },
+                // {
+                //   text: 'Send For Approval',
+                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                //   menuItemProps: {
+                //     onClick: e => {
+                //       // fetchCampaignDetail(row.id)
+                //     }
+                //   }
+                // }
               ]}
             />
           </Box>
         )
-      }
+      },
+      {
+        flex: 0.2,
+        field: 'itineraryName',
+        minWidth: 150,
+        headerName: 'Itnierary Name',
+        renderCell: ({ row }) => {
+          return (
+            <Box sx={{ display: 'flex' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.quotationName
+                  ? `${row.quotationName.slice(0, 17)}${row.quotationName.length > 17 ? '...' : ''}`
+                  : ''}
+              </Typography>
+            </Box>
+          )
+        }
+      },
+      {
+        flex: 0.2,
+        field: 'userName',
+        minWidth: 200,
+        headerName: 'User Name',
+        renderCell: ({ row }) => {
+          return (
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.userName}
+              </Typography>
+              {row.companyName && row.companyName.length > 0 && (
+                <Typography noWrap variant='caption'>
+                  {row.companyName}
+                </Typography>
+              )}
+            </Box>
+          )
+        }
+      },
+      {
+        flex: 0.1,
+        field: 'role',
+        minWidth: 130,
+        headerName: 'Role',
+        renderCell: ({ row }) => {
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <CustomChip
+                skin='light'
+                size='small'
+                label={row.clientType}
+                color='success'
+                sx={{ textTransform: 'capitalize' }}
+              />
+            </Box>
+          )
+        }
+      },
+      ...defaultColumns
+    ],
+    []
+  )
+
+  const otherColumns = useMemo(
+    () => [
+      {
+        flex: 0.1,
+        field: 'id',
+        minWidth: 80,
+        headerName: 'Sr.No.',
+        renderCell: ({ row }) => <Typography>{row.idx}</Typography>
+      },
+      {
+        flex: 0.05,
+        minWidth: 80,
+        sortable: false,
+        field: 'actions',
+        headerName: 'Actions',
+        renderCell: ({ row }) => (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <OptionsMenu
+              iconProps={{ fontSize: 20 }}
+              iconButtonProps={{ size: 'small' }}
+              menuProps={{ sx: { '& .MuiMenuItem-root svg': { mr: 2 } } }}
+              options={[
+                {
+                  text: 'Edit',
+                  icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      fetchQuotation(row)
+                    }
+                  }
+                },
+                {
+                  text: 'Delete',
+                  icon: <Icon icon='mdi:delete-outline' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      openDeleteDialog(row)
+                    }
+                  }
+                }
+                // {
+                //   text: 'Download',
+                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                //   menuItemProps: {
+                //     onClick: e => {
+                //       // fetchCampaignDetail(row.id)
+                //     }
+                //   }
+                // }
+                // {
+                //   text: 'Share',
+                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                //   menuItemProps: {
+                //     onClick: e => {
+                //       // fetchCampaignDetail(row.id)
+                //     }
+                //   }
+                // },
+                // {
+                //   text: 'Send For Approval',
+                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                //   menuItemProps: {
+                //     onClick: e => {
+                //       // fetchCampaignDetail(row.id)
+                //     }
+                //   }
+                // }
+              ]}
+            />
+          </Box>
+        )
+      },
+      {
+        flex: 0.25,
+        field: 'quotationName',
+        minWidth: 200,
+        headerName: 'Quotation Name',
+        renderCell: ({ row }) => {
+          return (
+            <Box sx={{ display: 'flex' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.quotationName
+                  ? `${row.quotationName.slice(0, 17)}${row.quotationName.length > 17 ? '...' : ''}`
+                  : ''}
+              </Typography>
+            </Box>
+          )
+        }
+      },
+      {
+        flex: 0.25,
+        field: 'travellerName',
+        minWidth: 200,
+        headerName: 'Traveller Name',
+        renderCell: ({ row }) => {
+          return (
+            <Box sx={{ display: 'flex' }}>
+              <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+                {row.travellerName
+                  ? `${row.travellerName.slice(0, 17)}${row.travellerName.length > 17 ? '...' : ''}`
+                  : ''}
+              </Typography>
+            </Box>
+          )
+        }
+      },
+      ...defaultColumns
     ],
     []
   )
@@ -293,12 +419,13 @@ const QuotationsHistory = () => {
 
     if (response.status) {
       setQuotationsHisotry(
-        response.data.map(data => {
-          const { quotationName, travelInfo, citiesHotelsInfo, transportInfo, id } = data
+        response.data.map((data, idx) => {
+          const { quotationName, travelInfo, citiesHotelsInfo, transportInfo, id, userName, companyName } = data
           const adult = citiesHotelsInfo?.cities[0]?.hotelInfo[0]?.adult || 0
           const child = citiesHotelsInfo?.cities[0]?.hotelInfo[0].child || 0
           return {
             id,
+            idx: idx + 1,
             quotationName: quotationName && quotationName.length != 0 ? quotationName : '-',
             travel: travelInfo,
             citiesHotels: citiesHotelsInfo,
@@ -315,7 +442,10 @@ const QuotationsHistory = () => {
                 ? `${child} Childs`
                 : `${adult} Adults`,
             isHotel: citiesHotelsInfo?.cities[0]?.hotelInfo?.length > 0 ? 'Yes' : 'No',
-            isTransport: transportInfo.vehicleType ? 'Yes' : 'No'
+            isTransport: transportInfo.vehicleType ? 'Yes' : 'No',
+            clientType: data.adminId ? 'Admin' : data.employeeId ? 'Employee' : 'Partner',
+            userName,
+            companyName
           }
         })
       )
@@ -455,12 +585,67 @@ const QuotationsHistory = () => {
   return (
     <Card sx={{ height: '100%' }}>
       <Loader open={isLoading} />
+      <CardContent>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+          <Button variant='contained' startIcon={<Icon icon='mdi:plus' />}>
+            Create Itinerary
+          </Button>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+            <TextField
+              size='small'
+              // value={value}
+              sx={{ mr: 4, mb: 2 }}
+              placeholder='Search Quote'
+              // onChange={e => handleFilter(e.target.value)}
+            />
+            <FormControl>
+              <InputLabel size='small'>Role</InputLabel>
+              <Select
+                size='small'
+                value=''
+                sx={{ mr: 4, mb: 2 }}
+                label='Role'
+                // disabled={selectedRows && selectedRows.length === 0}
+                // renderValue={selected => (selected.length === 0 ? 'Actions' : selected)}
+              >
+                <MenuItem value=''>All</MenuItem>
+                <MenuItem value='Admin'>Admin</MenuItem>
+                <MenuItem value='Partner'>Partner</MenuItem>
+                <MenuItem value='Employee'>Employee</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <InputLabel size='small'>Status</InputLabel>
+              <Select
+                size='small'
+                value=''
+                sx={{ mr: 4, mb: 2 }}
+                label='Status'
+                // disabled={selectedRows && selectedRows.length === 0}
+                // renderValue={selected => (selected.length === 0 ? 'Actions' : selected)}
+              >
+                <MenuItem value=''>All</MenuItem>
+                <MenuItem value='Approved'>Approved</MenuItem>
+                <MenuItem value='Pending'>Pending</MenuItem>
+                <MenuItem value='Rejected'>Rejected</MenuItem>
+                <MenuItem value='Draft'>Draft</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </Box>
+      </CardContent>
       <DataGrid
         autoHeight
         //   pagination
         rows={quotationHistory}
-        columns={columns}
-        //   checkboxSelection
+        columns={
+          localStorage.getItem('clientType')
+            ? localStorage.getItem('clientType') == 'admin'
+              ? adminColumns
+              : otherColumns
+            : otherColumns
+        }
+        checkboxSelection
         disableRowSelectionOnClick
         //   pageSizeOptions={[10, 25, 50]}
         //   paginationModel={paginationModel}
