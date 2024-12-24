@@ -71,15 +71,6 @@ const AccountSettings = () => {
             }
           />
           <Tab
-            value='security'
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                             {ProfileDocIcon}
-                <TabName>Basic Info</TabName>
-              </Box>
-            }
-          />
-          <Tab
             value='info'
             label={
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -92,9 +83,6 @@ const AccountSettings = () => {
 
         <TabPanel sx={{ p: 0 }} value='account'>
           <UserBasicInfo />
-        </TabPanel>
-        <TabPanel sx={{ p: 0 }} value='security'>
-          <UserCompanyInfo />
         </TabPanel>
         <TabPanel sx={{ p: 0 }} value='info'>
           <UserSecurityInfo />

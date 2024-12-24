@@ -154,6 +154,27 @@ const UserBasicInfo = () => {
 
                    
 
+                    <Grid item xs={12} sm={6}>
+                        <TextField fullWidth label='Tagline' placeholder='Enter Your Tagline' defaultValue='Your Adventure, Our Passion.' />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <TextField fullWidth label='Title' placeholder='Enter Your Title' defaultValue='Adventure Richa Holidays' />
+                    </Grid>
+
+                    <Grid item xs={12} >
+                        <TextField
+                            fullWidth
+                            multiline
+                            label='About'
+                            minRows={2}
+                            placeholder='Bio'
+                            defaultValue='We specialize in curating bespoke travel experiences that suit every traveler’s dream. Whether you’re looking for thrilling adventures, serene getaways, or corporate retreats, we offer custom domestic and international tours for individuals, groups, and businesses. With expert planning and a personal touch, your journey is in great hands—creating memories that last a lifetime.'
+                        />
+                    </Grid>
+
+                   
+
 
                     <Grid item xs={12}>
                         <Button variant='contained' sx={{ marginRight: 3.5 }}>
