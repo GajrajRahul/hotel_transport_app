@@ -46,9 +46,27 @@ const AuthProvider = ({ children }) => {
             companyName,
             mobile,
             referringAgent,
-            [`${clientType}Id`]: clientId
+            [`${clientType}Id`]: clientId,
+            gender,
+            designation,
+            tagline,
+            title,
+            about
           } = response.data
-          setUser({ logo, name, email, address, companyName, mobile, referringAgent })
+          setUser({
+            logo,
+            name,
+            email,
+            address,
+            companyName,
+            mobile,
+            referringAgent,
+            gender,
+            designation,
+            tagline,
+            title,
+            about
+          })
           setClientId(clientId)
           setAuthToken(storedToken)
         } else {
@@ -88,7 +106,7 @@ const AuthProvider = ({ children }) => {
     if (response.status) {
       setUser(user_data)
     } else {
-    // return;
+      // return;
       logoutHandler()
       return
     }

@@ -124,8 +124,7 @@ const exclusionItems = [
     text: 'Anything not listed in the inclusions is excluded from the package.',
     icon: ExclusionIcon
   }
-];
-
+]
 
 function generateDayWiseItinerary(cities, transportData, monuments) {
   const itinerary = []
@@ -394,13 +393,14 @@ const generateMonumentsData = data => {
     if (row.length > 0) {
       const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
 
-      const cityKey = `${rowData.city
-        ? rowData.city
-          .split(' ')
-          .map(c => c.toLowerCase())
-          .join('_')
-        : rowData.city
-        }`
+      const cityKey = `${
+        rowData.city
+          ? rowData.city
+              .split(' ')
+              .map(c => c.toLowerCase())
+              .join('_')
+          : rowData.city
+      }`
 
       const cityIntro = `${rowData.city_intro}`
       const cityImage = `${rowData.city_image}`
@@ -442,12 +442,12 @@ const getHotelFare = cities => {
       totalNights += totalDayNight
       const hotelInfo =
         hotelRate[
-        label
-          ? label
-            .split(' ')
-            .map(c => c.toLowerCase())
-            .join('_')
-          : ''
+          label
+            ? label
+                .split(' ')
+                .map(c => c.toLowerCase())
+                .join('_')
+            : ''
         ][type][name]
 
       Object.keys(hotel).map(data => {
@@ -664,10 +664,10 @@ const QutationPreview = ({ id }) => {
       quotationName: quotationName.current,
       travelInfo: travelInfoData.current
         ? {
-          userName: travelInfoData.current.name,
-          journeyStartDate: new Date(travelInfoData.current.dates[0]),
-          journeyEndDate: new Date(travelInfoData.current.dates[1])
-        }
+            userName: travelInfoData.current.name,
+            journeyStartDate: new Date(travelInfoData.current.dates[0]),
+            journeyEndDate: new Date(travelInfoData.current.dates[1])
+          }
         : null,
       citiesHotelsInfo: {
         cities: cities.current.map(city => {
@@ -707,19 +707,19 @@ const QutationPreview = ({ id }) => {
       },
       transportInfo: transportData
         ? {
-          vehicleType: transportData.current.vehicleType,
-          from:
-            typeof transportData.current.from == 'object'
-              ? transportData.current.from.description
-              : transportData.current.from,
-          to:
-            typeof transportData.current.to == 'object'
-              ? transportData.current.to.description
-              : transportData.current.from,
-          checkpoints: transportData.current.additionalStops.map(stop => stop.description),
-          transportStartDate: transportData.current.departureReturnDate[0],
-          transportEndDate: transportData.current.departureReturnDate[1]
-        }
+            vehicleType: transportData.current.vehicleType,
+            from:
+              typeof transportData.current.from == 'object'
+                ? transportData.current.from.description
+                : transportData.current.from,
+            to:
+              typeof transportData.current.to == 'object'
+                ? transportData.current.to.description
+                : transportData.current.from,
+            checkpoints: transportData.current.additionalStops.map(stop => stop.description),
+            transportStartDate: transportData.current.departureReturnDate[0],
+            transportEndDate: transportData.current.departureReturnDate[1]
+          }
         : null,
       totalAmount: `${totalAmount}`,
       companyName: user.companyName,
@@ -763,8 +763,8 @@ const QutationPreview = ({ id }) => {
     let waypoints =
       additionalStops.length > 0
         ? additionalStops.map((item, index) => {
-          return { location: item.description, stopover: true }
-        })
+            return { location: item.description, stopover: true }
+          })
         : []
 
     let distanceObj = {
@@ -781,9 +781,9 @@ const QutationPreview = ({ id }) => {
     directionsService.route(
       waypoints.length > 0
         ? {
-          ...distanceObj,
-          waypoints
-        }
+            ...distanceObj,
+            waypoints
+          }
         : distanceObj,
       (result, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
@@ -805,16 +805,23 @@ const QutationPreview = ({ id }) => {
             clientType.current == 'admin'
               ? Number(totalHotelAmount)
               : clientType.current == 'employee'
-                ? Number(totalHotelAmount) * 1.265
-                : Number(totalHotelAmount) * 0.95
+              ? Math.floor(Number(totalHotelAmount) * 1.265)
+              : Math.floor(Number(totalHotelAmount) * 0.95)
 
           const transportFinalAmount =
             clientType.current == 'admin'
               ? Number(totalTransportAmount)
               : clientType.current == 'employee'
-                ? Number(totalTransportAmount) * 1.265
-                : Number(totalTransportAmount) * 0.95
-          setTotalAmount(Number(hotelFinalAmount) + Number(transportFinalAmount))
+              ? Math.floor(Number(totalTransportAmount) * 1.265)
+              : Math.floor(Number(totalTransportAmount) * 0.95)
+
+          if (clientType.current == 'employee' && origin == destination) {
+            setTotalAmount(
+              Math.floor(Number(hotelFinalAmount) * 1.235) + Math.floor(Number(transportFinalAmount) * 1.235)
+            )
+          } else {
+            setTotalAmount(Number(hotelFinalAmount) + Number(transportFinalAmount))
+          }
           setTotalNights(totalNightCount)
         } else {
           toast.error(`error fetching distance: ${result?.status}`)
@@ -916,7 +923,12 @@ const QutationPreview = ({ id }) => {
                       <h3 className='accommodation-title'>Accommodation Overview</h3>
                       <div className='travel-basic-details'>
                         <div className='div-for-accomodations' style={{ width: '30%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Number of Travellers</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Number of Travellers
+                          </label>
                           <div className='no-of-traveller'>
                             {PersonCount}
                             <span>{cities.current[0]?.info[0]?.persons ?? ''}</span>
@@ -924,7 +936,12 @@ const QutationPreview = ({ id }) => {
                         </div>
 
                         <div className='div-for-accomodations' style={{ width: '50%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Hotel Category</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Hotel Category
+                          </label>
 
                           <div className='hotel-category'>
                             {HotelCategory}
@@ -933,7 +950,12 @@ const QutationPreview = ({ id }) => {
                         </div>
 
                         <div className='div-for-accomodations' style={{ width: '20%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Total Rooms</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Total Rooms
+                          </label>
                           <div className='no-of-rooms'>
                             {RoomCount}
                             <span>{cities.current[0].info[0].rooms}</span>
@@ -943,7 +965,12 @@ const QutationPreview = ({ id }) => {
 
                       <div className='travel-basic-details'>
                         <div className='div-for-accomodations' style={{ width: '30%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Room Category</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Room Category
+                          </label>
                           <div className='no-of-traveller'>
                             {RoomCategory}
                             <span>Basic Room</span>
@@ -951,30 +978,40 @@ const QutationPreview = ({ id }) => {
                         </div>
 
                         <div className='div-for-accomodations' style={{ width: '50%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Meals</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Meals
+                          </label>
                           <div className='hotel-category'>
                             {MealIcon}
                             <span>
                               {cities.current[0].info[0].breakfast &&
-                                cities.current[0].info[0].lunch &&
-                                cities.current[0].info[0].dinner
+                              cities.current[0].info[0].lunch &&
+                              cities.current[0].info[0].dinner
                                 ? 'Breakfast, Lunch, Dinner'
                                 : cities.current[0].info[0].breakfast && cities.current[0].info[0].lunch
-                                  ? 'Breakfast, Lunch'
-                                  : cities.current[0].info[0].breakfast && cities.current[0].info[0].dinner
-                                    ? 'Breakfast, Dinner'
-                                    : cities.current[0].info[0].lunch && cities.current[0].info[0].dinner
-                                      ? 'Lunch, Dinner'
-                                      : cities.current[0].info[0].breakfast
-                                        ? 'Breakfast'
-                                        : cities.current[0].info[0].lunch
-                                          ? 'Lunch'
-                                          : 'Dinner'}
+                                ? 'Breakfast, Lunch'
+                                : cities.current[0].info[0].breakfast && cities.current[0].info[0].dinner
+                                ? 'Breakfast, Dinner'
+                                : cities.current[0].info[0].lunch && cities.current[0].info[0].dinner
+                                ? 'Lunch, Dinner'
+                                : cities.current[0].info[0].breakfast
+                                ? 'Breakfast'
+                                : cities.current[0].info[0].lunch
+                                ? 'Lunch'
+                                : 'Dinner'}
                             </span>
                           </div>
                         </div>
                         <div className='div-for-accomodations' style={{ width: '20%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Extra Bed</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Extra Bed
+                          </label>
                           {![undefined, null].includes(cities.current[0].info[0].extraBed) && (
                             <div className='no-of-rooms'>
                               {BedCount}
@@ -1009,7 +1046,12 @@ const QutationPreview = ({ id }) => {
                       <h3 className='accommodation-title'>Transportation Overview</h3>
                       <div className='travel-basic-details'>
                         <div className='div-for-accomodations' style={{ width: '40%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Pick-up Location</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Pick-up Location
+                          </label>
                           <div className='pick-up-location'>
                             {PickupLocation}
                             <span>
@@ -1020,7 +1062,12 @@ const QutationPreview = ({ id }) => {
                           </div>
                         </div>
                         <div className='div-for-accomodations' style={{ width: '45%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Drop Location</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Drop Location
+                          </label>
                           <div className='drop-location'>
                             {DropLocation}
                             <span>
@@ -1032,14 +1079,19 @@ const QutationPreview = ({ id }) => {
                         </div>
 
                         <div className='div-for-accomodations' style={{ width: '15%' }}>
-                          <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }} htmlFor='traveller-count'>Vehicle</label>
+                          <label
+                            style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                            htmlFor='traveller-count'
+                          >
+                            Vehicle
+                          </label>
                           <div className='vehicle-type'>
                             {vehicleType}
                             <span>
                               {transportData.current.vehicleType
                                 ? `${transportData.current.vehicleType[0].toUpperCase()}${transportData.current.vehicleType.slice(
-                                  1
-                                )}`
+                                    1
+                                  )}`
                                 : ''}
                             </span>
                           </div>
@@ -1100,8 +1152,22 @@ const QutationPreview = ({ id }) => {
                         <div>
                           <p className='day-description'>{itinerary.description}</p>
                           {itinerary.attractions.map((place, idx) => (
-                            <div key={idx} style={{ display: 'flex', alignItems: 'normal', justifyContent: 'space-around', marginTop: '20px' }}>
-                              <img style={{ marginTop: '5px' }} alt='avatar' width='4%' height={30} src='/images/column.png' />
+                            <div
+                              key={idx}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'normal',
+                                justifyContent: 'space-around',
+                                marginTop: '20px'
+                              }}
+                            >
+                              <img
+                                style={{ marginTop: '5px' }}
+                                alt='avatar'
+                                width='4%'
+                                height={30}
+                                src='/images/column.png'
+                              />
                               <p style={{ width: '95%' }} className='day-attraction-dexcription'>
                                 <b>{place.split(':')[0]} : </b> {place.split(':')[1]}
                               </p>
@@ -1150,16 +1216,18 @@ const QutationPreview = ({ id }) => {
                   </div>
 
                   <div className='contact-info-last'>
-                    <h6 className='contact-info-title'>{user.name || "Owner"}</h6>
-                    <p className='contact-info-designation'> {user.designation || "Sales"}</p>
+                    <h6 className='contact-info-title'>{user.name || 'Owner'}</h6>
+                    <p className='contact-info-designation'> {user.designation || 'Sales'}</p>
                     <div className='contact-info-emailphone'>
-                      <p>{user.mobile || '+91 Number Missing'} </p> <span style={{ margin: '0 10px' }}> | </span> <p>{user.email || 'Email Missing'}</p>
+                      <p>{user.mobile || '+91 Number Missing'} </p> <span style={{ margin: '0 10px' }}> | </span>{' '}
+                      <p>{user.email || 'Email Missing'}</p>
                     </div>
                     <p className='contact-info-address'>
                       <span>{user.address || 'Address Missing'}</span>
                     </p>
                     <div className='follow-on-socialmedia'>
-                     <span> Do follow us on :</span> <span style={{paddingLeft: '10px'}}>{InstagramIcon}</span><span style={{paddingLeft: '10px'}}>{FacebookIcon}</span>
+                      <span> Do follow us on :</span> <span style={{ paddingLeft: '10px' }}>{InstagramIcon}</span>
+                      <span style={{ paddingLeft: '10px' }}>{FacebookIcon}</span>
                     </div>
                   </div>
                 </div>
