@@ -794,6 +794,7 @@ const HotelDialog = ({
                         errors={errors}
                         icon='double-bed'
                         theme={theme}
+                        rooms={rooms}
                       />
                     </Box>
                   </Grid>

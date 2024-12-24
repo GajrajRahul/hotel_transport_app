@@ -9,7 +9,7 @@ import Box from '@mui/material/Box'
 
 import Icon from 'src/@core/components/icon'
 
-const CusomInputWithButttons = ({ name, hotelControl, isRequired, label, errors, icon, theme }) => {
+const CusomInputWithButttons = ({ name, hotelControl, isRequired, label, errors, icon, theme, rooms }) => {
   return (
     <Controller
       name={name}
@@ -59,7 +59,13 @@ const CusomInputWithButttons = ({ name, hotelControl, isRequired, label, errors,
               edge='end'
               onClick={e => {
                 e.stopPropagation()
-                onChange(`${Number(value) + 1}`)
+                if (name == 'extraBed') {
+                  if (Number(value) < Number(rooms)) {
+                    onChange(`${Number(value) + 1}`)
+                  }
+                } else {
+                  onChange(`${Number(value) + 1}`)
+                }
               }}
               aria-label='toggle plus visibility'
               size='small'
