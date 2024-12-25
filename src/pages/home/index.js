@@ -54,15 +54,15 @@ const Img = styled('img')({
 
 const data = [
   {
-    title: 'Create Quotation',
-    subtitle: 'Lorem Ipsum',
+    title: 'Create Itinerary',
+    subtitle: 'Plan your perfect journey, effortlessly',
     src: '/images/icons/pencil.png',
     color: '#FF9B9E',
     href: '/quotations'
   },
   {
-    title: 'Quote History',
-    subtitle: '838 Quotes',
+    title: 'Itinerary History',
+    subtitle: 'Relive your past adventures, anytime',
     src: '/images/icons/bill.png',
     color: '#F9CD90',
     href: '/quotations-history'
@@ -75,15 +75,15 @@ const data = [
   // },
   {
     // title: 'Taxi Services',
-    title: 'Book a Texi',
-    subtitle: '345 taxi bookings',
+    title: 'Book a Taxi',
+    subtitle: 'Your ride, your way, at your doorstep',
     src: '/images/icons/taxi-stop.png',
     color: '#97D786',
     href: '/texi'
   },
   {
-    title: 'ARH Trust',
-    subtitle: '1,288 packages',
+    title: 'ARH Prime Hotels',
+    subtitle: "Stay secure with ARH's guarantee",
     src: '/images/icons/luggage.png',
     color: '#BBBAF6',
     href: '/packages'
@@ -143,14 +143,13 @@ const transformHotelData = data => {
     if (row.length > 0) {
       const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
 
-      const cityKey = `${
-        rowData.city
+      const cityKey = `${rowData.city
           ? rowData.city
-              .split(' ')
-              .map(c => c.toLowerCase())
-              .join('_')
+            .split(' ')
+            .map(c => c.toLowerCase())
+            .join('_')
           : rowData.city
-      }`
+        }`
 
       const hotelTypeKey = `${rowData.type_of_hotel}`
 
@@ -296,13 +295,12 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
     <>
       <Loader open={isLoading} />
       {/* <KeenSliderWrapper> */}
-      <Grid container spacing={6}>
+      <Grid container sx={{justifyContent: 'center'}}>
         {data.map((item, index) => (
-          <Grid key={index} item xs={6} sm={2.4}>
+          <Grid key={index}  xs={12}  sm={6}  md={4}  lg={3}  sx={{padding: '10px 10px'}}>
             <Card
               sx={{
-                // overflow: 'visible',
-                // position: 'relative',
+                width: '100% !important',
                 borderRadius: '17px',
                 backgroundColor: item.color,
                 cursor: 'pointer'
@@ -350,6 +348,7 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
           </Grid>
         ))}
       </Grid>
+
       <Grid container spacing={6} className='match-height' sx={{ mt: 0 }}>
         <Grid item xs={12}>
           <Dashboard />

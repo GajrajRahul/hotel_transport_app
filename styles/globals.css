@@ -820,3 +820,11 @@ code[class*='language-'] {
 .contact-info-emailphone p {
   margin: 0px 0px 0px 0px;
 }
+
+.choose-us-points li {
+  text-align: left;
+  font-size: 15px;
+  color: #ffffff;
+  padding: 20px 0px 0px 0px;
+  margin: 0px 0px 0px 0px; 
+}

@@ -28,6 +28,9 @@ import { transformHotelData } from '.'
 import {
   InstagramIcon,
   FacebookIcon,
+  LocationIcon,
+  CallIcon,
+  EmailIcon,
   BedCount,
   DayNight,
   DropLocation,
@@ -46,7 +49,8 @@ import {
   SeightSeeing,
   TravelDate,
   TravellerName,
-  vehicleType
+  vehicleType,
+  YoutubeIcon
 } from 'src/utils/icons'
 import { useAuth } from 'src/hooks/useAuth'
 
@@ -87,12 +91,12 @@ const inclusionItems = [
 ]
 
 const knowBeforeItems = [
-  { text: 'Welcome drink on arrival.', icon: KnowBeforeYouGo },
-  { text: 'Daily Delicious Buffet Breakfast in Every Hotel.', icon: KnowBeforeYouGo },
-  { text: 'Breakfast + dinner in desert camp & camel ride at camp.', icon: KnowBeforeYouGo },
-  { text: 'Accommodation in 3 star Hotels & camp for 05 Nights.', icon: KnowBeforeYouGo },
+  { text: 'Ensure you have a valid photo ID for a smooth check-in process as per government regulations.', icon: KnowBeforeYouGo },
+  { text: 'Check-in time is 12:00 PM and check-out time is 10:00 AM. Please adhere to these times.', icon: KnowBeforeYouGo },
+  { text: 'Please note, air conditioning may not be available in hill stations due to local conditions.', icon: KnowBeforeYouGo },
+  { text: 'Meal timings are set by the hotel. We are not responsible for meals not availed within the specified times.', icon: KnowBeforeYouGo },
   { text: 'All applicable transportation and Hotel Taxes.', icon: KnowBeforeYouGo },
-  { text: 'Cultural shows & dances at Camp.', icon: KnowBeforeYouGo }
+  { text: 'We are not responsible for any cancellations of bus or train services due to weather conditions or unforeseen circumstances.', icon: KnowBeforeYouGo }
 ]
 
 const exclusionItems = [
@@ -393,14 +397,13 @@ const generateMonumentsData = data => {
     if (row.length > 0) {
       const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
 
-      const cityKey = `${
-        rowData.city
-          ? rowData.city
-              .split(' ')
-              .map(c => c.toLowerCase())
-              .join('_')
-          : rowData.city
-      }`
+      const cityKey = `${rowData.city
+        ? rowData.city
+          .split(' ')
+          .map(c => c.toLowerCase())
+          .join('_')
+        : rowData.city
+        }`
 
       const cityIntro = `${rowData.city_intro}`
       const cityImage = `${rowData.city_image}`
@@ -442,12 +445,12 @@ const getHotelFare = cities => {
       totalNights += totalDayNight
       const hotelInfo =
         hotelRate[
-          label
-            ? label
-                .split(' ')
-                .map(c => c.toLowerCase())
-                .join('_')
-            : ''
+        label
+          ? label
+            .split(' ')
+            .map(c => c.toLowerCase())
+            .join('_')
+          : ''
         ][type][name]
 
       Object.keys(hotel).map(data => {
@@ -664,10 +667,10 @@ const QutationPreview = ({ id }) => {
       quotationName: quotationName.current,
       travelInfo: travelInfoData.current
         ? {
-            userName: travelInfoData.current.name,
-            journeyStartDate: new Date(travelInfoData.current.dates[0]),
-            journeyEndDate: new Date(travelInfoData.current.dates[1])
-          }
+          userName: travelInfoData.current.name,
+          journeyStartDate: new Date(travelInfoData.current.dates[0]),
+          journeyEndDate: new Date(travelInfoData.current.dates[1])
+        }
         : null,
       citiesHotelsInfo: {
         cities: cities.current.map(city => {
@@ -707,19 +710,19 @@ const QutationPreview = ({ id }) => {
       },
       transportInfo: transportData
         ? {
-            vehicleType: transportData.current.vehicleType,
-            from:
-              typeof transportData.current.from == 'object'
-                ? transportData.current.from.description
-                : transportData.current.from,
-            to:
-              typeof transportData.current.to == 'object'
-                ? transportData.current.to.description
-                : transportData.current.from,
-            checkpoints: transportData.current.additionalStops.map(stop => stop.description),
-            transportStartDate: transportData.current.departureReturnDate[0],
-            transportEndDate: transportData.current.departureReturnDate[1]
-          }
+          vehicleType: transportData.current.vehicleType,
+          from:
+            typeof transportData.current.from == 'object'
+              ? transportData.current.from.description
+              : transportData.current.from,
+          to:
+            typeof transportData.current.to == 'object'
+              ? transportData.current.to.description
+              : transportData.current.from,
+          checkpoints: transportData.current.additionalStops.map(stop => stop.description),
+          transportStartDate: transportData.current.departureReturnDate[0],
+          transportEndDate: transportData.current.departureReturnDate[1]
+        }
         : null,
       totalAmount: `${totalAmount}`,
       companyName: user.companyName,
@@ -763,8 +766,8 @@ const QutationPreview = ({ id }) => {
     let waypoints =
       additionalStops.length > 0
         ? additionalStops.map((item, index) => {
-            return { location: item.description, stopover: true }
-          })
+          return { location: item.description, stopover: true }
+        })
         : []
 
     let distanceObj = {
@@ -781,9 +784,9 @@ const QutationPreview = ({ id }) => {
     directionsService.route(
       waypoints.length > 0
         ? {
-            ...distanceObj,
-            waypoints
-          }
+          ...distanceObj,
+          waypoints
+        }
         : distanceObj,
       (result, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
@@ -805,15 +808,15 @@ const QutationPreview = ({ id }) => {
             clientType.current == 'admin'
               ? Number(totalHotelAmount)
               : clientType.current == 'employee'
-              ? Math.floor(Number(totalHotelAmount) * 1.265)
-              : Math.floor(Number(totalHotelAmount) * 0.95)
+                ? Math.floor(Number(totalHotelAmount) * 1.265)
+                : Math.floor(Number(totalHotelAmount) * 0.95)
 
           const transportFinalAmount =
             clientType.current == 'admin'
               ? Number(totalTransportAmount)
               : clientType.current == 'employee'
-              ? Math.floor(Number(totalTransportAmount) * 1.265)
-              : Math.floor(Number(totalTransportAmount) * 0.95)
+                ? Math.floor(Number(totalTransportAmount) * 1.265)
+                : Math.floor(Number(totalTransportAmount) * 0.95)
 
           if (clientType.current == 'employee' && origin == destination) {
             setTotalAmount(
@@ -988,20 +991,20 @@ const QutationPreview = ({ id }) => {
                             {MealIcon}
                             <span>
                               {cities.current[0].info[0].breakfast &&
-                              cities.current[0].info[0].lunch &&
-                              cities.current[0].info[0].dinner
+                                cities.current[0].info[0].lunch &&
+                                cities.current[0].info[0].dinner
                                 ? 'Breakfast, Lunch, Dinner'
                                 : cities.current[0].info[0].breakfast && cities.current[0].info[0].lunch
-                                ? 'Breakfast, Lunch'
-                                : cities.current[0].info[0].breakfast && cities.current[0].info[0].dinner
-                                ? 'Breakfast, Dinner'
-                                : cities.current[0].info[0].lunch && cities.current[0].info[0].dinner
-                                ? 'Lunch, Dinner'
-                                : cities.current[0].info[0].breakfast
-                                ? 'Breakfast'
-                                : cities.current[0].info[0].lunch
-                                ? 'Lunch'
-                                : 'Dinner'}
+                                  ? 'Breakfast, Lunch'
+                                  : cities.current[0].info[0].breakfast && cities.current[0].info[0].dinner
+                                    ? 'Breakfast, Dinner'
+                                    : cities.current[0].info[0].lunch && cities.current[0].info[0].dinner
+                                      ? 'Lunch, Dinner'
+                                      : cities.current[0].info[0].breakfast
+                                        ? 'Breakfast'
+                                        : cities.current[0].info[0].lunch
+                                          ? 'Lunch'
+                                          : 'Dinner'}
                             </span>
                           </div>
                         </div>
@@ -1090,8 +1093,8 @@ const QutationPreview = ({ id }) => {
                             <span>
                               {transportData.current.vehicleType
                                 ? `${transportData.current.vehicleType[0].toUpperCase()}${transportData.current.vehicleType.slice(
-                                    1
-                                  )}`
+                                  1
+                                )}`
                                 : ''}
                             </span>
                           </div>
@@ -1216,7 +1219,7 @@ const QutationPreview = ({ id }) => {
                   </div>
 
                   <div className='contact-info-last'>
-                    <h6 className='contact-info-title'>{user.name || 'Owner'}</h6>
+                    {/* <h6 className='contact-info-title'>{user.name || 'Owner'}</h6>
                     <p className='contact-info-designation'> {user.designation || 'Sales'}</p>
                     <div className='contact-info-emailphone'>
                       <p>{user.mobile || '+91 Number Missing'} </p> <span style={{ margin: '0 10px' }}> | </span>{' '}
@@ -1228,7 +1231,62 @@ const QutationPreview = ({ id }) => {
                     <div className='follow-on-socialmedia'>
                       <span> Do follow us on :</span> <span style={{ paddingLeft: '10px' }}>{InstagramIcon}</span>
                       <span style={{ paddingLeft: '10px' }}>{FacebookIcon}</span>
+                    </div> */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0px 0px 20px 0px', }}>
+                      <div>
+                        <h3 style={{ fontSize: '30px', color: '#ffffff', padding: '0px', margin: '0px' }}>{user.name || 'Owner'}</h3>
+                        <p style={{ fontSize: '15px', color: '#ffffff', padding: '0px', margin: '0px', textAlign: 'left' }}>{user.designation || 'Sales head'}</p>
+                      </div>
+                      <img src="/images/white_logo.png" height={"70vh"} alt="logo" />
                     </div>
+                    <p style={{ fontSize: '15px', color: '#ffffff', padding: '20px 0px 0px 0px', margin: '0px 0px 0px 0px', borderTop: '1px solid #ffffff50', textAlign: 'center' }}>{user.about || "Specializing in both domestic and international travel, we create seamless, personalized tours that turn your travel dreams into reality. Whether you're exploring nearby or venturing abroad, we handle the details, ensuring a smooth and unforgettable experience."}</p>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px 0px 20px 0px', }}>
+                      <div style={{ display: 'flex', justifyContent: 'normal', padding: '10px', backgroundColor: '#ffffff40', margin: '0px 10px 0px 0px ', borderRadius: '10px', width: '100%' }}>
+                        {EmailIcon}
+                        <div style={{ textAlign: 'left', padding: '0px 0px 0px 7px' }}>
+                          <h3 style={{ fontSize: '10px', color: '#ffffff', padding: '0px', margin: '0px' }}>Email</h3>
+                          <p style={{ fontSize: '13px', color: '#ffffff', padding: '0px', margin: '0px', textAlign: 'left' }}>{user.email || 'vikas@gmail.com'}</p>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'normal', padding: '10px', backgroundColor: '#ffffff40', margin: '0px 10px 0px 0px ', borderRadius: '10px', width: '100%' }}>
+                        {CallIcon}
+                        <div style={{ textAlign: 'left', padding: '0px 0px 0px 7px' }}>
+                          <h3 style={{ fontSize: '10px', color: '#ffffff', padding: '0px', margin: '0px' }}>Phone Number</h3>
+                          <p style={{ fontSize: '13px', color: '#ffffff', padding: '0px', margin: '0px', textAlign: 'left' }}>{user.mobile || '8890842006'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'normal', padding: '10px', backgroundColor: '#ffffff40', borderRadius: '10px' }}>
+                      {LocationIcon}
+                      <div style={{ textAlign: 'left', padding: '0px 0px 0px 7px' }}>
+                        <h3 style={{ fontSize: '10px', color: '#ffffff', padding: '0px', margin: '0px' }}>Address</h3>
+                        <p style={{ fontSize: '13px', color: '#ffffff', padding: '0px', margin: '0px', textAlign: 'left' }}>{user.address || 'G -22, Pushp Enclave, Sanganer, Sector 11, Pratap Nagar, Jaipur, Rajasthan - 302033'}</p>
+                      </div>
+                    </div>
+                    <h1 style={{ color: 'white', textAlign: 'center', borderTop: '1px solid #ffffff50', paddingTop: '20px', marginBottom: '0px' }}> Why Choose Us?</h1>
+
+                    {/* <p >Travel with Vaibhav and travel company! Offering tailored domestic and international tours for individuals, groups, and corporate clients. Adventure and relaxation, all perfectly planned.</p> */}
+                    <div className='why-choose-us'>
+                      <ul className='choose-us-points'>
+                        <li><strong>Tailored Experiences:</strong> We create customized itineraries that match your interests, preferences, and budget, ensuring your trip is uniquely yours.</li>
+                        <li><strong>Expert Knowledge:</strong> With years of industry experience, our team offers expert advice and insider knowledge to help you discover the best destinations, activities, and hidden gems.</li>
+                        <li><strong>End-to-End Service:</strong> From planning to execution, we handle every detail—flights, accommodation, transportation, and local experiences—so you can focus on enjoying your trip.</li>
+                        <li><strong>Global Reach, Local Expertise:</strong> Whether you’re traveling domestically or internationally, we offer local insights and trusted partnerships to enhance your travel experience.</li>
+                        <li><strong>Customer Satisfaction:</strong> Your satisfaction is our top priority. We are dedicated to providing exceptional customer service, ensuring a smooth and stress-free journey every time.</li>
+                        <li><strong>Affordable Luxury:</strong> Enjoy premium services at competitive prices, ensuring you get the most value for your travel investment.</li>
+                        <li><strong>24/7 Support:</strong> Our dedicated support team is always available to assist you before, during, and after your trip, ensuring peace of mind throughout your journey.</li>
+                      </ul>
+                    </div>
+
+
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px 0px 0px 0px', }}>
+                      <span style={{ marginRight: '10px' }}>{FacebookIcon} </span>
+                      <span style={{ marginRight: '10px' }}>{InstagramIcon} </span>
+                      <span style={{ marginRight: '10px' }}>{YoutubeIcon} </span>
+                    </div>
+
                   </div>
                 </div>
               </CardContent>
