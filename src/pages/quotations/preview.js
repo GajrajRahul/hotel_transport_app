@@ -95,7 +95,6 @@ const knowBeforeItems = [
   { text: 'Check-in time is 12:00 PM and check-out time is 10:00 AM. Please adhere to these times.', icon: KnowBeforeYouGo },
   { text: 'Please note, air conditioning may not be available in hill stations due to local conditions.', icon: KnowBeforeYouGo },
   { text: 'Meal timings are set by the hotel. We are not responsible for meals not availed within the specified times.', icon: KnowBeforeYouGo },
-  { text: 'All applicable transportation and Hotel Taxes.', icon: KnowBeforeYouGo },
   { text: 'We are not responsible for any cancellations of bus or train services due to weather conditions or unforeseen circumstances.', icon: KnowBeforeYouGo }
 ]
 
@@ -1242,7 +1241,7 @@ const QutationPreview = ({ id }) => {
                     <p style={{ fontSize: '15px', color: '#ffffff', padding: '20px 0px 0px 0px', margin: '0px 0px 0px 0px', borderTop: '1px solid #ffffff50', textAlign: 'center' }}>{user.about || "Specializing in both domestic and international travel, we create seamless, personalized tours that turn your travel dreams into reality. Whether you're exploring nearby or venturing abroad, we handle the details, ensuring a smooth and unforgettable experience."}</p>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px 0px 20px 0px', }}>
                       <div style={{ display: 'flex', justifyContent: 'normal', padding: '10px', backgroundColor: '#ffffff40', margin: '0px 10px 0px 0px ', borderRadius: '10px', width: '100%' }}>
-                        {EmailIcon}
+                      <div className='contactinfo-icon-div'> {EmailIcon} </div>
                         <div style={{ textAlign: 'left', padding: '0px 0px 0px 7px' }}>
                           <h3 style={{ fontSize: '10px', color: '#ffffff', padding: '0px', margin: '0px' }}>Email</h3>
                           <p style={{ fontSize: '13px', color: '#ffffff', padding: '0px', margin: '0px', textAlign: 'left' }}>{user.email || 'vikas@gmail.com'}</p>
@@ -1259,7 +1258,7 @@ const QutationPreview = ({ id }) => {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'normal', padding: '10px', backgroundColor: '#ffffff40', borderRadius: '10px' }}>
-                      {LocationIcon}
+                    <div className='contactinfo-icon-div'>  {LocationIcon} </div>
                       <div style={{ textAlign: 'left', padding: '0px 0px 0px 7px' }}>
                         <h3 style={{ fontSize: '10px', color: '#ffffff', padding: '0px', margin: '0px' }}>Address</h3>
                         <p style={{ fontSize: '13px', color: '#ffffff', padding: '0px', margin: '0px', textAlign: 'left' }}>{user.address || 'G -22, Pushp Enclave, Sanganer, Sector 11, Pratap Nagar, Jaipur, Rajasthan - 302033'}</p>

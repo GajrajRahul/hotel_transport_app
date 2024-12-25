@@ -828,3 +828,15 @@ code[class*='language-'] {
   padding: 20px 0px 0px 0px;
   margin: 0px 0px 0px 0px; 
 }
+
+.contactinfo-icon-div {
+  background-color: #ffffff80;
+    border-radius: 8px;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    padding: 9px;
+}
