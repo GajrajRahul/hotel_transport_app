@@ -121,7 +121,7 @@ code[class*='language-'] {
 }
 
 .logo {
-  height: 11vh;
+  height: 90px;
 }
 
 .days-nights {
@@ -143,8 +143,6 @@ code[class*='language-'] {
 .days-nights span {
   padding-left: 8px;
 }
-
-/* Section 1 */
 
 .title-description {
   margin: 40px auto 40px auto;
@@ -184,8 +182,6 @@ code[class*='language-'] {
   letter-spacing: 0.5px;
   color: #ffffff;
 }
-
-/* Section 2 */
 
 .basic-info {
   display: flex;
@@ -253,8 +249,6 @@ code[class*='language-'] {
   padding-left: 8px;
 }
 
-/* Section 3 */
-
 .accommodation-section {
   margin: 40px auto 40px auto;
   backdrop-filter: blur(10px);
@@ -263,19 +257,15 @@ code[class*='language-'] {
   text-align: center;
   padding: 20px;
   border-radius: 15px;
-  /* height: 220px; */
 }
 
 .accommodation-title {
   text-align: center;
-  /* font-family: 'Montserrat', serif !important; */
   letter-spacing: 2pt;
   font-weight: 800;
   text-transform: uppercase;
   color: #ffffff;
 }
-
-/* data fields */
 
 .travel-basic-details {
   display: flex;
@@ -284,7 +274,6 @@ code[class*='language-'] {
 }
 
 .div-for-accomodations {
-  
   display: flex;
   flex-direction: column;
   margin-right: 10px;
@@ -300,7 +289,6 @@ code[class*='language-'] {
   text-align: center;
   justify-content: left;
   padding: 15px 15px 15px 15px;
-  width: 100%;
   margin-right: 10px;
   color: white;
 }
@@ -319,8 +307,6 @@ code[class*='language-'] {
   text-align: center;
   justify-content: left;
   padding: 15px 15px 15px 15px;
-  width: 100%;
-  /* margin-right: 10px; */
   color: white;
 }
 
@@ -338,8 +324,6 @@ code[class*='language-'] {
   text-align: center;
   justify-content: left;
   padding: 15px 15px 15px 15px;
-  width: 100%;
-  /* margin-right: 10px; */
   color: white;
 }
 
@@ -371,7 +355,6 @@ code[class*='language-'] {
   justify-content: left;
   padding: 15px 15px 15px 15px;
   color: white;
-  width: 100%;
 }
 
 .hotel-name span {
@@ -388,7 +371,6 @@ code[class*='language-'] {
   text-align: center;
   justify-content: left;
   padding: 15px 15px 15px 15px;
-  /* width: 20%; */
   margin-top: 20px;
   color: white;
 }
@@ -407,7 +389,6 @@ code[class*='language-'] {
   text-align: center;
   justify-content: left;
   padding: 15px 15px 15px 15px;
-  width: 100%;
   margin-right: 10px;
   color: white;
 }
@@ -426,7 +407,6 @@ code[class*='language-'] {
   text-align: center;
   justify-content: left;
   padding: 15px 15px 15px 15px;
-  width: 100%;
   margin-right: 10px;
   color: white;
 }
@@ -445,7 +425,6 @@ code[class*='language-'] {
   text-align: center;
   justify-content: left;
   padding: 15px 15px 15px 15px;
-  width: 100%;
   margin-right: 10px;
   color: white;
 }
@@ -483,7 +462,6 @@ code[class*='language-'] {
 }
 
 .textfield-container input {
-  /* width: 100%; */
   padding: 16px 12px 8px 40px;
   border: 1px solid #ccc;
   border-radius: 7px;
@@ -501,8 +479,6 @@ code[class*='language-'] {
   top: 35%;
   left: 4%;
 }
-
-/* Position */
 
 .no-of-person-position {
   position: relative;
@@ -539,8 +515,6 @@ code[class*='language-'] {
   bottom: 347px;
   left: 18px;
 }
-
-/* Section 4 */
 
 .price-section-state {
   position: relative;
@@ -585,8 +559,6 @@ code[class*='language-'] {
   font-size: 20px;
 }
 
-/* section 5 */
-
 .transportation-section {
   margin: 15px auto 40px auto;
   backdrop-filter: blur(10px);
@@ -595,7 +567,6 @@ code[class*='language-'] {
   text-align: center;
   padding: 20px;
   border-radius: 15px;
-  /* height: 140px; */
 }
 
 .pickup-location-position {
@@ -616,8 +587,6 @@ code[class*='language-'] {
   left: 490px;
 }
 
-/* Section 6 */
-
 .itinerary-title {
   text-align: center;
   font-family: 'Montserrat', sans-serif;
@@ -635,7 +604,6 @@ code[class*='language-'] {
   text-align: center;
   padding: 10px;
   border-radius: 15px;
-  /* height: 40px; */
 }
 
 .travel-inclusive {
@@ -647,10 +615,8 @@ code[class*='language-'] {
   align-items: center;
   font-family: 'Montserrat', sans-serif;
   font-weight: 500;
-  /* text-align: center; */
   justify-content: space-evenly;
   padding: 15px 15px 15px 15px;
-  /* width: 47%; */
   color: white;
 }
 
@@ -681,15 +647,12 @@ code[class*='language-'] {
   text-align: center;
   padding: 30px;
   border-radius: 15px;
-  /* height: 40px; */
 }
 
 .day-description {
   text-align: left;
   font-family: 'Montserrat', sans-serif;
-  /* letter-spacing: 1pt; */
   font-weight: 300;
-  /* text-transform: uppercase; */
   line-height: 1.5em;
   color: #ffffff;
 }
@@ -826,17 +789,15 @@ code[class*='language-'] {
   font-size: 15px;
   color: #ffffff;
   padding: 20px 0px 0px 0px;
-  margin: 0px 0px 0px 0px; 
+  margin: 0px 0px 0px 0px;
 }
 
 .contactinfo-icon-div {
-  background-color: #ffffff80;
-    border-radius: 8px;
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    align-content: center;
-    justify-content: center;
-    padding: 9px;
+  border-radius: 8px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
 }

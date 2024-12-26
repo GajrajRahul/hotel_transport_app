@@ -23,7 +23,7 @@ import Loader from 'src/components/common/Loader'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 import { postRequest, putRequest } from 'src/api-main-file/APIServices'
-import { getDayNightCount } from 'src/utils/function'
+import { generateItineraryCss, getDayNightCount } from 'src/utils/function'
 import { transformHotelData } from '.'
 import {
   InstagramIcon,
@@ -637,7 +637,7 @@ const QutationPreview = ({ id }) => {
   }
 
   const getDayWiseItineryStyle = itineraryDayWiseData => {
-    let background = ['url(/images/background-image.jpg)']
+    let background = ['url(https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/background-image.jpg)']
     // let backgroundPosition = ['0vh 0vh']
     let backgroundPosition = ['0px 0px']
     let backgroundSize = ['100%']
@@ -650,13 +650,18 @@ const QutationPreview = ({ id }) => {
       } else {
         currIndex += 1
       }
-      background.push(`url('/images/pdf-image/${itinerary.cityName}/${itinerary.cityName}00${currIndex + 1}.jpg')`)
+      // background.push(`url('/images/pdf-image/${itinerary.cityName}/${itinerary.cityName}00${currIndex + 1}.jpg')`)
+      background.push(
+        `url(https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/pdf-image/${itinerary.cityName}/${
+          itinerary.cityName
+        }00${currIndex + 1}.jpg)`
+      )
       // backgroundPosition.push(`0vh ${(index + 1) * 136}vh`)
       backgroundPosition.push(`0px ${(index + 1) * 1120}px`)
       backgroundSize.push('100%')
     })
 
-    background.push('url(/images/background-image.jpg)')
+    background.push('url(https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/background-image.jpg)')
     // backgroundPosition.push(`0vh ${(itineraryDayWiseData.length + 1) * 136}vh`)
     backgroundPosition.push(`0px ${(itineraryDayWiseData.length + 1) * 1120}px`)
     backgroundSize.push('100%')
@@ -742,8 +747,25 @@ const QutationPreview = ({ id }) => {
       totalAmount: `${totalAmount}`,
       companyName: user.companyName,
       userName: user.name,
-      htmlContent: targetRef.current ? `${targetRef.current.innerHTML}` : ''
+      htmlContent: targetRef.current
+        ? `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Richa Holidays</title><style>${generateItineraryCss()}</style></head><body>${
+            targetRef.current.innerHTML
+          }</body></html>`
+        : ''
     }
+    console.log(dataToSend)
+    // return
+
+    // const pdfContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+    // <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    // <title>Adventure Richa Holidays</title><style>${generateItineraryCss()}</style></head><body>${
+    //   targetRef.current.innerHTML
+    // }</body></html>`
+    // console.log(pdfContent)
+    // // console.log(targetRef.current.innerHTML)
+    // return
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
     const api_url = `${BASE_URL}/${clientType.current}`
@@ -896,7 +918,10 @@ const QutationPreview = ({ id }) => {
                   }}
                 >
                   <div className='Header'>
-                    <img className='logo' src='/images/logo_full.png' />
+                    <img
+                      className='logo'
+                      src='https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/logo_full.png'
+                    />
                     <div className='days-nights'>
                       {DayNight}
                       <span>{travelInfoData.current['days-nights']}</span>
@@ -1152,7 +1177,11 @@ const QutationPreview = ({ id }) => {
                         </div>
                         <div className='daywise-itinerary'>
                           <img
-                            src={itinerary.hotelImage.length > 0 ? itinerary.hotelImage : '/images/hotels/jaipur.jpg'}
+                            src={
+                              itinerary.hotelImage.length > 0
+                                ? itinerary.hotelImage
+                                : 'https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/hotels/jaipur.jpg'
+                            }
                             width='320px'
                             height='150px'
                           />
@@ -1185,7 +1214,7 @@ const QutationPreview = ({ id }) => {
                                 alt='avatar'
                                 width='4%'
                                 height={30}
-                                src='/images/column.png'
+                                src='https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/column.png'
                               />
                               <p style={{ width: '95%' }} className='day-attraction-dexcription'>
                                 <b>{place.split(':')[0]} : </b> {place.split(':')[1]}
@@ -1272,7 +1301,11 @@ const QutationPreview = ({ id }) => {
                           {user.designation || 'Sales head'}
                         </p>
                       </div>
-                      <img src='/images/white_logo.png' height={'70vh'} alt='logo' />
+                      <img
+                        src='https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/white_logo.png'
+                        height={'70vh'}
+                        alt='logo'
+                      />
                     </div>
                     <p
                       style={{
