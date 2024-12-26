@@ -79,7 +79,7 @@ const data = [
     subtitle: 'Your ride, your way, at your doorstep',
     src: '/images/icons/taxi-stop.png',
     color: '#97D786',
-    href: '/texi'
+    href: '/taxi'
   },
   {
     title: 'ARH Prime Hotels',
@@ -310,6 +310,9 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
               onClick={() => {
                 if (item.href == '/quotations' || item.href == '/quotations-history') {
                   router.push(item.href)
+                }
+                else if(item.href == '/taxi') {
+                  router.push('/book-taxi')
                 }
                 if (item.href == '/quotations') {
                   localStorage.removeItem("quotationId")
