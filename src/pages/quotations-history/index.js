@@ -122,9 +122,12 @@ const defaultColumns = [
 ]
 
 const QuotationsHistory = () => {
+  const clientType = localStorage.getItem('clientType') || 'admin'
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedQuotation, setSelectedQuotation] = useState(null)
+  const [apiQuotationHistoryList, setApiQuotationHistoryList] = useState([])
   const [quotationHistory, setQuotationsHisotry] = useState([])
+  const [searchValue, setSearchValue] = useState('')
   const [statesList, setStatesList] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -378,6 +381,18 @@ const QuotationsHistory = () => {
     fetchHotelData()
   }, [])
 
+  const handleSearchQuotation = newValue => {
+    setSearchValue(newValue)
+    if (newValue.length == 0) {
+      setQuotationsHisotry(apiQuotationHistoryList)
+    } else {
+      const filteredData = quotationHistory.filter(data =>
+        data.quotationName.toLowerCase().includes(newValue.toLowerCase())
+      )
+      setQuotationsHisotry(filteredData)
+    }
+  }
+
   const openDeleteDialog = row => {
     setSelectedQuotation(row)
     setIsDeleteDialogOpen(true)
@@ -391,7 +406,6 @@ const QuotationsHistory = () => {
   const deleteQuotation = async () => {
     setIsLoading(true)
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-    const clientType = localStorage.getItem('clientType') || 'admin'
     const api_url = `${BASE_URL}/${clientType}`
 
     const response = await deleteRequest(`${api_url}/delete-quotation`, {
@@ -411,44 +425,43 @@ const QuotationsHistory = () => {
   const fetchQuotationList = async () => {
     setIsLoading(true)
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-    const clientType = localStorage.getItem('clientType') || 'admin'
     const api_url = `${BASE_URL}/${clientType}`
 
     const response = await getRequest(`${api_url}/fetch-quotations`)
     setIsLoading(false)
 
     if (response.status) {
-      setQuotationsHisotry(
-        response.data.map((data, idx) => {
-          const { quotationName, travelInfo, citiesHotelsInfo, transportInfo, id, userName, companyName } = data
-          const adult = citiesHotelsInfo?.cities[0]?.hotelInfo[0]?.adult || 0
-          const child = citiesHotelsInfo?.cities[0]?.hotelInfo[0].child || 0
-          return {
-            id,
-            idx: idx + 1,
-            quotationName: quotationName && quotationName.length != 0 ? quotationName : '-',
-            travel: travelInfo,
-            citiesHotels: citiesHotelsInfo,
-            transport: transportInfo,
-            travellerName: travelInfo.userName,
-            travelDate: format(new Date(travelInfo.journeyStartDate), 'dd MMM yyyy'),
-            destination: citiesHotelsInfo?.cities.map(city => city.cityName),
-            persons:
-              Number(adult) == 0 && Number(child) == 0
-                ? ''
-                : Number(adult) != 0 && Number(child) != 0
-                ? `${adult} Adults & ${child} Childs`
-                : Number(adult) == 0
-                ? `${child} Childs`
-                : `${adult} Adults`,
-            isHotel: citiesHotelsInfo?.cities[0]?.hotelInfo?.length > 0 ? 'Yes' : 'No',
-            isTransport: transportInfo.vehicleType ? 'Yes' : 'No',
-            clientType: data.adminId ? 'Admin' : data.employeeId ? 'Employee' : 'Partner',
-            userName,
-            companyName
-          }
-        })
-      )
+      const responseData = response.data.map((data, idx) => {
+        const { quotationName, travelInfo, citiesHotelsInfo, transportInfo, id, userName, companyName } = data
+        const adult = citiesHotelsInfo?.cities[0]?.hotelInfo[0]?.adult || 0
+        const child = citiesHotelsInfo?.cities[0]?.hotelInfo[0].child || 0
+        return {
+          id,
+          idx: idx + 1,
+          quotationName: quotationName && quotationName.length != 0 ? quotationName : '-',
+          travel: travelInfo,
+          citiesHotels: citiesHotelsInfo,
+          transport: transportInfo,
+          travellerName: travelInfo.userName,
+          travelDate: format(new Date(travelInfo.journeyStartDate), 'dd MMM yyyy'),
+          destination: citiesHotelsInfo?.cities.map(city => city.cityName),
+          persons:
+            Number(adult) == 0 && Number(child) == 0
+              ? ''
+              : Number(adult) != 0 && Number(child) != 0
+              ? `${adult} Adults & ${child} Childs`
+              : Number(adult) == 0
+              ? `${child} Childs`
+              : `${adult} Adults`,
+          isHotel: citiesHotelsInfo?.cities[0]?.hotelInfo?.length > 0 ? 'Yes' : 'No',
+          isTransport: transportInfo.vehicleType ? 'Yes' : 'No',
+          clientType: data.adminId ? 'Admin' : data.employeeId ? 'Employee' : 'Partner',
+          userName,
+          companyName
+        }
+      })
+      setQuotationsHisotry(responseData)
+      setApiQuotationHistoryList(responseData)
     } else {
       toast.error(response.error)
     }
@@ -587,33 +600,28 @@ const QuotationsHistory = () => {
       <Loader open={isLoading} />
       <CardContent>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-          <Button variant='contained' startIcon={<Icon icon='mdi:plus' />}>
+          <Button sx={{ mb: 2 }} variant='contained' startIcon={<Icon icon='mdi:plus' />}>
             Create Itinerary
           </Button>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             <TextField
               size='small'
-              // value={value}
+              value={searchValue}
               sx={{ mr: 4, mb: 2 }}
               placeholder='Search Quote'
-              // onChange={e => handleFilter(e.target.value)}
+              onChange={e => handleSearchQuotation(e.target.value)}
             />
-            <FormControl>
-              <InputLabel size='small'>Role</InputLabel>
-              <Select
-                size='small'
-                value=''
-                sx={{ mr: 4, mb: 2 }}
-                label='Role'
-                // disabled={selectedRows && selectedRows.length === 0}
-                // renderValue={selected => (selected.length === 0 ? 'Actions' : selected)}
-              >
-                <MenuItem value=''>All</MenuItem>
-                <MenuItem value='Admin'>Admin</MenuItem>
-                <MenuItem value='Partner'>Partner</MenuItem>
-                <MenuItem value='Employee'>Employee</MenuItem>
-              </Select>
-            </FormControl>
+            {clientType == 'admin' && (
+              <FormControl>
+                <InputLabel size='small'>Role</InputLabel>
+                <Select size='small' value='' sx={{ mr: 4, mb: 2 }} label='Role'>
+                  <MenuItem value=''>All</MenuItem>
+                  <MenuItem value='Admin'>Admin</MenuItem>
+                  <MenuItem value='Partner'>Partner</MenuItem>
+                  <MenuItem value='Employee'>Employee</MenuItem>
+                </Select>
+              </FormControl>
+            )}
             <FormControl>
               <InputLabel size='small'>Status</InputLabel>
               <Select
@@ -638,13 +646,7 @@ const QuotationsHistory = () => {
         autoHeight
         //   pagination
         rows={quotationHistory}
-        columns={
-          localStorage.getItem('clientType')
-            ? localStorage.getItem('clientType') == 'admin'
-              ? adminColumns
-              : otherColumns
-            : otherColumns
-        }
+        columns={clientType == 'admin' ? adminColumns : otherColumns}
         checkboxSelection
         disableRowSelectionOnClick
         //   pageSizeOptions={[10, 25, 50]}
