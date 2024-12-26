@@ -742,7 +742,7 @@ const QutationPreview = ({ id }) => {
       totalAmount: `${totalAmount}`,
       companyName: user.companyName,
       userName: user.name,
-      htmlContent: targetRef.current ? targetRef.current.innerHTML : ''
+      htmlContent: targetRef.current ? JSON.stringify(targetRef.current.innerHTML) : ''
     }
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
