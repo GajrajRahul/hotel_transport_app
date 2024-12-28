@@ -53,6 +53,7 @@ import {
   YoutubeIcon
 } from 'src/utils/icons'
 import { useAuth } from 'src/hooks/useAuth'
+import ShareQuotation from 'src/components/quotation/dialog/ShareQuotation'
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
@@ -73,7 +74,7 @@ const BulletPoint = ({ text, icon }) =>
 const inclusionItems = [
   { text: 'Enjoy a refreshing welcome drink when you arrive.', icon: InclusionIcon },
   {
-    text: 'Delicious meals with local and international flavors, if mentioned in your itinerary.',
+    text: 'Delicious meals with local and international flavors. Included meals: ',
     icon: InclusionIcon
   },
   {
@@ -155,6 +156,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   let currentDate = null
   let currentHotel = null
   let currentCity = null
+  let mealsData = []
 
   for (let i = 0; i < cities.length; i++) {
     const city = cities[i]
@@ -356,6 +358,16 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
         // Move to the next day
         currentDate.setDate(currentDate.getDate() + 1)
       }
+
+      if (hotel.lunch) {
+        mealsData.push('Lunch')
+      }
+      if (hotel.breakfast) {
+        mealsData.push('Breakfast')
+      }
+      if (hotel.dinner) {
+        mealsData.push('Dinner')
+      }
     }
 
     // Add travel day between cities
@@ -373,7 +385,14 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   // itinerary.push(`Day ${itinerary.length + 1} | Departure from ${lastCity}`)
 
   cityInclusions = [
-    ...inclusionItems,
+    ...inclusionItems.map(inclusion => {
+      return {
+        text: inclusion.text.includes('Included meals:')
+          ? `${inclusion.text}${[...new Set([...mealsData])].join(', ')}`
+          : inclusion.text,
+        icon: InclusionIcon
+      }
+    }),
     ...cityInclusionText.split('|').map(inclusion => {
       return {
         text: inclusion,
@@ -505,6 +524,7 @@ const getTransportFare = (data, cities) => {
   if (cities.current.length == 1) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
     if (additionalStops.length > 0) {
+      totalAmount = Number(vehicleRates['city_local_fare'] * (Number(totalDays) - 1))
       const tempTotalDistance = totalDistance < 280 ? 280 : totalDistance
       const remainingAmount =
         tempTotalDistance * Number(vehicleRates['amount_per_km']) +
@@ -570,7 +590,8 @@ const QutationPreview = ({ id }) => {
   const [error, setError] = useState(false)
   const [totalAmount, setTotalAmount] = useState(0)
   const [offerPrice, setOfferPrice] = useState('')
-  const [data, setData] = useState(null)
+  const [pdfUrl, setPdfUrl] = useState(localStorage.getItem('pdfUrl') ? localStorage.getItem('pdfUrl') : '')
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
 
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -779,12 +800,28 @@ const QutationPreview = ({ id }) => {
     setIsLoading(false)
 
     if (response.status) {
+      setPdfUrl(response.data.link)
       toast.success(typeof response.data == 'object' ? 'Success' : response.data)
-      resetLocalStorage()
-      router.push('/')
+      // resetLocalStorage()
+      // router.push('/')
     } else {
       toast.error(response.error)
     }
+  }
+
+  const downloadPdf = () => {
+    if (pdfUrl == undefined || pdfUrl.length == 0) {
+      toast.error('Kindly save pdf first.')
+      return
+    }
+
+    const link = document.createElement('a')
+    link.href = pdfUrl
+    link.download = `${quotationName.current}.pdf` // The file name for the downloaded file
+    link.target = '_blank' // Ensures it's downloaded, not opened in a new tab
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const getTotalAmount = () => {
@@ -849,6 +886,8 @@ const QutationPreview = ({ id }) => {
               ? Math.floor(Number(totalHotelAmount) * 1.265)
               : Math.floor(Number(totalHotelAmount) * 0.95)
 
+          console.log(totalTransportAmount)
+
           const transportFinalAmount =
             clientType.current == 'admin'
               ? Number(totalTransportAmount)
@@ -870,6 +909,10 @@ const QutationPreview = ({ id }) => {
         }
       }
     )
+  }
+
+  const handleCloseShareDialog = () => {
+    setIsShareDialogOpen(false)
   }
 
   const resetLocalStorage = () => {
@@ -1242,6 +1285,21 @@ const QutationPreview = ({ id }) => {
                     </div>
                   )}
 
+                  {transportData.current.additionalStops.length > 0 && (
+                    <div>
+                      <div className='days-section'>
+                        <h3 className='itinerary-title'>Additional Stops</h3>
+                        <p className='day-description'>
+                          Your journey will take you through some of the most captivating destinations, including{' '}
+                          {transportData.current.additionalStops.map(stop => stop.description).join(' | ')}. Each
+                          location offers its own unique charm, from vibrant streets and cultural landmarks to serene
+                          landscapes and artistic wonders. Together, they form a rich tapestry of experiences, ensuring
+                          that your trip is unforgettable and full of adventure.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className='bullet-points'>
                     <h6 className='bullet-title'>Inclusions</h6>
                     {dayWiseItinerary.cityInclusions.map((item, index) => (
@@ -1526,7 +1584,8 @@ const QutationPreview = ({ id }) => {
                 fullWidth
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-file-download' />}
-                onClick={() => toPDF()}
+                // onClick={() => toPDF()}
+                onClick={() => downloadPdf()}
                 variant='outlined'
               >
                 Download Pdf
@@ -1562,6 +1621,7 @@ const QutationPreview = ({ id }) => {
               </Button>
               <Button
                 fullWidth
+                onClick={() => setIsShareDialogOpen(true)}
                 variant='outlined'
                 sx={{ textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-share-quote' />}
@@ -1572,6 +1632,7 @@ const QutationPreview = ({ id }) => {
           </Card>
         </Grid>
       </Grid>
+      <ShareQuotation pdfUrl={pdfUrl} open={isShareDialogOpen} handleClose={handleCloseShareDialog} />
     </>
   )
 }

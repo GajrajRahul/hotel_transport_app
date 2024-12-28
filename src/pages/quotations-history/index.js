@@ -207,7 +207,7 @@ const QuotationsHistory = () => {
       {
         flex: 0.2,
         field: 'itineraryName',
-        minWidth: 150,
+        minWidth: 200,
         headerName: 'Itnierary Name',
         renderCell: ({ row }) => {
           return (
@@ -224,7 +224,7 @@ const QuotationsHistory = () => {
       {
         flex: 0.2,
         field: 'userName',
-        minWidth: 200,
+        minWidth: 150,
         headerName: 'User Name',
         renderCell: ({ row }) => {
           return (
@@ -432,7 +432,7 @@ const QuotationsHistory = () => {
 
     if (response.status) {
       const responseData = response.data.map((data, idx) => {
-        const { quotationName, travelInfo, citiesHotelsInfo, transportInfo, id, userName, companyName } = data
+        const { quotationName, travelInfo, citiesHotelsInfo, transportInfo, id, userName, companyName, pdfUrl } = data
         const adult = citiesHotelsInfo?.cities[0]?.hotelInfo[0]?.adult || 0
         const child = citiesHotelsInfo?.cities[0]?.hotelInfo[0].child || 0
         return {
@@ -457,7 +457,8 @@ const QuotationsHistory = () => {
           isTransport: transportInfo.vehicleType ? 'Yes' : 'No',
           clientType: data.adminId ? 'Admin' : data.employeeId ? 'Employee' : 'Partner',
           userName,
-          companyName
+          companyName,
+          pdfUrl
         }
       })
       setQuotationsHisotry(responseData)
@@ -485,7 +486,8 @@ const QuotationsHistory = () => {
   }
 
   const fetchQuotation = data => {
-    const { quotationName, travel, citiesHotels, transport, id } = data
+    const { quotationName, travel, citiesHotels, transport, id, pdfUrl } = data
+    localStorage.setItem('pdfUrl', pdfUrl)
     localStorage.setItem('quotationId', id)
     localStorage.setItem('quotationName', quotationName)
     const dayNightCount = getDayNightCount([travel.journeyStartDate, travel.journeyEndDate]) + 1
@@ -595,12 +597,23 @@ const QuotationsHistory = () => {
     router.push('/quotations')
   }
 
+  const resetLocalStorage = () => {
+    localStorage.removeItem('selectedStates')
+    localStorage.removeItem('citiesHotels')
+    localStorage.removeItem('quotationId')
+    localStorage.removeItem('quotationName')
+    localStorage.removeItem('transport')
+    localStorage.removeItem('travel')
+    localStorage.removeItem('pdfUrl')
+    router.push('/quotations')
+  }
+
   return (
     <Card sx={{ height: '100%' }}>
       <Loader open={isLoading} />
       <CardContent>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-          <Button sx={{ mb: 2 }} variant='contained' startIcon={<Icon icon='mdi:plus' />}>
+          <Button sx={{ mb: 2 }} variant='contained' startIcon={<Icon icon='mdi:plus' />} onClick={resetLocalStorage}>
             Create Itinerary
           </Button>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>

@@ -128,7 +128,7 @@ const Dashboard = () => {
         </Box>
         <CardContent>
           <Grid container spacing={6}>
-            <Grid item sm={4} xs={12}>
+            <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
                 <InputLabel id='role-select'>Select Role</InputLabel>
                 <Select
@@ -149,7 +149,7 @@ const Dashboard = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item sm={4} xs={12}>
+            <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
                 <InputLabel id='plan-select'>Select Plan</InputLabel>
                 <Select
@@ -169,7 +169,7 @@ const Dashboard = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item sm={4} xs={12}>
+            <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
                 <InputLabel id='status-select'>Select Status</InputLabel>
                 <Select
