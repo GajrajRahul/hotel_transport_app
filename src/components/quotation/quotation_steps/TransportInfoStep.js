@@ -2,6 +2,7 @@ import React from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
 import { addDays } from 'date-fns'
+import { useSelector } from 'react-redux'
 
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
@@ -23,7 +24,9 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import LocationAutocomplete from './LocationAutocomplete'
 import CustomInput from 'src/components/common/CustomInput'
 
-const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
+const TransportInfoStep = ({ handleBack, onSubmit }) => {
+  const transportSheetData = useSelector(state => state.transportRateData)
+
   const cities = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
   const transportData = localStorage.getItem('transport') ? JSON.parse(localStorage.getItem('transport')) : null
   const travelBasicData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
@@ -73,7 +76,7 @@ const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Grid container spacing={5} sx={{ width: '600px' }}>
             <Grid item xs={12}>
-              {transportRate && (
+              {transportSheetData && (
                 <FormControl fullWidth>
                   <InputLabel htmlFor='stepper-linear-account-name' error={Boolean(transportErrors.vehicleType)}>
                     Select type of vehicle
@@ -95,7 +98,7 @@ const TransportInfoStep = ({ transportRate, handleBack, onSubmit }) => {
                         }
                         onChange={onChange}
                       >
-                        {Object.keys(transportRate).map(transport => (
+                        {Object.keys(transportSheetData).map(transport => (
                           <MenuItem key={transport} value={transport}>
                             {transport.split('_').join(' ')}
                           </MenuItem>

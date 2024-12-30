@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { addDays } from 'date-fns'
+import { useSelector } from 'react-redux'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -68,11 +69,10 @@ const HotelDialog = ({
   handleClose,
   selectedCity,
   isEdit,
-  selectedHotelInfo,
-  hotelRate,
-  roomsList
+  selectedHotelInfo
 }) => {
   const travelInfoData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
+  const hotelSheetData = useSelector(state => state.hotelRateData)
   // console.log('selectedCitiesHotels: ', selectedCitiesHotels)
   // console.log(selectedHotelInfo)
 
@@ -107,28 +107,11 @@ const HotelDialog = ({
   const child = hotelWatch('child')
   const adult = hotelWatch('adult')
 
-  // useEffect(() => {
-  //   const travelDates = quotationsData.travelInfo['dates']
-  //   if (travelDates[0] != null && travelDates[1] != null) {
-  //     console.log(travelDates)
-  //     setHotelValue('checkInCheckOut', travelDates)
-  //     const daysNightsCount = getDayNightCount(travelDates) + 1
-  //     console.log("daysNightsCount: ", daysNightsCount)
-  //     setHotelValue(
-  //       'daysNights',
-  //       `${daysNightsCount} ${daysNightsCount < 2 ? 'Day' : 'Days'} & ${daysNightsCount - 1} ${
-  //         daysNightsCount < 3 ? 'Night' : 'Nights'
-  //       }`
-  //     )
-  //   }
-  // }, [quotationsData.travelInfo['days-nights']])
-
   useEffect(() => {
     if (selectedCity) {
       getHotelList()
     }
   }, [selectedCity])
-  // console.log(selectedHotelInfo)
 
   useEffect(() => {
     if (selectedHotelInfo) {
@@ -169,12 +152,11 @@ const HotelDialog = ({
 
   const getHotelList = () => {
     let finalHotelList = []
-    // console.log(hotelRate[selectedCity.label])
-    Object.keys(hotelRate[selectedCity.label]).map(hotel_type => {
+    Object.keys(hotelSheetData.hotelsRate[selectedCity.label]).map(hotel_type => {
       let hotelsArr = []
-      Object.keys(hotelRate[selectedCity.label][hotel_type]).map((hotel, index) => {
-        const minPrice = hotelRate[selectedCity.label][hotel_type][hotel]['minPrice']
-        const maxPrice = hotelRate[selectedCity.label][hotel_type][hotel]['maxPrice']
+      Object.keys(hotelSheetData.hotelsRate[selectedCity.label][hotel_type]).map((hotel, index) => {
+        const minPrice = hotelSheetData.hotelsRate[selectedCity.label][hotel_type][hotel]['minPrice']
+        const maxPrice = hotelSheetData.hotelsRate[selectedCity.label][hotel_type][hotel]['maxPrice']
         // console.log(hotel)
 
         hotelsArr.push({
@@ -271,7 +253,7 @@ const HotelDialog = ({
       return
     }
 
-    let selectedRoomsList = Object.keys(selectedHotelDetail).filter(roomType => roomsList.includes(roomType))
+    let selectedRoomsList = Object.keys(selectedHotelDetail).filter(roomType => hotelSheetData.roomsList.includes(roomType))
     let roomCount = 0
     selectedRoomsList.map(room => (roomCount += Number(selectedHotelDetail[room])))
     if (roomCount != Number(rooms)) {
@@ -907,9 +889,6 @@ const HotelDialog = ({
         selectedHotelDetail={selectedHotelDetail}
         handleClose={handleCloseRoomDialog}
         selectedHotel={selectedHotel}
-        roomsList={roomsList}
-        hotelRate={hotelRate}
-        totalRooms={totalRooms}
         rooms={rooms}
       />
     </Dialog>

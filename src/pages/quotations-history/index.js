@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
-import axios from 'axios'
 
 import { useRouter } from 'next/router'
 
@@ -23,10 +22,9 @@ import OptionsMenu from 'src/@core/components/option-menu'
 import CustomChip from 'src/@core/components/mui/chip'
 
 import Loader from 'src/components/common/Loader'
-import { deleteRequest, getRequest } from 'src/api-main-file/APIServices'
+import { deleteRequest, getRequest, putRequest } from 'src/api-main-file/APIServices'
 import CommonDialog from 'src/components/common/dialog'
 import { getDayNightCount } from 'src/utils/function'
-import { transformHotelData, transformTransportData } from '../quotations'
 
 const defaultColumns = [
   {
@@ -181,16 +179,20 @@ const QuotationsHistory = () => {
                     }
                   }
                 },
-                {
-                  text: 'Edit Status',
-                  icon: <Icon icon='mdi:pencil' fontSize={20} />,
-                  menuItemProps: {
-                    onClick: e => {
-                      fetchQuotation(row, '/quotations/preview')
-                      // fetchCampaignDetail(row.id)
+                row.clientType != 'Admin' ? (
+                  {
+                    text: 'Edit Status',
+                    icon: <Icon icon='mdi:pencil' fontSize={20} />,
+                    menuItemProps: {
+                      onClick: e => {
+                        fetchQuotation(row, '/quotations/preview')
+                        // fetchCampaignDetail(row.id)
+                      }
                     }
                   }
-                }
+                ) : (
+                  <></>
+                )
                 // {
                 //   text: 'Send For Approval',
                 //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
@@ -349,6 +351,7 @@ const QuotationsHistory = () => {
                       icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
                       menuItemProps: {
                         onClick: e => {
+                          updateQuotation(row)
                           // fetchCampaignDetail(row.id)
                         }
                       }
@@ -419,8 +422,6 @@ const QuotationsHistory = () => {
 
   useEffect(() => {
     fetchQuotationList()
-    fetchHotelData()
-    fetchTransportData()
   }, [])
 
   const handleSearchQuotation = newValue => {
@@ -448,6 +449,7 @@ const QuotationsHistory = () => {
   const deleteQuotation = async () => {
     setIsLoading(true)
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = 'http://localhost:4000/api'
     const api_url = `${BASE_URL}/${clientType}`
 
     const response = await deleteRequest(`${api_url}/delete-quotation`, {
@@ -522,40 +524,109 @@ const QuotationsHistory = () => {
     }
   }
 
-  const fetchHotelData = async () => {
-    const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
-    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    const HOTEL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${HOTEL_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+  const updateQuotation = async data => {
+    const { quotationName, travel, citiesHotels, transport, id, pdfUrl, status, createdQuoteClientId } = data
 
-    setIsLoading(true)
-    try {
-      const response = await axios.get(HOTEL_URL)
-      setIsLoading(false)
-      const finalData = transformHotelData(response.data.values)
-      localStorage.setItem('hotelRates', JSON.stringify(finalData.hotelsRate))
-      localStorage.setItem('roomsList', JSON.stringify(finalData.roomsList))
-      setStatesList(finalData.stateList)
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Failded fetching quotation data')
+    const { vehicleType, from, to, checkpoints, transportStartDate, transportEndDate } = transport
+
+    let dataToSend = {
+      quotationName,
+      travelInfo: {
+        userName: travel.userName,
+        journeyStartDate: new Date(travel.journeyStartDate),
+        journeyEndDate: new Date(travel.journeyEndDate)
+      },
+      citiesHotelsInfo: {
+        cities: citiesHotels.cities.map(city => {
+          const { id, cityName, hotelInfo } = city
+          return {
+            id: id,
+            cityName,
+            hotelInfo: hotelInfo.map(hotel => {
+              // console.log(hotel)
+              const {
+                checkIn,
+                checkOut,
+                isBreakfast,
+                isLunch,
+                isDinner,
+                rooms,
+                child,
+                extraBed,
+                persons,
+                adult,
+                hotelName,
+                hotelType,
+                price,
+                roomType
+              } = hotel
+              return {
+                id: hotel.id,
+                hotelName,
+                hotelType,
+                rooms,
+                roomType, // it will be like [{roomName: '', roomCount: 1}],
+                adult,
+                child,
+                checkIn: new Date(checkIn),
+                checkOut: new Date(checkOut),
+                isBreakfast,
+                isLunch,
+                isDinner,
+                extraBed,
+                persons, // might remove this,
+                hotelImage: hotel.image, // add this is mongoose,
+                price
+              }
+            })
+          }
+        })
+      },
+      transportInfo: {
+        vehicleType,
+        from,
+        to,
+        checkpoints,
+        transportStartDate: new Date(transportStartDate),
+        transportEndDate: new Date(transportEndDate)
+      },
+      ...data,
+      status: 'pending'
     }
-  }
 
-  const fetchTransportData = async () => {
-    const TRANSPORT_SHEET_ID = process.env.NEXT_PUBLIC_TRANSPORT_SHEET_ID
-    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    const TRANSPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/${TRANSPORT_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+    const createdClientType = createdQuoteClientId.split('_')[0]
 
+    if (createdClientType == 'employee') {
+      dataToSend = {
+        ...dataToSend,
+        employeeId: createdQuoteClientId
+      }
+    } else if (createdClientType == 'partner') {
+      dataToSend = {
+        ...dataToSend,
+        partnerId: createdQuoteClientId
+      }
+    }
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = 'http://localhost:4000/api'
+    const api_url = `${BASE_URL}/${createdClientType}`
     setIsLoading(true)
-    try {
-      const response = await axios.get(TRANSPORT_URL)
-      setIsLoading(false)
-      const transport_response = transformTransportData(response.data.values)
+    let response = await putRequest(
+      `${api_url}/update-quotation`,
+      { id, ...dataToSend },
+      {
+        [`${createdClientType}id`]: createdQuoteClientId
+      }
+    )
+    setIsLoading(false)
 
-      localStorage.setItem('transportRates', JSON.stringify(transport_response))
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Failded fetching quotation data')
+    if (response.status) {
+      toast.success(typeof response.data == 'object' ? 'Success' : response.data)
+      fetchQuotationList()
+      // resetLocalStorage()
+      // router.push('/')
+    } else {
+      toast.error(response.error)
     }
   }
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { addDays, format } from 'date-fns'
 import toast from 'react-hot-toast'
+import { useSelector } from 'react-redux'
 
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
@@ -40,7 +41,9 @@ let defaultHotelInfoValues = {
 }
 
 const HotelInfoStep = props => {
-  const { onSubmit, handleBack, hotelRate, roomsList, statesList } = props
+  const { onSubmit, handleBack } = props
+
+  const hotelSheetData = useSelector(state => state.hotelRateData)
 
   const [selectedCitiesHotels, setSelectedCitiesHotels] = useState(
     localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
@@ -56,8 +59,8 @@ const HotelInfoStep = props => {
   const theme = useTheme()
 
   const citiesList = useMemo(() => {
-    return hotelRate
-      ? Object.keys(hotelRate).map((city, index) => {
+    return hotelSheetData.hotelsRate
+      ? Object.keys(hotelSheetData.hotelsRate).map((city, index) => {
           return { id: index, label: city, info: [] }
         })
       : []
@@ -527,10 +530,8 @@ const HotelInfoStep = props => {
       <CitiesDialog
         open={openCitiesDialog}
         handleClose={handleCloseCitiesDialog}
-        hotelRate={hotelRate}
         selectedCitiesHotels={selectedCitiesHotels}
         setSelectedCitiesHotels={setSelectedCitiesHotels}
-        statesList={statesList}
       />
 
       <HotelDialog
@@ -542,8 +543,6 @@ const HotelInfoStep = props => {
         // setHotelValue={setHotelValue}
         selectedCity={selectedCity}
         open={openHotelDialog}
-        hotelRate={hotelRate}
-        roomsList={roomsList}
         isEdit={false}
       />
 
@@ -556,8 +555,6 @@ const HotelInfoStep = props => {
         // setHotelValue={setHotelValue}
         selectedCity={selectedCity}
         open={openEditHotelDialog}
-        hotelRate={hotelRate}
-        roomsList={roomsList}
         isEdit={true}
       />
       <CommonDialog

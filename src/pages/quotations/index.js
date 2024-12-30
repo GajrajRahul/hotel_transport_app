@@ -17,9 +17,6 @@ import Step from '@mui/material/Step'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 
-import addDays from 'date-fns/addDays'
-import toast from 'react-hot-toast'
-import axios from 'axios'
 // import { useJsApiLoader } from '@react-google-maps/api'
 
 import StepperWrapper from 'src/@core/styles/mui/stepper'
@@ -60,134 +57,7 @@ function loadScript(src, position, id) {
   position.appendChild(script)
 }
 
-export const transformHotelData = data => {
-  const headers = data[0]
-  const result = {}
-
-  const matchingColumnIndices = headers
-    .map((header, index) => (header?.startsWith('room_type_') && header?.endsWith('_tag') ? index : -1))
-    .filter(index => index !== -1)
-
-  const filtered = data.slice(1).map(row => matchingColumnIndices.map(colIndex => row[colIndex] || ''))
-
-  let roomsList = []
-  filtered.map(data =>
-    data.map(item => {
-      if (item.length > 0 && !roomsList.includes(item)) roomsList.push(item)
-    })
-  )
-
-  const stateList = []
-
-  data.slice(1).forEach(row => {
-    if (row.length > 0) {
-      const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
-
-      const stateKey = `${
-        rowData.destination
-          ? rowData.destination
-              .split(' ')
-              .map(c => c.toLowerCase())
-              .join('_')
-          : rowData.destination
-      }`
-
-      const cityKey = `${
-        rowData.city
-          ? rowData.city
-              .split(' ')
-              .map(c => c.toLowerCase())
-              .join('_')
-          : rowData.city
-      }`
-
-      const hotelTypeKey = `${rowData.type_of_hotel}`
-
-      const hotelNameKey = `${rowData.hotel_name}`
-
-      if (!result[cityKey]) {
-        const existingState = stateList.find(state => state.name == stateKey)
-        if (existingState) {
-          existingState.cities.push({ name: cityKey })
-        } else {
-          stateList.push({ name: stateKey, cities: [{ name: cityKey }] })
-        }
-        result[cityKey] = {}
-      }
-
-      if (!result[cityKey][hotelTypeKey]) result[cityKey][hotelTypeKey] = {}
-      if (!result[cityKey][hotelTypeKey][hotelNameKey]) {
-        result[cityKey][hotelTypeKey][hotelNameKey] = {}
-      }
-
-      result[cityKey][hotelTypeKey][hotelNameKey] = {
-        ...result[cityKey][hotelTypeKey][hotelNameKey],
-        breakfast: rowData.breakfast || '',
-        lunch: rowData.lunch || '',
-        dinner: rowData.dinner || '',
-        extrabed: rowData.extrabed || '',
-        [`${rowData.room_type_1_tag}`]: rowData.room_type_1 || '',
-        [`${rowData.room_type_2_tag}`]: rowData.room_type_2 || '',
-        [`${rowData.room_type_3_tag}`]: rowData.room_type_3 || '',
-        [`${rowData.room_type_4_tag}`]: rowData.room_type_4 || '',
-        // roomsType: [
-        //   { roomType: rowData.room_type_1_tag, price: room_type_1 || '' },
-        //   { roomType: rowData.room_type_2_tag, price: room_type_2 || '' },
-        //   { roomType: rowData.room_type_3_tag, price: room_type_3 || '' },
-        //   { roomType: rowData.room_type_4_tag, price: room_type_4 || '' }
-        // ],
-        minPrice: rowData.room_type_1
-          ? rowData.room_type_1
-          : rowData.room_type_2
-          ? rowData.room_type_2
-          : rowData.room_type_3
-          ? rowData.room_type_3
-          : rowData.room_type_4
-          ? rowData.room_type_4
-          : '',
-        maxPrice: rowData.room_type_4
-          ? rowData.room_type_4
-          : rowData.room_type_3
-          ? rowData.room_type_3
-          : rowData.room_type_2
-          ? rowData.room_type_2
-          : rowData.room_type_1
-          ? rowData.room_type_1
-          : ''
-      }
-    }
-  })
-
-  return { roomsList, hotelsRate: result, stateList }
-}
-
-export const transformTransportData = data => {
-  const headers = data[0]
-  const result = {}
-
-  data.slice(1).forEach(row => {
-    if (row.length > 0) {
-      const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
-
-      const carName = `${rowData.car_name}`
-
-      if (!result[carName]) result[carName] = {}
-      headers.map(item => {
-        if (item != 'car_name') {
-          result[carName] = { ...result[carName], [item]: rowData[item] }
-        }
-      })
-    }
-  })
-
-  return result
-}
-
-const Quotations = ({ hotel_response, rooms_list, transport_response, state_list }) => {
-  localStorage.setItem('hotelRates', JSON.stringify(hotel_response))
-  localStorage.setItem('transportRates', JSON.stringify(transport_response))
-  localStorage.setItem('roomsList', JSON.stringify(rooms_list))
-
+const Quotations = () => {
   const [isAmountDialogOpen, setIsAmountDialogOpen] = useState(false)
   const [calculatedAmount, setCalculatedAmount] = useState(null)
   const [quotationNameError, setQuotationNameError] = useState('')
@@ -249,17 +119,9 @@ const Quotations = ({ hotel_response, rooms_list, transport_response, state_list
       case 0:
         return <TravelInfoStep onSubmit={onSubmit} />
       case 1:
-        return (
-          <HotelInfoStep
-            hotelRate={hotel_response}
-            roomsList={rooms_list}
-            handleBack={handleBack}
-            onSubmit={onSubmit}
-            statesList={state_list}
-          />
-        )
+        return <HotelInfoStep handleBack={handleBack} onSubmit={onSubmit} />
       case 2:
-        return <TransportInfoStep transportRate={transport_response} handleBack={handleBack} onSubmit={onSubmit} />
+        return <TransportInfoStep handleBack={handleBack} onSubmit={onSubmit} />
       default:
         return null
     }
@@ -365,53 +227,6 @@ const Quotations = ({ hotel_response, rooms_list, transport_response, state_list
       />
     </Card>
   )
-}
-
-export async function getServerSideProps() {
-  const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
-  const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  const HOTEL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${HOTEL_SHEET_ID}/values/Sheet1?key=${API_KEY}`
-
-  const TRANSPORT_SHEET_ID = process.env.NEXT_PUBLIC_TRANSPORT_SHEET_ID
-  // const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  const TRANSPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/${TRANSPORT_SHEET_ID}/values/Sheet1?key=${API_KEY}`
-
-  let hotel_response = null
-  let rooms_list = []
-  let transport_response = null
-  let state_list = []
-
-  try {
-    const response = await axios.get(HOTEL_URL)
-    const finalData = transformHotelData(response.data.values)
-    hotel_response = finalData.hotelsRate
-    rooms_list = finalData.roomsList
-    state_list = finalData.stateList
-    // setHotelData(finalData.hotelsRate)
-    // setRoomsList(finalData.roomsList)
-  } catch (error) {
-    toast.error('Failed fetching transport data')
-    console.error('Error fetching data:', error)
-  }
-
-  try {
-    const response = await axios.get(TRANSPORT_URL)
-    const finalData = transformTransportData(response.data.values)
-    transport_response = finalData
-    // setTransportRate(finalData)
-  } catch (error) {
-    toast.error('Failed fetching transport data')
-    console.error('Error fetching data:', error)
-  }
-
-  return {
-    props: {
-      hotel_response,
-      rooms_list,
-      transport_response,
-      state_list
-    }
-  }
 }
 
 export default Quotations

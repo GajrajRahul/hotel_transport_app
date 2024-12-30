@@ -25,9 +25,10 @@ const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(2)
 }))
 
-const CitiesDialog = ({ open, handleClose, hotelRate, selectedCitiesHotels, setSelectedCitiesHotels, statesList }) => {
+const CitiesDialog = ({ open, handleClose, selectedCitiesHotels, setSelectedCitiesHotels }) => {
   const hotelInfoReduxData = useSelector(state => state.hotelInfo)
   const dispatch = useDispatch()
+  const hotelSheetData = useSelector(state => state.hotelRateData)
 
   const {
     reset,
@@ -51,7 +52,7 @@ const CitiesDialog = ({ open, handleClose, hotelRate, selectedCitiesHotels, setS
   }, [open])
 
   const onSubmit = () => {
-    const isCityExist = Object.keys(hotelRate).find(
+    const isCityExist = Object.keys(hotelSheetData.hotelsRate).find(
       cityHotel =>
         cityHotel ==
         city
@@ -85,7 +86,7 @@ const CitiesDialog = ({ open, handleClose, hotelRate, selectedCitiesHotels, setS
   const onFinalSubmit = () => {
     const cityLabels = chipData.map(item => item.label)
 
-    const finalState = statesList
+    const finalState = hotelSheetData.stateList
       .map(state => {
         const filteredCities = state.cities.filter(city => cityLabels.includes(city.name))
         return {

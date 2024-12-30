@@ -58,8 +58,8 @@ const ForgotPassword = ({ registerUrl }) => {
     setIsLoading(true)
 
     const api_url = `${process.env.NEXT_PUBLIC_BASE_URL}/${routes[routes.length - 1]}`
-    // const response = await postRequest(`${api_url}/forgot-password`, { email })
-    const response = await postRequest(`http://localhost:4000/api/${routes[routes.length - 1]}/forgot-password`, { email })
+    const response = await postRequest(`${api_url}/forgot-password`, { email })
+    // const response = await postRequest(`http://localhost:4000/api/${routes[routes.length - 1]}/forgot-password`, { email })
     setIsLoading(false)
     if (response.status) {
       toast.success('Email Send Successfully')

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { useSelector } from 'react-redux'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -132,25 +133,17 @@ const Room = ({ room, roomInfoRef, rooms, selectedHotelDetail }) => {
   )
 }
 
-const RoomDialog = ({
-  open,
-  handleClose,
-  rooms,
-  selectedHotel,
-  selectedHotelDetail,
-  roomsList,
-  hotelRate,
-  totalRooms
-}) => {
+const RoomDialog = ({ open, handleClose, rooms, selectedHotel, selectedHotelDetail }) => {
   const roomInfoRef = useRef([])
   const [roomError, setRoomError] = useState('')
+  const hotelSheetData = useSelector(state => state.hotelRateData)
 
   const roomTypes = useMemo(() => {
     if (selectedHotel) {
       const { location, type, name } = selectedHotel
       let roomsTypeList = []
-      Object.keys(hotelRate[location][type][name]).map(k => {
-        if (roomsList.includes(k)) {
+      Object.keys(hotelSheetData.hotelsRate[location][type][name]).map(k => {
+        if (hotelSheetData.roomsList.includes(k)) {
           roomsTypeList.push(k)
         }
       })
@@ -209,7 +202,6 @@ const RoomDialog = ({
         Select Room Type
       </DialogTitle>
       <DialogContent>
-        {/* <DialogContentText textAlign='center'>Select {totalRooms == 0 ? rooms : totalRooms} rooms</DialogContentText> */}
         <DialogContentText textAlign='center'>
           Select Rooms in {selectedHotel ? selectedHotel.name : ''}
         </DialogContentText>

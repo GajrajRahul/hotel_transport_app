@@ -26,7 +26,6 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 import { postRequest, putRequest } from 'src/api-main-file/APIServices'
 import { generateItineraryCss, getDayNightCount } from 'src/utils/function'
-import { transformHotelData } from '.'
 import {
   InstagramIcon,
   FacebookIcon,
@@ -467,9 +466,7 @@ const generateMonumentsData = data => {
   return { result }
 }
 
-const getHotelFare = cities => {
-  const hotelRate = JSON.parse(localStorage.getItem('hotelRates'))
-  const roomsList = JSON.parse(localStorage.getItem('roomsList'))
+const getHotelFare = (cities, hotelSheetData) => {
   let hotelAmount = 0
   let totalNights = 0
   cities.map(city => {
@@ -480,7 +477,7 @@ const getHotelFare = cities => {
       const totalDayNight = Number(getDayNightCount(checkInCheckOut))
       totalNights += totalDayNight
       const hotelInfo =
-        hotelRate[
+        hotelSheetData.hotelsRate[
           label
             ? label
                 .split(' ')
@@ -490,7 +487,7 @@ const getHotelFare = cities => {
         ][type][name]
 
       Object.keys(hotel).map(data => {
-        if (roomsList.includes(data)) {
+        if (hotelSheetData.roomsList.includes(data)) {
           hotelAmount += Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight
           // console.log("room: ", Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight)
         }
@@ -518,10 +515,9 @@ const getHotelFare = cities => {
   return { hotelAmount: hotelAmount, totalNights }
 }
 
-const getTransportFare = (data, cities) => {
+const getTransportFare = (data, cities, transportSheetData) => {
   const { totalDays, totalDistance, vehicleType, additionalStops } = data
-  const transportRate = JSON.parse(localStorage.getItem('transportRates'))
-  const vehicleRates = transportRate[vehicleType]
+  const vehicleRates = transportSheetData[vehicleType]
 
   if (cities.current.length == 1) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
@@ -566,6 +562,7 @@ const getTransportFare = (data, cities) => {
 const QutationPreview = ({ id }) => {
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
   const hotelSheetData = useSelector(state => state.hotelRateData)
+  const transportSheetData = useSelector(state => state.transportRateData)
 
   const quotationId = useRef(localStorage.getItem('quotationId') ?? '')
   const travelInfoData = useRef(localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null)
@@ -771,8 +768,8 @@ const QutationPreview = ({ id }) => {
     } else if (createdClientType == 'partner') {
       dataToSend = { ...dataToSend, partnerId: localStorage.getItem('createdQuoteClientId') }
     }
-    // const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-    const BASE_URL = 'http://localhost:4000/api'
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = 'http://localhost:4000/api'
     const api_url = `${BASE_URL}/${createdClientType}`
     setIsLoading(true)
     let response
@@ -864,9 +861,13 @@ const QutationPreview = ({ id }) => {
                 totalDays: totalDays + 1,
                 additionalStops
               },
-              cities
+              cities,
+              transportSheetData
             ) ?? 0
-          const { hotelAmount: totalHotelAmount, totalNights: totalNightCount } = getHotelFare(cities.current)
+          const { hotelAmount: totalHotelAmount, totalNights: totalNightCount } = getHotelFare(
+            cities.current,
+            hotelSheetData
+          )
           const hotelFinalAmount =
             clientType.current == 'admin'
               ? Number(totalHotelAmount)
@@ -1542,16 +1543,33 @@ const QutationPreview = ({ id }) => {
                 }}
               />
 
-              <TextField fullWidth multiline rows={3} label='Comment' sx={{ mt: 5 }} value='' onChange={e => {}} />
+              {localStorage.getItem('createdQuoteClientId') &&
+                !localStorage.getItem('createdQuoteClientId').includes('admin') &&
+                localStorage.getItem('quotationStatus') != 'approved' && (
+                  <TextField
+                    disabled={clientType.current != 'admin'}
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label='Comment'
+                    sx={{ mt: 5 }}
+                    value=''
+                    onChange={e => {}}
+                  />
+                )}
             </CardContent>
-            <CardActions>
-              <Button variant='contained' sx={{ mr: 2 }} onClick={() => saveQuotation('approved')}>
-                Approve
-              </Button>
-              <Button color='error' variant='outlined' onClick={() => saveQuotation('rejected')}>
-                Reject
-              </Button>
-            </CardActions>
+            {localStorage.getItem('createdQuoteClientId') &&
+              !localStorage.getItem('createdQuoteClientId').includes('admin') &&
+              localStorage.getItem('quotationStatus') != 'approved' && (
+                <CardActions>
+                  <Button variant='contained' sx={{ mr: 2 }} onClick={() => saveQuotation('approved')}>
+                    Approve
+                  </Button>
+                  <Button color='error' variant='outlined' onClick={() => saveQuotation('rejected')}>
+                    Reject
+                  </Button>
+                </CardActions>
+              )}
           </Card>
           <Card sx={{ mt: 5 }}>
             <CardContent>

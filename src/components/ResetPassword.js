@@ -69,11 +69,11 @@ const ResetPassword = ({ registerUrl }) => {
     setIsLoading(true)
 
     const api_url = `${process.env.NEXT_PUBLIC_BASE_URL}/${routes[routes.length - 1]}`
-    // const response = await postRequest(`${api_url}/reset-password`, { password, token: router.query.token })
-    const response = await postRequest(`http://localhost:4000/api/${routes[routes.length - 1]}/reset-password`, {
-      password,
-      token: router.query.token
-    })
+    const response = await postRequest(`${api_url}/reset-password`, { password, token: router.query.token })
+    // const response = await postRequest(`http://localhost:4000/api/${routes[routes.length - 1]}/reset-password`, {
+    //   password,
+    //   token: router.query.token
+    // })
     setIsLoading(false)
     if (response.status) {
       toast.success(typeof response.data != 'object' ? response.data : 'Password reset successfully')

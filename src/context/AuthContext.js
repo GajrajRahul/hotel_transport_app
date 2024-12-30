@@ -6,9 +6,9 @@ import { useRouter } from 'next/router'
 
 import { getRequest, postRequest } from 'src/api-main-file/APIServices'
 import axios from 'axios'
-import { transformHotelData, transformTransportData } from 'src/pages/quotations'
 import { replaceHotelData } from 'src/store/HotelDataSlice'
 import { replaceTransportData } from 'src/store/TransportDataSlice'
+import { transformHotelData, transformTransportData } from 'src/utils/function'
 
 // ** Defaults
 const defaultProvider = {
@@ -99,8 +99,7 @@ const AuthProvider = ({ children }) => {
     if (user) {
       fetchSheetData()
     }
-  }),
-    [user]
+  }, [user])
 
   const fetchSheetData = async () => {
     setLoading(true)
@@ -108,11 +107,11 @@ const AuthProvider = ({ children }) => {
     const [hotelData, transportData] = await Promise.all([fetchHotelData(), fetchTransportData()])
 
     if (hotelData) {
-      dispatch(replaceTransportData(hotelData))
+      dispatch(replaceHotelData(hotelData))
     }
 
     if (transportData) {
-      dispatch(replaceHotelData(transportData))
+      dispatch(replaceTransportData(transportData))
     }
 
     setLoading(false)
