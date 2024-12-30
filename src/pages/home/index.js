@@ -258,39 +258,6 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
     resetFunc()
   }
 
-  // const getHotelRates = async () => {
-  //   setIsLoading(true)
-  //   const SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
-  //   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  //   const URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1?key=${API_KEY}`
-  //   try {
-  //     const response = await axios.get(URL)
-  //     const finalData = transformHotelData(response.data.values ?? [])
-  //     setHotelData(finalData.hotelsRate)
-  //     setRoomsList(finalData.roomsList)
-  //   } catch (error) {
-  //     toast.error('Failed fetching hotel data')
-  //     console.error('Error fetching data:', error)
-  //   }
-  //   setIsLoading(false)
-  // }
-
-  // const getTransportRate = async () => {
-  //   setIsLoading(true)
-  //   const SHEET_ID = process.env.NEXT_PUBLIC_TRANSPORT_SHEET_ID
-  //   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  //   const URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1?key=${API_KEY}`
-  //   try {
-  //     const response = await axios.get(URL)
-  //     const finalData = transformTransportData(response.data.values ?? [])
-  //     setTransportRate(finalData)
-  //   } catch (error) {
-  //     toast.error('Failed fetching transport data')
-  //     console.error('Error fetching data:', error)
-  //   }
-  //   setIsLoading(false)
-  // }
-
   return (
     <>
       <Loader open={isLoading} />

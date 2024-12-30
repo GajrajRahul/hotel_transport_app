@@ -1,9 +1,14 @@
 import { createContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useDispatch } from 'react-redux'
 
 import { useRouter } from 'next/router'
 
 import { getRequest, postRequest } from 'src/api-main-file/APIServices'
+import axios from 'axios'
+import { transformHotelData, transformTransportData } from 'src/pages/quotations'
+import { replaceHotelData } from 'src/store/HotelDataSlice'
+import { replaceTransportData } from 'src/store/TransportDataSlice'
 
 // ** Defaults
 const defaultProvider = {
@@ -24,6 +29,7 @@ const AuthProvider = ({ children }) => {
   const [clientId, setClientId] = useState(defaultProvider.clientId)
   const [loading, setLoading] = useState(defaultProvider.loading)
   const [user, setUser] = useState(defaultProvider.user)
+  const dispatch = useDispatch()
 
   const router = useRouter()
   useEffect(() => {
@@ -88,6 +94,57 @@ const AuthProvider = ({ children }) => {
     initAuth()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (user) {
+      fetchSheetData()
+    }
+  }),
+    [user]
+
+  const fetchSheetData = async () => {
+    setLoading(true)
+
+    const [hotelData, transportData] = await Promise.all([fetchHotelData(), fetchTransportData()])
+
+    if (hotelData) {
+      dispatch(replaceTransportData(hotelData))
+    }
+
+    if (transportData) {
+      dispatch(replaceHotelData(transportData))
+    }
+
+    setLoading(false)
+  }
+
+  const fetchHotelData = async () => {
+    const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
+    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const HOTEL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${HOTEL_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+
+    try {
+      const response = await axios.get(HOTEL_URL)
+      return transformHotelData(response.data.values)
+    } catch (error) {
+      toast.error('Failded fetching quotation data')
+      return { hotelsRate: null, roomsList: [], stateList: [] }
+    }
+  }
+
+  const fetchTransportData = async () => {
+    const TRANSPORT_SHEET_ID = process.env.NEXT_PUBLIC_TRANSPORT_SHEET_ID
+    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const TRANSPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/${TRANSPORT_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+
+    try {
+      const response = await axios.get(TRANSPORT_URL)
+      return transformTransportData(response.data.values)
+    } catch (error) {
+      toast.error('Failded fetching quotation data')
+      return {}
+    }
+  }
 
   const fetchUserDataHandler = async data => {
     const { token, clientType, user_data } = data

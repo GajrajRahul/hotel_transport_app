@@ -26,7 +26,7 @@ import Loader from 'src/components/common/Loader'
 import { deleteRequest, getRequest } from 'src/api-main-file/APIServices'
 import CommonDialog from 'src/components/common/dialog'
 import { getDayNightCount } from 'src/utils/function'
-import { transformHotelData } from '../quotations'
+import { transformHotelData, transformTransportData } from '../quotations'
 
 const defaultColumns = [
   {
@@ -159,7 +159,7 @@ const QuotationsHistory = () => {
                   icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      fetchQuotation(row)
+                      fetchQuotation(row, '/quotations')
                     }
                   }
                 },
@@ -171,25 +171,26 @@ const QuotationsHistory = () => {
                       openDeleteDialog(row)
                     }
                   }
+                },
+                {
+                  text: 'Download',
+                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      // fetchCampaignDetail(row.id)
+                    }
+                  }
+                },
+                {
+                  text: 'Edit Status',
+                  icon: <Icon icon='mdi:pencil' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      fetchQuotation(row, '/quotations/preview')
+                      // fetchCampaignDetail(row.id)
+                    }
+                  }
                 }
-                // {
-                //   text: 'Download',
-                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                //   menuItemProps: {
-                //     onClick: e => {
-                //       // fetchCampaignDetail(row.id)
-                //     }
-                //   }
-                // }
-                // {
-                //   text: 'Share',
-                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                //   menuItemProps: {
-                //     onClick: e => {
-                //       // fetchCampaignDetail(row.id)
-                //     }
-                //   }
-                // },
                 // {
                 //   text: 'Send For Approval',
                 //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
@@ -217,6 +218,25 @@ const QuotationsHistory = () => {
                   ? `${row.quotationName.slice(0, 17)}${row.quotationName.length > 17 ? '...' : ''}`
                   : ''}
               </Typography>
+            </Box>
+          )
+        }
+      },
+      {
+        flex: 0.1,
+        field: 'status',
+        minWidth: 130,
+        headerName: 'Status',
+        renderCell: ({ row }) => {
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <CustomChip
+                skin='light'
+                size='small'
+                label={row.status}
+                color='success'
+                sx={{ textTransform: 'capitalize' }}
+              />
             </Box>
           )
         }
@@ -292,7 +312,7 @@ const QuotationsHistory = () => {
                   icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      fetchQuotation(row)
+                      fetchQuotation(row, '/quotations')
                     }
                   }
                 },
@@ -304,34 +324,36 @@ const QuotationsHistory = () => {
                       openDeleteDialog(row)
                     }
                   }
-                }
-                // {
-                //   text: 'Download',
-                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                //   menuItemProps: {
-                //     onClick: e => {
-                //       // fetchCampaignDetail(row.id)
-                //     }
-                //   }
-                // }
-                // {
-                //   text: 'Share',
-                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                //   menuItemProps: {
-                //     onClick: e => {
-                //       // fetchCampaignDetail(row.id)
-                //     }
-                //   }
-                // },
-                // {
-                //   text: 'Send For Approval',
-                //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                //   menuItemProps: {
-                //     onClick: e => {
-                //       // fetchCampaignDetail(row.id)
-                //     }
-                //   }
-                // }
+                },
+                {
+                  text: 'Download',
+                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      // fetchCampaignDetail(row.id)
+                    }
+                  }
+                },
+                {
+                  text: 'Share',
+                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      // fetchCampaignDetail(row.id)
+                    }
+                  }
+                },
+                row.status != 'pending'
+                  ? {
+                      text: 'Send For Approval',
+                      icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                      menuItemProps: {
+                        onClick: e => {
+                          // fetchCampaignDetail(row.id)
+                        }
+                      }
+                    }
+                  : {}
               ]}
             />
           </Box>
@@ -350,6 +372,25 @@ const QuotationsHistory = () => {
                   ? `${row.quotationName.slice(0, 17)}${row.quotationName.length > 17 ? '...' : ''}`
                   : ''}
               </Typography>
+            </Box>
+          )
+        }
+      },
+      {
+        flex: 0.1,
+        field: 'status',
+        minWidth: 130,
+        headerName: 'Status',
+        renderCell: ({ row }) => {
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <CustomChip
+                skin='light'
+                size='small'
+                label={row.status}
+                color='success'
+                sx={{ textTransform: 'capitalize' }}
+              />
             </Box>
           )
         }
@@ -379,6 +420,7 @@ const QuotationsHistory = () => {
   useEffect(() => {
     fetchQuotationList()
     fetchHotelData()
+    fetchTransportData()
   }, [])
 
   const handleSearchQuotation = newValue => {
@@ -432,7 +474,17 @@ const QuotationsHistory = () => {
 
     if (response.status) {
       const responseData = response.data.map((data, idx) => {
-        const { quotationName, travelInfo, citiesHotelsInfo, transportInfo, id, userName, companyName, pdfUrl } = data
+        const {
+          quotationName,
+          travelInfo,
+          citiesHotelsInfo,
+          transportInfo,
+          id,
+          userName,
+          companyName,
+          pdfUrl,
+          status
+        } = data
         const adult = citiesHotelsInfo?.cities[0]?.hotelInfo[0]?.adult || 0
         const child = citiesHotelsInfo?.cities[0]?.hotelInfo[0].child || 0
         return {
@@ -458,7 +510,9 @@ const QuotationsHistory = () => {
           clientType: data.adminId ? 'Admin' : data.employeeId ? 'Employee' : 'Partner',
           userName,
           companyName,
-          pdfUrl
+          pdfUrl,
+          status,
+          createdQuoteClientId: data.employeeId ? data.employeeId : data.partnerId ? data.partnerId : data.adminId
         }
       })
       setQuotationsHisotry(responseData)
@@ -478,6 +532,8 @@ const QuotationsHistory = () => {
       const response = await axios.get(HOTEL_URL)
       setIsLoading(false)
       const finalData = transformHotelData(response.data.values)
+      localStorage.setItem('hotelRates', JSON.stringify(finalData.hotelsRate))
+      localStorage.setItem('roomsList', JSON.stringify(finalData.roomsList))
       setStatesList(finalData.stateList)
     } catch (error) {
       setIsLoading(false)
@@ -485,8 +541,29 @@ const QuotationsHistory = () => {
     }
   }
 
-  const fetchQuotation = data => {
-    const { quotationName, travel, citiesHotels, transport, id, pdfUrl } = data
+  const fetchTransportData = async () => {
+    const TRANSPORT_SHEET_ID = process.env.NEXT_PUBLIC_TRANSPORT_SHEET_ID
+    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const TRANSPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/${TRANSPORT_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+
+    setIsLoading(true)
+    try {
+      const response = await axios.get(TRANSPORT_URL)
+      setIsLoading(false)
+      const transport_response = transformTransportData(response.data.values)
+
+      localStorage.setItem('transportRates', JSON.stringify(transport_response))
+    } catch (error) {
+      setIsLoading(false)
+      toast.error('Failded fetching quotation data')
+    }
+  }
+
+  const fetchQuotation = (data, routeUrl) => {
+    const { quotationName, travel, citiesHotels, transport, id, pdfUrl, status, createdQuoteClientId } = data
+
+    localStorage.setItem('quotationStatus', status)
+    localStorage.setItem('createdQuoteClientId', createdQuoteClientId)
     localStorage.setItem('pdfUrl', pdfUrl)
     localStorage.setItem('quotationId', id)
     localStorage.setItem('quotationName', quotationName)
@@ -594,7 +671,7 @@ const QuotationsHistory = () => {
       })
     )
 
-    router.push('/quotations')
+    router.push(routeUrl)
   }
 
   const resetLocalStorage = () => {

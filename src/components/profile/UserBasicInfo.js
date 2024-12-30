@@ -55,9 +55,9 @@ const ResetButtonStyled = styled(Button)(({ theme }) => ({
 const UserBasicInfo = () => {
   // ** State
   const { user } = useAuth()
-  const { name, email, mobile, gender, address, companyName, designation, tagline, title, about } = user
+  const { name, email, mobile, gender, address, companyName, designation, tagline, title, about, logo } = user
 
-  const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
+  const [imgSrc, setImgSrc] = useState(logo ? logo : '')
   const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -99,7 +99,7 @@ const UserBasicInfo = () => {
     setIsLoading(true)
     const baseUri = process.env.NEXT_PUBLIC_BASE_URL
     const clientType = localStorage.getItem('clientType') ? localStorage.getItem('clientType') : 'admin'
-    const response = await putRequest(`${baseUri}/${clientType}/update-profile`, data)
+    const response = await putRequest(`${baseUri}/${clientType}/update-profile`, { ...data, logo: imgSrc })
     setIsLoading(false)
 
     if (response.status) {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, Fragment } from 'react'
 import toast from 'react-hot-toast'
 import { usePDF } from 'react-to-pdf'
+import { useSelector } from 'react-redux'
 
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -11,6 +12,7 @@ import { format } from 'date-fns'
 import axios from 'axios'
 
 import CardContent from '@mui/material/CardContent'
+import CardActions from '@mui/material/CardActions'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Alert from '@mui/material/Alert'
@@ -563,6 +565,8 @@ const getTransportFare = (data, cities) => {
 
 const QutationPreview = ({ id }) => {
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
+  const hotelSheetData = useSelector(state => state.hotelRateData)
+
   const quotationId = useRef(localStorage.getItem('quotationId') ?? '')
   const travelInfoData = useRef(localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null)
   const cities = useRef(localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : [])
@@ -590,7 +594,7 @@ const QutationPreview = ({ id }) => {
   const [error, setError] = useState(false)
   const [totalAmount, setTotalAmount] = useState(0)
   const [offerPrice, setOfferPrice] = useState('')
-  const [pdfUrl, setPdfUrl] = useState(localStorage.getItem('pdfUrl') ? localStorage.getItem('pdfUrl') : '')
+  const [pdfUrl, setPdfUrl] = useState(() => localStorage.getItem('pdfUrl') || '')
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
 
   const [isLoading, setIsLoading] = useState(false)
@@ -608,32 +612,21 @@ const QutationPreview = ({ id }) => {
     }
   }, [isLoaded])
 
-  const fetchHotelData = async () => {
-    const HOTEL_SHEET_ID = process.env.NEXT_PUBLIC_HOTEL_SHEET_ID
-    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    const HOTEL_URL = `https://sheets.googleapis.com/v4/spreadsheets/${HOTEL_SHEET_ID}/values/Sheet1?key=${API_KEY}`
-
-    setIsLoading(true)
-    try {
-      const response = await axios.get(HOTEL_URL)
-      setIsLoading(false)
-      const finalData = transformHotelData(response.data.values).stateList
-      const cityLabels = cities.current.map(item => item.label)
-      const selectedStates = finalData
-        .map(state => {
-          const filteredCities = state.cities.filter(city => cityLabels.includes(city.name))
-          return {
-            ...state,
-            cities: filteredCities
-          }
-        })
-        .filter(state => state.cities.length > 0)
-      setStates(selectedStates)
-      localStorage.setItem('selectedStates', JSON.stringify(selectedStates))
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Failded fetching quotation data')
-    }
+  const fetchHotelData = () => {
+    const cityLabels = cities.current.map(item => item.label)
+    const selectedStates = hotelSheetData
+      ? hotelSheetData.stateList
+          .map(state => {
+            const filteredCities = state.cities.filter(city => cityLabels.includes(city.name))
+            return {
+              ...state,
+              cities: filteredCities
+            }
+          })
+          .filter(state => state.cities.length > 0)
+      : []
+    setStates(selectedStates)
+    localStorage.setItem('selectedStates', JSON.stringify(selectedStates))
   }
 
   const fetchMonumentsData = async () => {
@@ -694,17 +687,8 @@ const QutationPreview = ({ id }) => {
     })
   }
 
-  const saveQuotation = async () => {
-    // const quotationId = localStorage.getItem('quotationId')
-    // const travelInfoData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
-    // const cities = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
-    // const transportData = localStorage.getItem('transport') ? JSON.parse(localStorage.getItem('transport')) : null
-    // const clientType = ['admin', 'partner', 'employee'].includes(localStorage.getItem('clientType'))
-    //   ? localStorage.getItem('clientType')
-    //   : 'admin'
-
-    const dataToSend = {
-      // quotationName: localStorage.getItem('quotationName') ? localStorage.getItem('quotationName') : '',
+  const saveQuotation = async status => {
+    let dataToSend = {
       quotationName: quotationName.current,
       travelInfo: travelInfoData.current
         ? {
@@ -774,26 +758,30 @@ const QutationPreview = ({ id }) => {
     <title>Adventure Richa Holidays</title><style>${generateItineraryCss()}</style></head><body>${
             targetRef.current.innerHTML
           }</body></html>`
-        : ''
+        : '',
+      status
     }
-    console.log(dataToSend)
-    // return
 
-    // const pdfContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-    // <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    // <title>Adventure Richa Holidays</title><style>${generateItineraryCss()}</style></head><body>${
-    //   targetRef.current.innerHTML
-    // }</body></html>`
-    // console.log(pdfContent)
-    // // console.log(targetRef.current.innerHTML)
-    // return
+    const createdClientType = localStorage.getItem('createdQuoteClientId')
+      ? localStorage.getItem('createdQuoteClientId').split('_')[0]
+      : clientType.current
 
-    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-    const api_url = `${BASE_URL}/${clientType.current}`
+    if (createdClientType == 'employee') {
+      dataToSend = { ...dataToSend, employeeId: localStorage.getItem('createdQuoteClientId') }
+    } else if (createdClientType == 'partner') {
+      dataToSend = { ...dataToSend, partnerId: localStorage.getItem('createdQuoteClientId') }
+    }
+    // const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    const BASE_URL = 'http://localhost:4000/api'
+    const api_url = `${BASE_URL}/${createdClientType}`
     setIsLoading(true)
     let response
     if (quotationId.current.length > 0) {
-      response = await putRequest(`${api_url}/update-quotation`, { id: quotationId, ...dataToSend })
+      response = await putRequest(
+        `${api_url}/update-quotation`,
+        { id: quotationId.current, ...dataToSend },
+        { [`${createdClientType}id`]: localStorage.getItem('createdQuoteClientId') }
+      )
     } else {
       response = await postRequest(`${api_url}/create-quotation`, dataToSend)
     }
@@ -885,8 +873,6 @@ const QutationPreview = ({ id }) => {
               : clientType.current == 'employee'
               ? Math.floor(Number(totalHotelAmount) * 1.265)
               : Math.floor(Number(totalHotelAmount) * 0.95)
-
-          console.log(totalTransportAmount)
 
           const transportFinalAmount =
             clientType.current == 'admin'
@@ -1555,7 +1541,17 @@ const QutationPreview = ({ id }) => {
                   setOfferPrice(value)
                 }}
               />
+
+              <TextField fullWidth multiline rows={3} label='Comment' sx={{ mt: 5 }} value='' onChange={e => {}} />
             </CardContent>
+            <CardActions>
+              <Button variant='contained' sx={{ mr: 2 }} onClick={() => saveQuotation('approved')}>
+                Approve
+              </Button>
+              <Button color='error' variant='outlined' onClick={() => saveQuotation('rejected')}>
+                Reject
+              </Button>
+            </CardActions>
           </Card>
           <Card sx={{ mt: 5 }}>
             <CardContent>
@@ -1592,6 +1588,7 @@ const QutationPreview = ({ id }) => {
               </Button>
               <Button
                 fullWidth
+                onClick={() => saveQuotation('pending')}
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 variant='outlined'
                 startIcon={<Icon icon='mdi:custom-send-quote' />}
@@ -1612,7 +1609,7 @@ const QutationPreview = ({ id }) => {
               </Button>
               <Button
                 fullWidth
-                onClick={() => saveQuotation()}
+                onClick={() => saveQuotation('draft')}
                 variant='outlined'
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-save-quote' />}

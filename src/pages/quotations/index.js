@@ -161,7 +161,7 @@ export const transformHotelData = data => {
   return { roomsList, hotelsRate: result, stateList }
 }
 
-const transformTransportData = data => {
+export const transformTransportData = data => {
   const headers = data[0]
   const result = {}
 

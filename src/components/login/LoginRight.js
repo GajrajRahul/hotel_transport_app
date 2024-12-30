@@ -202,7 +202,7 @@ const LoginRight = () => {
                   textAlign: 'end'
                 }}
               >
-                <LinkStyled href='/forgot-password'>Recover Password?</LinkStyled>
+                <LinkStyled href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
               </Typography>
               <Button
                 type='submit'
@@ -339,7 +339,7 @@ const LoginRight = () => {
                   textAlign: 'end'
                 }}
               >
-                <LinkStyled href='/forgot-password'>Recover Password?</LinkStyled>
+                <LinkStyled href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
               </Typography>
               <Button
                 type='submit'

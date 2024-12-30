@@ -3,11 +3,15 @@ import { configureStore, combineReducers, createAsyncThunk } from '@reduxjs/tool
 import BreadCrumbsSlice from './BreadCrumbsSlice'
 import TravelInfoSlice from './quotations/TravelInfoSlice'
 import HotelsInfoSlice from './quotations/HotelsInfoSlice'
+import HotelDataSlice from './HotelDataSlice'
+import TransportDataSlice from './TransportDataSlice'
 
 const reducers = combineReducers({
   breadcrumb: BreadCrumbsSlice,
   travelInfo: TravelInfoSlice,
-  hotelsInfo: HotelsInfoSlice
+  hotelsInfo: HotelsInfoSlice,
+  hotelRateData: HotelDataSlice,
+  transportRateData: TransportDataSlice
 })
 
 const reducerProxy = (state, action) => {
