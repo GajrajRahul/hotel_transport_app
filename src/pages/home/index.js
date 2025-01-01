@@ -87,7 +87,7 @@ const data = [
     src: '/images/icons/luggage.png',
     color: '#BBBAF6',
     href: '/packages'
-  },
+  }
   // {
   //   title: 'Approval Status ',
   //   // subtitle: 'Offer curated travel packages.',
@@ -184,9 +184,9 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
     <>
       <Loader open={isLoading} />
       {/* <KeenSliderWrapper> */}
-      <Grid container sx={{justifyContent: 'center'}}>
+      <Grid container sx={{ justifyContent: 'center' }}>
         {data.map((item, index) => (
-          <Grid key={index}  xs={12}  sm={6}  md={4}  lg={3}  sx={{padding: '10px 10px'}}>
+          <Grid key={index} item xs={12} sm={6} md={4} lg={3} sx={{ padding: '10px 10px' }}>
             <Card
               sx={{
                 width: '100% !important',
@@ -199,13 +199,12 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
               onClick={() => {
                 if (item.href == '/quotations' || item.href == '/quotations-history') {
                   router.push(item.href)
-                }
-                else if(item.href == '/taxi') {
+                } else if (item.href == '/taxi') {
                   router.push('/book-taxi')
                 }
                 if (item.href == '/quotations') {
-                  localStorage.removeItem("quotationId")
-                  localStorage.removeItem("quotationName")
+                  localStorage.removeItem('quotationId')
+                  localStorage.removeItem('quotationName')
                   localStorage.removeItem('travel')
                   localStorage.removeItem('citiesHotels')
                   localStorage.removeItem('transport')
