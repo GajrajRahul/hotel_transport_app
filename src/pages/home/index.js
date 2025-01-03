@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { useDispatch, useSelector } from 'react-redux'
+
+import toast from 'react-hot-toast'
+import axios from 'axios'
 
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
@@ -9,41 +13,10 @@ import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Box from '@mui/material/Box'
 
-import axios from 'axios'
-import toast from 'react-hot-toast'
-
-import { useKeenSlider } from 'keen-slider/react'
-import clsx from 'clsx'
-
 import { styled } from '@mui/material/styles'
-import { useTheme } from '@mui/material/styles'
-
-import SideDrawer from 'src/components/SideDrawer'
-import KeenSliderWrapper from 'src/@core/styles/libs/keen-slider'
-import Icon from 'src/@core/components/icon'
-import CardSnippet from 'src/@core/components/card-snippet'
-import AnalyticsTransactionsCard from 'src/views/analytics/AnalyticsTransactionsCard'
-import EcommerceTotalSalesDonut from 'src/views/analytics/EcommerceTotalSalesDonut'
-import CrmTotalGrowth from 'src/views/analytics/CrmTotalGrowth'
-import QuotationSteps from 'src/components/quotation/QuotationSteps'
 import Loader from 'src/views/common/Loader'
 import Dashboard from 'src/components/dashboard/Dashboard'
-
-const MutationPlugin = slider => {
-  const observer = new MutationObserver(mutations => {
-    mutations.forEach(() => {
-      slider.update()
-    })
-  })
-  const config = { childList: true }
-
-  slider.on('created', () => {
-    observer.observe(slider.container, config)
-  })
-  slider.on('destroyed', () => {
-    observer.disconnect()
-  })
-}
+import { replaceTravelPackageData } from 'src/store/TravelPackageSlice'
 
 const Img = styled('img')({
   // right: 7,
@@ -122,68 +95,89 @@ const data = [
   // }
 ]
 
-const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
-  const [openDrawer, setOpenDrawer] = useState(false)
-  // const [slides, setSlides] = useState(data)
-  const [loaded, setLoaded] = useState(false)
-  const [currentSlide, setCurrentSlide] = useState(0)
-  // const [transportRate, setTransportRate] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  // const [hotelRate, setHotelData] = useState(finalData?.hotelsRate ?? null)
-  // const [roomsList, setRoomsList] = useState(finalData?.roomsList ?? [])
+const transformPackageData = data => {
+  const headers = data[0]
 
-  const theme = useTheme()
-  const router = useRouter()
-  const [sliderRef, instanceRef] = useKeenSlider(
-    {
-      rtl: false,
-      slides: {
-        // perView: 3,
-        perView: 4,
-        spacing: 10
-      },
-      breakpoints: {
-        [`(max-width: ${theme.breakpoints.values.custom1}px)`]: {
-          slides: { perView: 3, spacing: 10 }
-        },
-        // [`(max-width: ${theme.breakpoints.values.laptopSm}px)`]: {
-        //   slides: { perView: 3, spacing: 10 }
-        // },
-        [`(max-width: ${theme.breakpoints.values.tabletMd}px)`]: {
-          slides: { perView: 2, spacing: 10 }
-        },
-        [`(max-width: ${theme.breakpoints.values.sm}px)`]: {
-          slides: { perView: 1, spacing: 16 }
+  let result = []
+  data.slice(1).forEach((row, index) => {
+    let obj = {}
+    let packages = []
+    let count = 1
+
+    headers.forEach((header, idx) => {
+      if (!header.includes('package_') || header == 'package_duration') {
+        if (header.trim() == 'tour_route') {
+          let segments = row[idx].split(',')
+
+          let places = segments.flatMap(segment => segment.split('-').map(place => place.trim()))
+
+          obj[header.trim()] = [...new Set(places)]
+        } else {
+          obj[header.trim()] = row[idx]
         }
-      },
-      slideChanged(slider) {
-        setCurrentSlide(slider.track.details.rel)
-      },
-      created() {
-        setLoaded(true)
+      } else if (header.startsWith('package_') && header.endsWith('_price_per_person')) {
+        if (row[idx - 2]) {
+          // console.log('row[idx - 2]: ', row[idx - 2])
+          // console.log('row[idx]: ', row[idx])
+          packages.push({
+            [`package_${count}_name`]: row[idx - 2] || '',
+            [`package_${count}_hotels`]: row[idx - 1]
+              ? row[idx - 1].split('|').map((hotels_info, j) => {
+                  if (
+                    hotels_info.split(':')[0] &&
+                    hotels_info.split(':')[0] != '\n' &&
+                    hotels_info.split(':')[0] != '\n '
+                  ) {
+                    // console.log("hotels_info.split(':'): ", hotels_info.split(':'))
+                    return { city: hotels_info.split(':')[0], hotels: hotels_info.split(':')[1] }
+                  } else {
+                    return { city: '', hotels: '' }
+                  }
+                })
+              : [],
+            [`package_${count}_price_per_person`]: row[idx]
+          })
+          count++
+        }
       }
-    },
-    [MutationPlugin]
-  )
+    })
+    obj.packages = packages
+    result.push(obj)
+  })
+  return result
+}
 
-  // useEffect(() => {
-  // getHotelRates()
-  //   getTransportRate()
-  // }, [])
+const MainHome = () => {
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleOpenDrawer = () => {
-    setOpenDrawer(true)
-  }
+  const router = useRouter()
+  const dispatch = useDispatch()
 
-  const handleCloseDrawer = resetFunc => {
-    setOpenDrawer(false)
-    resetFunc()
+  useEffect(() => {
+    fetchTravelPackageData()
+  }, [])
+
+  const fetchTravelPackageData = async () => {
+    const TRAVEL_PACKAGE_SHEET_ID = process.env.NEXT_PUBLIC_TRAVEL_PACKAGES_SHEET_ID
+    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const TRAVEL_PACKAGE_URL = `https://sheets.googleapis.com/v4/spreadsheets/${TRAVEL_PACKAGE_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+
+    try {
+      const response = await axios.get(TRAVEL_PACKAGE_URL)
+      const travelPackageSheetData = transformPackageData(response.data.values)
+      // console.log(travelPackageSheetData)
+      dispatch(replaceTravelPackageData(travelPackageSheetData))
+      // return transformHotelData(response.data.values)
+    } catch (error) {
+      console.log(error)
+      toast.error('Failded fetching quotation data')
+      return { hotelsRate: null, roomsList: [], stateList: [] }
+    }
   }
 
   return (
     <>
       <Loader open={isLoading} />
-      {/* <KeenSliderWrapper> */}
       <Grid container sx={{ justifyContent: 'center' }}>
         {data.map((item, index) => (
           <Grid key={index} item xs={12} sm={6} md={4} lg={3} sx={{ padding: '10px 10px' }}>
@@ -195,7 +189,6 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
                 cursor: 'pointer'
               }}
               key={index}
-              // className='keen-slider__slide default-slide'
               onClick={() => {
                 if (item.href == '/quotations' || item.href == '/quotations-history') {
                   router.push(item.href)
@@ -244,100 +237,7 @@ const MainHome = ({ hotel_response, rooms_list, transport_response }) => {
         <Grid item xs={12}>
           <Dashboard />
         </Grid>
-        {/* <Grid item xs={12}> */}
-        {/* <Box className='navigation-wrapper'> // this is not importnat */}
-        {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {loaded && instanceRef.current && (
-              <Icon
-                style={{ cursor: 'pointer' }}
-                icon='mdi:round-arrow-left'
-                className={clsx('arrow arrow-left', {
-                  'arrow-disabled': currentSlide === 0
-                })}
-                onClick={e => e.stopPropagation() || instanceRef.current?.prev()}
-              />
-            )}
-            <Box ref={sliderRef} className='keen-slider'>
-              {data.map((item, index) => {
-                return (
-                  <Card
-                    // title=''
-                    // code={{
-                    //   tsx: null,
-                    //   jsx: null
-                    // }}
-                    sx={{
-                      overflow: 'visible',
-                      position: 'relative',
-                      borderRadius: '17px',
-                      backgroundColor: item.color
-                    }}
-                    key={index}
-                    className='keen-slider__slide default-slide'
-                  >
-                    <CardContent
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        pt: 3,
-                        '&.MuiCardContent-root': {
-                          pb: 3
-                        }
-                      }}
-                    >
-                      <Box>
-                        <Typography sx={{ mb: 3, fontWeight: 600 }}>{item.title}</Typography>
-                        <Box sx={{ rowGap: 1, display: 'flex', flexWrap: 'wrap' }}>
-                          <Typography fontSize={14}>{item.subtitle}</Typography>
-                        </Box>
-                      </Box>
-                      <Img src={item.src} alt={item.title} />
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </Box>
-            {loaded && instanceRef.current && (
-              <Icon
-                style={{ cursor: 'pointer' }}
-                icon='mdi:round-arrow-right'
-                className={clsx('arrow arrow-right', {
-                  'arrow-disabled': currentSlide === instanceRef.current.track.details.slides.length - 1
-                })}
-                onClick={e => e.stopPropagation() || instanceRef.current?.next()}
-              />
-            )}
-          </Box> */}
-        {/* </Box> */}
-        {/* </Grid> */}
-        {/* <Grid item xs={6} md={6}>
-            <AnalyticsTransactionsCard />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <EcommerceTotalSalesDonut />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <CrmTotalGrowth />
-          </Grid> */}
-        {/* <Grid item xs={12} sx={{ height: '100%' }}>
-          {hotel_response && rooms_list && transport_response && (
-            <QuotationSteps hotelRate={hotel_response} roomsList={rooms_list} transportRate={transport_response} />
-          )}
-        </Grid> */}
-
-        {/* <Grid item xs={12}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Button variant='contained' onClick={handleOpenDrawer}>
-                  Open Drawer
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid> */}
-        {/* <SideDrawer open={openDrawer} toggle={handleCloseDrawer} /> */}
       </Grid>
-      {/* </KeenSliderWrapper> */}
     </>
   )
 }

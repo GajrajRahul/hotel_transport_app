@@ -5,13 +5,15 @@ import TravelInfoSlice from './quotations/TravelInfoSlice'
 import HotelsInfoSlice from './quotations/HotelsInfoSlice'
 import HotelDataSlice from './HotelDataSlice'
 import TransportDataSlice from './TransportDataSlice'
+import TravelPackageSlice from './TravelPackageSlice'
 
 const reducers = combineReducers({
   breadcrumb: BreadCrumbsSlice,
   travelInfo: TravelInfoSlice,
   hotelsInfo: HotelsInfoSlice,
   hotelRateData: HotelDataSlice,
-  transportRateData: TransportDataSlice
+  transportRateData: TransportDataSlice,
+  travelPackageData: TravelPackageSlice
 })
 
 const reducerProxy = (state, action) => {

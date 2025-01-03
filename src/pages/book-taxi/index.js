@@ -37,37 +37,60 @@ import { getDayNightCount } from 'src/utils/function'
 const libraries = ['places']
 
 const getTransportFare = (data, cities, transportSheetData) => {
-  const { totalDays, totalDistance, vehicleType, additionalStops } = data
+  const { totalDays, totalDistance, vehicleType, additionalStops, from, to } = data
   const vehicleRates = transportSheetData[vehicleType]
+  console.log('cities: ', cities)
 
-  if (cities.length == 1) {
+  if (from.place == to.place) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
+    // console.log(additionalStops)
+    // console.log('totalAmount: ', totalAmount)
     if (additionalStops.length > 0) {
       totalAmount = Number(vehicleRates['city_local_fare'] * (Number(totalDays) - 1))
       const tempTotalDistance = totalDistance < 280 ? 280 : totalDistance
+      console.log('tempTotalDistance: ', tempTotalDistance)
+
       const remainingAmount =
         tempTotalDistance * Number(vehicleRates['amount_per_km']) +
         Number(vehicleRates['toll_charges_per_day']) +
         Number(vehicleRates['driver_charges_per_day']) +
         Number(vehicleRates['parking_charges_per_day']) +
         Number(vehicleRates['service_cleaning_charge_one_time'])
+
       totalAmount += remainingAmount
+
+      console.log(
+        "tempTotalDistance * Number(vehicleRates['amount_per_km']): ",
+        tempTotalDistance * Number(vehicleRates['amount_per_km'])
+      )
+      console.log('per_km: ', Number(vehicleRates['amount_per_km']))
+      console.log('toll_day: ', Number(vehicleRates['toll_charges_per_day']))
+      console.log('driver_day: ', Number(vehicleRates['driver_charges_per_day']))
+      console.log('parking_km: ', Number(vehicleRates['parking_charges_per_day']))
+      console.log('cleaning: ', Number(vehicleRates['service_cleaning_charge_one_time']))
+      console.log('totalAmount: ', totalAmount)
     }
     return totalAmount
   } else {
     const distanceAmount =
       Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
+    console.log('distanceAmount: ', distanceAmount)
 
     let distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
+    console.log('distanceAmount2: ', distanceAmount2)
 
     // if (totalDistance >= 1500) {
     //   distanceAmount2 = distanceAmount2 * 1.32
     // }
 
     const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
+    console.log('tollAmount: ', tollAmount)
     const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
+    console.log('driverAmount: ', driverAmount)
     const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
+    console.log('parkingCharges: ', parkingCharges)
     const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
+    console.log('cleaningAmount: ', cleaningAmount)
 
     const totalAmount =
       (distanceAmount > distanceAmount2 ? distanceAmount : Math.floor(distanceAmount2)) +
@@ -76,6 +99,7 @@ const getTransportFare = (data, cities, transportSheetData) => {
       Number(parkingCharges) +
       Number(cleaningAmount)
 
+    console.log('grandTotal: ', totalAmount)
     return totalAmount
   }
 }
@@ -133,9 +157,9 @@ const getTotalAmount = async (transportData, transportSheetData) => {
     const result = await getRoute()
 
     const totalDist = result.routes[0].legs.reduce((acc, leg) => acc + leg.distance.value, 0)
-    console.log('result.routes[0].legs: ', result.routes[0].legs)
+    // console.log('result.routes[0].legs: ', result.routes[0].legs)
     const totalDistance = (totalDist / 1000).toFixed(2)
-    console.log('totalDistance: ', totalDistance)
+    // console.log('totalDistance: ', totalDistance)
 
     const totalTransportAmount =
       getTransportFare(
@@ -212,7 +236,7 @@ const BookTaxi = () => {
     stops.push(data.to.city || '')
 
     const amountData = await getTotalAmount(data, transportSheetData)
-    console.log('amountData: ', amountData)
+    // console.log('amountData: ', amountData)
     if (amountData.status) {
       setPreviewTaxi({
         pickup: `${data.from?.city || ''}, ${data.from?.state}`,
