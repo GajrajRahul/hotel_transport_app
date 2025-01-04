@@ -110,6 +110,10 @@ const Dashboard = () => {
     setStatus(e.target.value)
   }, [])
 
+  const resetSelectedTravelPackage = useCallback(() => {
+    setSelectedTravelPackage(null)
+  }, [])
+
   return (
     <>
       {!selectedTravelPackage ? (
@@ -379,7 +383,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       ) : (
-        <Preview selectedTravelPackage={selectedTravelPackage} />
+        <Preview selectedTravelPackage={selectedTravelPackage} onClose={() => setSelectedTravelPackage(false)} />
       )}
     </>
   )

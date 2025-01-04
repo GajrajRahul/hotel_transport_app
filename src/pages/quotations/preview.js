@@ -872,14 +872,18 @@ const QutationPreview = ({ id }) => {
             clientType.current == 'admin'
               ? Number(totalHotelAmount)
               : clientType.current == 'employee'
-              ? Math.floor(Number(totalHotelAmount) * 1.265)
+              ? origin == destination
+                ? Math.floor(Number(totalHotelAmount) * 1.44)
+                : Math.floor(Number(totalHotelAmount) * 1.3)
               : Math.floor(Number(totalHotelAmount) * 0.95)
 
           const transportFinalAmount =
             clientType.current == 'admin'
               ? Number(totalTransportAmount)
               : clientType.current == 'employee'
-              ? Math.floor(Number(totalTransportAmount) * 1.265)
+              ? origin == destination
+                ? Math.floor(Number(totalTransportAmount) * 1.44)
+                : Math.floor(Number(totalHotelAmount) * 1.3)
               : Math.floor(Number(totalTransportAmount) * 0.95)
 
           if (clientType.current == 'employee' && origin == destination) {

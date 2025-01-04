@@ -5,6 +5,7 @@ import TravelInfoSlice from './quotations/TravelInfoSlice'
 import HotelsInfoSlice from './quotations/HotelsInfoSlice'
 import HotelDataSlice from './HotelDataSlice'
 import TransportDataSlice from './TransportDataSlice'
+import MonumentDataSlice from './MonumentDataSlice'
 import TravelPackageSlice from './TravelPackageSlice'
 
 const reducers = combineReducers({
@@ -13,6 +14,7 @@ const reducers = combineReducers({
   hotelsInfo: HotelsInfoSlice,
   hotelRateData: HotelDataSlice,
   transportRateData: TransportDataSlice,
+  monumentRateData: MonumentDataSlice,
   travelPackageData: TravelPackageSlice
 })
 

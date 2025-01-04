@@ -8,7 +8,8 @@ import { getRequest, postRequest } from 'src/api-main-file/APIServices'
 import axios from 'axios'
 import { replaceHotelData } from 'src/store/HotelDataSlice'
 import { replaceTransportData } from 'src/store/TransportDataSlice'
-import { transformHotelData, transformTransportData } from 'src/utils/function'
+import { replaceMonumentData } from 'src/store/MonumentDataSlice'
+import { transformHotelData, transformMonumentsData, transformTransportData } from 'src/utils/function'
 
 // ** Defaults
 const defaultProvider = {
@@ -104,7 +105,11 @@ const AuthProvider = ({ children }) => {
   const fetchSheetData = async () => {
     setLoading(true)
 
-    const [hotelData, transportData] = await Promise.all([fetchHotelData(), fetchTransportData()])
+    const [hotelData, transportData, monumentData] = await Promise.all([
+      fetchHotelData(),
+      fetchTransportData(),
+      fetchMonumentsData()
+    ])
 
     if (hotelData) {
       dispatch(replaceHotelData(hotelData))
@@ -114,6 +119,9 @@ const AuthProvider = ({ children }) => {
       dispatch(replaceTransportData(transportData))
     }
 
+    if (monumentData) {
+      dispatch(replaceMonumentData(monumentData))
+    }
     setLoading(false)
   }
 
@@ -142,6 +150,21 @@ const AuthProvider = ({ children }) => {
     } catch (error) {
       toast.error('Failded fetching quotation data')
       return {}
+    }
+  }
+
+  const fetchMonumentsData = async () => {
+    const MONUMENTS_SHEET_ID = process.env.NEXT_PUBLIC_MONUMENTS_SHEET_ID
+    const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const MONUMENTS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${MONUMENTS_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+
+    try {
+      const response = await axios.get(MONUMENTS_URL)
+      return transformMonumentsData(response.data.values)
+    } catch (error) {
+      toast.error('Failed fetching monuments data')
+      console.error('Error fetching data:', error)
+      return []
     }
   }
 

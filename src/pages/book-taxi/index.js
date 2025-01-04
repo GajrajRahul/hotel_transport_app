@@ -48,7 +48,7 @@ const getTransportFare = (data, cities, transportSheetData) => {
     if (additionalStops.length > 0) {
       totalAmount = Number(vehicleRates['city_local_fare'] * (Number(totalDays) - 1))
       const tempTotalDistance = totalDistance < 280 ? 280 : totalDistance
-      console.log('tempTotalDistance: ', tempTotalDistance)
+      // console.log('tempTotalDistance: ', tempTotalDistance)
 
       const remainingAmount =
         tempTotalDistance * Number(vehicleRates['amount_per_km']) +
@@ -59,38 +59,38 @@ const getTransportFare = (data, cities, transportSheetData) => {
 
       totalAmount += remainingAmount
 
-      console.log(
-        "tempTotalDistance * Number(vehicleRates['amount_per_km']): ",
-        tempTotalDistance * Number(vehicleRates['amount_per_km'])
-      )
-      console.log('per_km: ', Number(vehicleRates['amount_per_km']))
-      console.log('toll_day: ', Number(vehicleRates['toll_charges_per_day']))
-      console.log('driver_day: ', Number(vehicleRates['driver_charges_per_day']))
-      console.log('parking_km: ', Number(vehicleRates['parking_charges_per_day']))
-      console.log('cleaning: ', Number(vehicleRates['service_cleaning_charge_one_time']))
-      console.log('totalAmount: ', totalAmount)
+      // console.log(
+      //   "tempTotalDistance * Number(vehicleRates['amount_per_km']): ",
+      //   tempTotalDistance * Number(vehicleRates['amount_per_km'])
+      // )
+      // console.log('per_km: ', Number(vehicleRates['amount_per_km']))
+      // console.log('toll_day: ', Number(vehicleRates['toll_charges_per_day']))
+      // console.log('driver_day: ', Number(vehicleRates['driver_charges_per_day']))
+      // console.log('parking_km: ', Number(vehicleRates['parking_charges_per_day']))
+      // console.log('cleaning: ', Number(vehicleRates['service_cleaning_charge_one_time']))
+      // console.log('totalAmount: ', totalAmount)
     }
     return totalAmount
   } else {
     const distanceAmount =
       Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
-    console.log('distanceAmount: ', distanceAmount)
+    // console.log('distanceAmount: ', distanceAmount)
 
     let distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
-    console.log('distanceAmount2: ', distanceAmount2)
+    // console.log('distanceAmount2: ', distanceAmount2)
 
     // if (totalDistance >= 1500) {
     //   distanceAmount2 = distanceAmount2 * 1.32
     // }
 
     const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
-    console.log('tollAmount: ', tollAmount)
+    // console.log('tollAmount: ', tollAmount)
     const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
-    console.log('driverAmount: ', driverAmount)
+    // console.log('driverAmount: ', driverAmount)
     const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
-    console.log('parkingCharges: ', parkingCharges)
+    // console.log('parkingCharges: ', parkingCharges)
     const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
-    console.log('cleaningAmount: ', cleaningAmount)
+    // console.log('cleaningAmount: ', cleaningAmount)
 
     const totalAmount =
       (distanceAmount > distanceAmount2 ? distanceAmount : Math.floor(distanceAmount2)) +
@@ -99,7 +99,7 @@ const getTransportFare = (data, cities, transportSheetData) => {
       Number(parkingCharges) +
       Number(cleaningAmount)
 
-    console.log('grandTotal: ', totalAmount)
+    // console.log('grandTotal: ', totalAmount)
     return totalAmount
   }
 }
