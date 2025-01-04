@@ -594,7 +594,7 @@ const QutationPreview = ({ id }) => {
   const [pdfUrl, setPdfUrl] = useState(() => localStorage.getItem('pdfUrl') || '')
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
 
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const { user } = useAuth()
 
@@ -627,12 +627,18 @@ const QutationPreview = ({ id }) => {
   }
 
   const fetchMonumentsData = async () => {
+    if (quotationName.current.length == 0) {
+      setIsLoading(false)
+      router.push('/')
+      return
+    }
+
     const MONUMENTS_SHEET_ID = process.env.NEXT_PUBLIC_MONUMENTS_SHEET_ID
     const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     const MONUMENTS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${MONUMENTS_SHEET_ID}/values/Sheet1?key=${API_KEY}`
 
     try {
-      setIsLoading(true)
+      // setIsLoading(true)
       const response = await axios.get(MONUMENTS_URL)
       setIsLoading(false)
       const finalData = generateMonumentsData(response.data.values ?? [])
@@ -907,12 +913,15 @@ const QutationPreview = ({ id }) => {
   }
 
   const resetLocalStorage = () => {
-    localStorage.removeItem('selectedStates')
-    localStorage.removeItem('citiesHotels')
     localStorage.removeItem('quotationId')
     localStorage.removeItem('quotationName')
-    localStorage.removeItem('transport')
+    localStorage.removeItem('quotationStatus')
     localStorage.removeItem('travel')
+    localStorage.removeItem('citiesHotels')
+    localStorage.removeItem('transport')
+    localStorage.removeItem('selectedStates')
+    localStorage.removeItem('createdQuoteClientId')
+    localStorage.removeItem('pdfUrl')
   }
 
   return (
