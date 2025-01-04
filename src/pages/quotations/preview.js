@@ -1656,7 +1656,7 @@ const QutationPreview = ({ id }) => {
   )
 }
 
-QutationPreview.getLayout = page => <BlankLayout>{page}</BlankLayout>
-QutationPreview.guestGuard = false
+// QutationPreview.getLayout = page => <BlankLayout>{page}</BlankLayout>
+// QutationPreview.guestGuard = false
 
 export default QutationPreview

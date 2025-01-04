@@ -109,8 +109,8 @@ const Quotations = () => {
       setActiveStep(activeStep + 1)
     } else {
       localStorage.setItem('transport', JSON.stringify(data))
-      // router.push('/quotations/preview')
-      window.open('/quotations/preview', '_blank')
+      router.push('/quotations/preview')
+      // window.open('/quotations/preview', '_blank')
     }
   }
 

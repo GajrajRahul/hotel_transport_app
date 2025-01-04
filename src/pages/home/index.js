@@ -155,7 +155,20 @@ const MainHome = () => {
 
   useEffect(() => {
     fetchTravelPackageData()
+    resetLocalStorage()
   }, [])
+
+  const resetLocalStorage = () => {
+    localStorage.removeItem('quotationId')
+    localStorage.removeItem('quotationName')
+    localStorage.removeItem('quotationStatus')
+    localStorage.removeItem('travel')
+    localStorage.removeItem('citiesHotels')
+    localStorage.removeItem('transport')
+    localStorage.removeItem('selectedStates')
+    localStorage.removeItem('createdQuoteClientId')
+    localStorage.removeItem('pdfUrl')
+  }
 
   const fetchTravelPackageData = async () => {
     const TRAVEL_PACKAGE_SHEET_ID = process.env.NEXT_PUBLIC_TRAVEL_PACKAGES_SHEET_ID
@@ -194,14 +207,6 @@ const MainHome = () => {
                   router.push(item.href)
                 } else if (item.href == '/taxi') {
                   router.push('/book-taxi')
-                }
-                if (item.href == '/quotations') {
-                  localStorage.removeItem('quotationId')
-                  localStorage.removeItem('quotationName')
-                  localStorage.removeItem('travel')
-                  localStorage.removeItem('citiesHotels')
-                  localStorage.removeItem('transport')
-                  localStorage.removeItem('selectedStates')
                 }
               }}
             >
