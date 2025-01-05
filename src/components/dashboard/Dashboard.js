@@ -129,8 +129,8 @@ const Dashboard = () => {
               textAlign: 'center'
             }}
           >
-            <Typography variant='h4'>Your Gateway to Incredible Adventures</Typography>
-            <Divider sx={{ width: '100px' }} />
+            <Typography variant='h4' sx={{fontWeight: '900', mt: 4, mb: 2, textTransform:'uppercase', letterSpacing: '3px'}}>Your Gateway to Incredible Adventures</Typography>
+            <Divider sx={{ width: '100px',  mt: 2, mb: 4, backgroundColor: 'orange', height: '3px' }} />
             <Typography>
               Unlock a world of unforgettable travel experiences! Browse through captivating travel packages designed to
               suit every wanderlust dream. From serene escapes to thrilling expeditions, manage and showcase your

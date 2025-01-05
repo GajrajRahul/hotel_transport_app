@@ -26,6 +26,7 @@ import {
   vehicleType,
   YoutubeIcon
 } from 'src/utils/icons'
+import { flexbox, fontFamily } from '@mui/system'
 
 const BulletPoint = ({ text, icon }) =>
   text &&
@@ -168,11 +169,9 @@ const getDayWiseItinerary = (selectedTravelPackage, monuments) => {
     if (i == 0) {
       title = `Day ${i + 1} | Arrival In ${stayData[i].city}`
 
-      description = `Upon your arrival in ${stayData[i].city}, ${
-        monuments[cityName]?.cityIntro ?? ''
-      } you will be transferred to your hotel in a comfortable ${vehicle} Vehicle. Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${
-        stayData[i].city
-      }`
+      description = `Upon your arrival in ${stayData[i].city}, ${monuments[cityName]?.cityIntro ?? ''
+        } you will be transferred to your hotel in a comfortable ${vehicle} Vehicle. Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${stayData[i].city
+        }`
 
       if (meals.includes('Lunch')) {
         description += ` Return to the hotel for a delightful lunch, experiencing authentic flavors.`
@@ -208,13 +207,10 @@ const getDayWiseItinerary = (selectedTravelPackage, monuments) => {
         description += 'Enjoy a delicious breakfast at the hotel.'
       }
 
-      description += `Complete the check-out formalities and proceed to your onward journey. Upon your arrival in ${
-        stayData[i].city
-      }, ${
-        monuments[cityName]?.cityIntro ?? ''
-      } you will be transferred to your hotel in a comfortable ${vehicle} Vehicle. Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${
-        stayData[i].city
-      }`
+      description += `Complete the check-out formalities and proceed to your onward journey. Upon your arrival in ${stayData[i].city
+        }, ${monuments[cityName]?.cityIntro ?? ''
+        } you will be transferred to your hotel in a comfortable ${vehicle} Vehicle. Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${stayData[i].city
+        }`
 
       if (meals.includes('Lunch')) {
         description += ` Return to the hotel for a delightful lunch, experiencing authentic flavors.`
@@ -285,7 +281,7 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
 
   return (
     <>
-    <Button sx={{mb: 10}} variant='contained' onClick={onClose}>Back</Button>
+      <Button sx={{ mb: 10 }} variant='contained' onClick={onClose}>Back</Button>
       <div
         style={{
           backgroundImage: 'url(/images/pdf-image/jaipur/jaipur002.jpg), url(/images/pdf-image/jaipur/jaipur002.jpg)',
@@ -311,12 +307,9 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
         </div>
 
         <div className='title-description'>
-          <div className='tag-line'>Your Gateway to Memorable Journeys</div>
-          <h1 className='title'>Vaibhav and travel company</h1>
-          <p className='description'>
-            Travel with Vaibhav and travel company! Offering tailored domestic and international tours for individuals,
-            groups, and corporate clients. Adventure and relaxation, all perfectly planned.
-          </p>
+          <div className='tag-line'>{user.tagline || 'Your Gateway to Memorable Journeys'}</div>
+          <h1 className='title'>{user.title || 'Your Journey, Our Expertise'}</h1>
+          <p className='description'>{user.about || 'Travel with with trust! Offering tailored domestic and international tours for individuals,groups, and corporate clients. Adventure and relaxation, all perfectly planned.'}</p>
         </div>
 
         <div className='route'>
@@ -333,12 +326,13 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
           <div className='accommodation-section'>
             <h3 className='accommodation-title'>Accommodation Overview</h3>
             <div className='travel-basic-details'>
-              <div className='div-for-accomodations' style={{ width: '30%' }}>
+
+              <div className='div-for-accomodations' style={{ width: '25%' }}>
                 <label
                   style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
                   htmlFor='traveller-count'
                 >
-                  Number of Travellers
+                  No. of Pax
                 </label>
                 <div className='no-of-traveller'>
                   {PersonCount}
@@ -346,36 +340,33 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
                 </div>
               </div>
 
-              <div className='div-for-accomodations' style={{ width: '50%' }}>
+              <div className='div-for-accomodations' style={{ width: '30%' }}>
                 <label
                   style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
                   htmlFor='traveller-count'
                 >
                   Valid Till
                 </label>
-
-                <div className='hotel-category'>
+                <div className='hotel-category' style={{ width: '100%' }}>
                   {TravelDate}
                   <span>{selectedTravelPackage['validity']}</span>
                 </div>
               </div>
 
-              <div className='div-for-accomodations' style={{ width: '20%' }}>
-                <label
-                  style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+              <div className='div-for-accomodations' style={{ width: '15%' }}>
+                <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
                   htmlFor='traveller-count'
                 >
-                  Total Rooms
+                  Rooms
                 </label>
                 <div className='no-of-rooms'>
                   {RoomCount}
                   <span>{selectedTravelPackage['no_of_room']}</span>
                 </div>
               </div>
-            </div>
 
-            <div className='travel-basic-details'>
-              <div className='div-for-accomodations' style={{ width: '50%' }}>
+
+              <div className='div-for-accomodations' style={{ width: '30%' }}>
                 <label
                   style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
                   htmlFor='traveller-count'
@@ -387,14 +378,18 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
                   <span>{selectedTravelPackage['food']}</span>
                 </div>
               </div>
+
+
             </div>
+
+
           </div>
         </div>
 
         <div style={{ height: '180px', color: '#ffffff' }}>
           <div className='transportation-section'>
             <h3 className='accommodation-title'>{selectedTravelPackage['title']}</h3>
-            <h6 className='accommodation-title'>{selectedTravelPackage['sub_title']}</h6>
+            <h6 className='package-description'>{selectedTravelPackage['sub_title']}</h6>
           </div>
         </div>
 
@@ -424,7 +419,7 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
               {selectedTravelPackage['packages'].map((amount, j) => (
                 <Fragment key={j}>
                   <span>{amount[`package_${j + 1}_price_per_person`]}</span>
-                  {j != selectedTravelPackage['packages'].length - 1 && <span> - </span>}
+                  {j != selectedTravelPackage['packages'].length - 1 && <span style={{ color: 'white', fontSize: '15px' }}> to </span>}
                 </Fragment>
               ))}
             </span>
@@ -479,41 +474,54 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
               </div>
             </div>
           </div>
-          {/* {console.log(selectedTravelPackage)} */}
         </div>
 
+
+
         {selectedTravelPackage['packages'].map((packageData, index) => (
-          <div key={index}>
+          <div key={index} className="package-rate-section-bg">
             {packageData[`package_${index + 1}_name`] && (
-              <div style={{ textAlign: 'center' }} className='days-section'>
-                <h3 className='itinerary-title'>{packageData[`package_${index + 1}_name`]}</h3>
-                {packageData[`package_${index + 1}_hotels`].map((hotelInfo, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 20,
-                      marginBottom: '20px'
-                    }}
-                  >
-                    <span style={{ fontSize: 13 }} className='hotel-name'>
-                      {hotelInfo['city']}
-                    </span>
-                    {/* {console.log(hotelInfo)} */}
-                    <span style={{ color: '#ffffff' }}>{hotelInfo['hotels'].split(',').join(' | ')}</span>
-                  </div>
-                ))}
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                  <span style={{ width: '200px' }} className='hotel-name'>
+              <>
+                {/* Package Rate Section */}
+                <div className="package-rate-section">
+                  <h3 className="package-rate-section-title">{packageData[`package_${index + 1}_name`]}</h3>
+                  <h4 className="package-rate-section-Price">
                     ₹ {packageData[`package_${index + 1}_price_per_person`]} / Person
-                  </span>
+                  </h4>
                 </div>
-              </div>
+
+                {/* Package Destination Section */}
+
+                <div className="package-rate-Destination-section">
+                  {packageData[`package_${index + 1}_hotels`].map((hotelInfo, idx) => (
+                    <div key={idx} className='package-rate-Destination-section-2'>
+                      <h6 className="package-rate-Destination-section-city">{hotelInfo['city']}</h6>
+                      <span className='package-rate-Destination-section-hotel' style={{ fontSize: 13 }}>
+                        {hotelInfo['hotels']
+                          .split(',')
+                          .map((hotel, index, array) => {
+                            return (
+                              <>
+                                {hotel}
+                                {index < array.length - 1 && (
+                                  <span style={{ color: 'orange' }}> | </span>
+                                )}
+                              </>
+                            );
+                          })}
+
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+              </>
             )}
           </div>
         ))}
+
+
+
 
         <div className='itinerary-section'>
           <h3 className='itinerary-title'>Day Wise Itinerary</h3>

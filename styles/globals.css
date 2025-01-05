@@ -267,6 +267,82 @@ code[class*='language-'] {
   color: #ffffff;
 }
 
+.package-description {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  text-align: center;
+  letter-spacing: 1pt;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.package-rate-section-bg {
+  margin: 40px auto 40px auto;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(50px);
+  background-color: rgba(0, 0, 0, 0.8);
+  text-align: center;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.package-rate-section {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.package-rate-section-title {
+  margin: 0px;
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.package-rate-section-Price {
+  color: #ffffff;
+  background-color: #ffffff60;
+  padding: 5px 18px;
+  border-radius: 5px;
+  margin: 0px;
+}
+
+.package-rate-Destination-section {
+  display: block;
+  align-items: center;
+  width: 100%;
+}
+.package-rate-Destination-section-2 {
+  display: flex;
+  align-items: center;
+}
+
+
+
+.package-rate-Destination-section-city {
+  color: #333333;
+  background-color: #ffffff60;
+  padding: 2px 14px;
+  border-radius: 50px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  margin: 8px 0px;
+}
+
+.package-rate-Destination-section-hotel {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0px 15px;
+}
+
+
+
 .travel-basic-details {
   display: flex;
   align-items: center;
