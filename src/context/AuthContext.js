@@ -203,8 +203,12 @@ const AuthProvider = ({ children }) => {
     setLoading(false)
 
     if (response.status) {
-      const { status } = response.data
-      if (status != 'approved') {
+      const { user_data } = response.data
+      if(!user_data) {
+        toast.error(response.error)
+        return
+      }
+      if (user_data && user_data.status != 'approved') {
         toast.error(response.error)
         return
       }
