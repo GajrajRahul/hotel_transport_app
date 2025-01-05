@@ -195,51 +195,6 @@ const HotelInfoStep = props => {
             disableCloseOnSelect
           />
         </Grid>
-        {/* <Grid item xs={12}>
-          <Box
-            sx={{
-              border: '1px solid #9A9A9A',
-              borderRadius: '6px',
-              position: 'relative',
-              height: '55.7px',
-              display: 'flex',
-              alignItems: 'center',
-              width: '100%',
-              cursor: 'pointer',
-              px: 3
-            }}
-            onClick={handleOpenCitiesDialog}
-          >
-            <Typography
-              variant='caption'
-              sx={{ position: 'absolute', top: -11.5, left: 10, background: 'white', px: 1 }}
-            >
-              Add City
-            </Typography>
-            <Icon icon='mdi:track' color={theme.palette.primary.main} style={{ position: 'absolute' }} />
-            <Stack direction='row' spacing={1} sx={{ position: 'absolute', left: '55px' }}>
-              {selectedCitiesHotels.map(city => (
-                <Chip
-                  key={city.id}
-                  label={city.label
-                    .split('_')
-                    .map(c => `${c[0].toUpperCase()}${c.slice(1)}`)
-                    .join(' ')}
-                  sx={{
-                    backgroundColor: theme => theme.palette.primary.light,
-                    color: theme => theme.palette.primary.dark
-                  }}
-                  size='small'
-                />
-              ))}
-            </Stack>
-            <Icon
-              icon='mdi:map-location-add'
-              color={theme.palette.primary.main}
-              style={{ position: 'absolute', right: '10px' }}
-            />
-          </Box>
-        </Grid> */}
         {selectedCitiesHotels.map((city, index) => (
           <Grid item xs={12} key={index}>
             <Accordion
@@ -289,14 +244,6 @@ const HotelInfoStep = props => {
                           .join(' ')
                       : ''}
                   </Typography>
-                  {/* <Icon
-                    onClick={e => {
-                      e.stopPropagation()
-                      handleDeleteCity(city.id)
-                    }}
-                    icon='mdi:delete-outline'
-                    color={theme.palette.primary.main}
-                  /> */}
                 </Box>
               </AccordionSummary>
               <AccordionDetails>
@@ -525,8 +472,6 @@ const HotelInfoStep = props => {
           </Button>
         </Grid>
       </Grid>
-      {/* <form key={1}>
-      </form> */}
       <CitiesDialog
         open={openCitiesDialog}
         handleClose={handleCloseCitiesDialog}
@@ -539,8 +484,6 @@ const HotelInfoStep = props => {
         selectedCitiesHotels={selectedCitiesHotels}
         selectedHotelInfo={defaultHotelInfoValues}
         handleClose={handleCloseHotelDialog}
-        // travelDates={travelDates}
-        // setHotelValue={setHotelValue}
         selectedCity={selectedCity}
         open={openHotelDialog}
         isEdit={false}
@@ -551,8 +494,6 @@ const HotelInfoStep = props => {
         selectedCitiesHotels={selectedCitiesHotels}
         selectedHotelInfo={selectedHotelInfo}
         handleClose={handleCloseEditHotelDialog}
-        // cities={cities}
-        // setHotelValue={setHotelValue}
         selectedCity={selectedCity}
         open={openEditHotelDialog}
         isEdit={true}

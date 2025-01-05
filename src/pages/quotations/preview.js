@@ -184,6 +184,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
 
     for (let j = 0; j < hotels.length; j++) {
       const hotel = hotels[j]
+      // console.log('hotel.hotel: ', hotel.hotel)
       const hotelName = hotel.hotel.name
       const { type, extraBed, roomType, image } = hotel.hotel
       const [checkIn, checkOut] = hotel.checkInCheckOut.map(date => new Date(date))
@@ -193,6 +194,13 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
       )}`
 
       if (!currentDate) currentDate = new Date(checkIn)
+      let roomTypes = []
+      Object.keys(hotel.hotel).map(h => {
+        if (!['id', 'name', 'location', 'image', 'price', 'selected', 'type'].includes(h)) {
+          roomTypes.push(h)
+        }
+      })
+      console.log('roomTypes is: ', roomTypes)
 
       while (currentDate < checkOut) {
         const day = itinerary.length + 1
@@ -206,7 +214,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
         const dayAttractions = attractions.slice(currentAttractionIndex, currentAttractionIndex + dailyAttractionsCount)
         currentAttractionIndex += dailyAttractionsCount
 
-        let hotelInfo = { hotelType: type, roomType, extraBed }
+        let hotelInfo = { hotelType: type, roomType, extraBed, roomTypes }
         let meals = []
         // First day in the city
         if (day == 1) {
@@ -486,10 +494,16 @@ const getHotelFare = (cities, hotelSheetData) => {
             : ''
         ][type][name]
 
+      // console.log('hotel: ', hotel)
       Object.keys(hotel).map(data => {
         if (hotelSheetData.roomsList.includes(data)) {
           hotelAmount += Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight
-          // console.log("room: ", Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight)
+          // console.log('hotel[data]: ', hotel[data])
+          // console.log('data: ', data)
+          // console.log('hotelInfo: ', hotelInfo)
+          // console.log('hotelInfo[data]: ', hotelInfo[data])
+          // console.log('hotelSheetData.roomsList: ', hotelSheetData.roomsList)
+          // console.log('room: ', Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight)
         }
       })
 
@@ -690,6 +704,7 @@ const QutationPreview = ({ id }) => {
     })
   }
 
+  // console.log("cities.current: ", cities.current)
   const saveQuotation = async status => {
     let dataToSend = {
       quotationName: quotationName.current,
@@ -711,7 +726,8 @@ const QutationPreview = ({ id }) => {
               let roomTypes = []
               Object.keys(hotel).map(h => {
                 if (!['id', 'name', 'location', 'image', 'price', 'selected', 'type'].includes(h)) {
-                  roomTypes.push(hotel[h])
+                  // roomTypes.push(hotel[h])
+                  roomTypes.push({ roomName: h, roomCount: hotel[h] })
                 }
               })
               return {
@@ -765,6 +781,8 @@ const QutationPreview = ({ id }) => {
       status
     }
 
+    console.log('dataToSend: ', dataToSend)
+    return
     const createdClientType = localStorage.getItem('createdQuoteClientId')
       ? localStorage.getItem('createdQuoteClientId').split('_')[0]
       : clientType.current
@@ -816,6 +834,10 @@ const QutationPreview = ({ id }) => {
   }
 
   const getTotalAmount = () => {
+    if (!transportData.current) {
+      router.push('/')
+      return
+    }
     const { from, to, additionalStops, departureReturnDate } = transportData.current
     const origin = typeof from == 'object' ? from.description : from
     const destination = typeof from == 'object' ? to.description : to
@@ -870,6 +892,7 @@ const QutationPreview = ({ id }) => {
               cities,
               transportSheetData
             ) ?? 0
+          // console.log('totalTransportAmount: ', totalTransportAmount)
           const { hotelAmount: totalHotelAmount, totalNights: totalNightCount } = getHotelFare(
             cities.current,
             hotelSheetData
@@ -882,6 +905,7 @@ const QutationPreview = ({ id }) => {
                 ? Math.floor(Number(totalHotelAmount) * 1.44)
                 : Math.floor(Number(totalHotelAmount) * 1.3)
               : Math.floor(Number(totalHotelAmount) * 0.95)
+          // console.log('totalHotelAmount: ', totalHotelAmount)
 
           const transportFinalAmount =
             clientType.current == 'admin'
@@ -1199,7 +1223,8 @@ const QutationPreview = ({ id }) => {
                           {HotelCategory}
                           <span>{itinerary.hotelInfo.hotelType}</span> <span>|</span>
                           {RoomCategory}
-                          <span>Base Catagory</span>
+                          {/* {console.log("itinerary.hotelInfo: ", itinerary.hotelInfo)} */}
+                          <span>{itinerary.hotelInfo.roomTypes.join(',')}</span>
                           <span>|</span>
                           {SeightSeeing}
                           <span>Sightseeing</span>

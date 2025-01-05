@@ -134,7 +134,7 @@ const Register = ({ registerUrl }) => {
     const response = await postRequest(`${api_url}/signup`, data)
     setIsLoading(false)
     if (response.status) {
-      toast.success('Signup Successful')
+      toast.success('Signup request sent successfully, wait for admin response')
       router.push('/login')
     } else {
       toast.error(response.error)

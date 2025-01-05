@@ -203,6 +203,12 @@ const AuthProvider = ({ children }) => {
     setLoading(false)
 
     if (response.status) {
+      const { status } = response.data
+      if (status != 'approved') {
+        toast.error(response.error)
+        return
+      }
+
       fetchUserDataHandler({ ...response.data, clientType })
     } else {
       toast.error(response.error)

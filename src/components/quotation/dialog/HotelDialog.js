@@ -232,6 +232,7 @@ const HotelDialog = ({
   }
 
   const handleOpenRoomDialog = hotel => {
+    console.log("hotel is: ", hotel)
     setSelectedHotel(hotel)
     setOpenRoomDialog(true)
   }
@@ -255,6 +256,10 @@ const HotelDialog = ({
 
     let selectedRoomsList = Object.keys(selectedHotelDetail).filter(roomType => hotelSheetData.roomsList.includes(roomType))
     let roomCount = 0
+    // console.log("hotelSheetData.roomsList: ", hotelSheetData.roomsList)
+    // console.log("selectedRoomsList: ", selectedRoomsList)
+    // console.log("selectedHotelDetail: ", selectedHotelDetail)
+    // return;
     selectedRoomsList.map(room => (roomCount += Number(selectedHotelDetail[room])))
     if (roomCount != Number(rooms)) {
       setTotalRooms(roomCount)
@@ -452,16 +457,13 @@ const HotelDialog = ({
                   <FormGroup
                     sx={{
                       display: 'flex',
-                      // flexWrap: 'wrap',
                       flexDirection: 'row',
-                      // justifyContent: { xs: 'space-between', mobileMd: 'space-evenly' },
                       justifyContent: 'space-evenly',
                       height: '100%',
                       alignItems: 'center',
                       '&.MuiFormGroup-root': {
                         flexWrap: 'nowrap'
                       },
-                      // gap: 3,
                       pl: 2
                     }}
                   >

@@ -687,6 +687,10 @@ const QuotationsHistory = () => {
             hotelType,
             price
           } = hotel
+          let roomTypes = {}
+          roomType.map(room => {
+            roomTypes = { ...roomTypes, [room.roomName]: room.roomCount }
+          })
           const dayNight = getDayNightCount([checkIn, checkOut]) + 1
           return {
             id: hotel.id,
@@ -709,7 +713,8 @@ const QuotationsHistory = () => {
               price,
               selected: false,
               type: hotelType,
-              'Base Catagory': roomType[0]
+              ...roomTypes
+              // 'Base Catagory': roomType[0]
             },
             adult,
             persons:
