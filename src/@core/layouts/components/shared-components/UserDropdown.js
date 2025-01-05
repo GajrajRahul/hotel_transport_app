@@ -20,6 +20,7 @@ import Icon from 'src/@core/components/icon'
 // ** Context
 import { useAuth } from 'src/hooks/useAuth'
 import { getInitials } from 'src/@core/utils/get-initials'
+import { ARHUserIcon, LogoutIcon, ProfileIcon } from 'src/utils/icons'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -31,6 +32,8 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 }))
 
 const UserDropdown = props => {
+  const clientType = localStorage.getItem('clientType') || 'admin'
+
   // ** Props
   const { settings } = props
 
@@ -160,15 +163,23 @@ const UserDropdown = props => {
         <Divider /> */}
         <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/profile')}>
           <Box sx={styles}>
-            <Icon icon='mdi:account-outline' />
+            {ProfileIcon}
             Profile
           </Box>
         </MenuItem>
+        {clientType == 'admin' && (
+          <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/user-management')}>
+            <Box sx={styles}>
+              {ARHUserIcon}
+              ARH Users
+            </Box>
+          </MenuItem>
+        )}
         <MenuItem
           onClick={handleLogout}
           sx={{ py: 2, '& svg': { mr: 2, fontSize: '1.375rem', color: 'text.primary' } }}
         >
-          <Icon icon='mdi:logout-variant' />
+          {LogoutIcon}
           Logout
         </MenuItem>
       </Menu>
