@@ -52,14 +52,14 @@ const data = [
     subtitle: 'Your ride, your way, at your doorstep',
     src: '/images/icons/taxi-stop.png',
     color: '#97D786',
-    href: '/taxi'
+    href: '/book-taxi'
   },
   {
     title: 'ARH Prime Hotels',
     subtitle: "Stay secure with ARH's guarantee",
     src: '/images/icons/luggage.png',
     color: '#BBBAF6',
-    href: '/packages'
+    href: '/arh-prime-hotels'
   }
   // {
   //   title: 'Approval Status ',
@@ -202,13 +202,7 @@ const MainHome = () => {
                 cursor: 'pointer'
               }}
               key={index}
-              onClick={() => {
-                if (item.href == '/quotations' || item.href == '/quotations-history') {
-                  router.push(item.href)
-                } else if (item.href == '/taxi') {
-                  router.push('/book-taxi')
-                }
-              }}
+              onClick={() => router.push(item.href)}
             >
               <CardContent
                 sx={{

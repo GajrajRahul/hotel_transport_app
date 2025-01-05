@@ -39,6 +39,7 @@ export const transformHotelData = data => {
   data.slice(1).forEach(row => {
     if (row.length > 0) {
       const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
+      // console.log('rowData: ', rowData)
 
       const stateKey = `${
         rowData.destination
@@ -110,7 +111,8 @@ export const transformHotelData = data => {
           ? rowData.room_type_2
           : rowData.room_type_1
           ? rowData.room_type_1
-          : ''
+          : '',
+        primeHotels: rowData.prime_hotels
       }
     }
   })
