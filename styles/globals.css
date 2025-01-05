@@ -801,3 +801,19 @@ code[class*='language-'] {
   align-content: center;
   justify-content: center;
 }
+
+.main-title {
+  text-align: left;
+  letter-spacing: 2pt;
+  font-family: "Montserrat", serif;
+  font-weight: 800 !important;
+  font-style: normal;
+  color: #ffffff;
+  padding: 0px 0px 20px 0px !important;
+  margin: 0px;
+}
+
+
+
+
+
