@@ -38,12 +38,14 @@ const getArhHotelsList = hotels => {
   let hotelsArr = []
 
   for (const [city, cityValue] of Object.entries(hotels)) {
-    if (city && city.length > 0 && citiesList.includes(city)) {
+    if (city && city.length > 0 && !citiesList.includes(city)) {
       citiesList.push(city)
     }
 
     for (const [hotelType, hotelInfo] of Object.entries(cityValue)) {
-      hotelCategoryList.push(hotelType)
+      if (hotelType && hotelType.length > 0 && !hotelCategoryList.includes(hotelType)) {
+        hotelCategoryList.push(hotelType)
+      }
       for (const [hotelName, hotelDetail] of Object.entries(hotelInfo)) {
         const minPrice = hotelDetail['minPrice']
         const maxPrice = hotelDetail['maxPrice']
@@ -76,21 +78,35 @@ const getArhHotelsList = hotels => {
     }
   }
 
+  // console.log("hotelCategoryList: ", hotelCategoryList)
   return { hotelCategoryList, citiesList, hotelsArr }
 }
 
 const ARHPrimeHotel = () => {
   const hotelSheetData = useSelector(state => state.hotelRateData)
   const arhPrimeData = getArhHotelsList(hotelSheetData?.hotelsRate ?? {})
-  const hotelCategries = arhPrimeData.hotelCategoryList
-  const citiesList = arhPrimeData.citiesList
-  const hotelsList = arhPrimeData.hotelsArr
-  // console.log(hotelSheetData);
+  const [hotelCategories, setHotelCategories] = useState(arhPrimeData.hotelCategoryList)
+  const [citiesList, setCitiesList] = useState(arhPrimeData.citiesList)
+  const [hotelsList, setHotelList] = useState(arhPrimeData.hotelsArr)
+
+  const [category, setCategory] = useState('')
+  const [city, setCity] = useState('')
+
+  useEffect(() => {
+    handleFilter()
+  }, [city, category])
+
+  const handleFilter = () => {
+    setHotelList(
+      arhPrimeData.hotelsArr
+        .filter(hotel => hotel.type.toLowerCase().includes(category.toLowerCase()))
+        .filter(hotel => hotel.location.toLowerCase().includes(city.toLowerCase()))
+    )
+  }
 
   return (
     <>
       <Typography className='main-title' variant='h3'>
-        {' '}
         ARH Prime Hotels
       </Typography>
       <Grid container spacing={6}>
@@ -187,10 +203,18 @@ const ARHPrimeHotel = () => {
       >
         <Grid container spacing={6}>
           <Grid item xs={12} md={6} sm={12}>
+            {/* {console.log(hotelCategories)} */}
             <FormControl fullWidth>
               <InputLabel id='hotel-category-label'>Hotel Category</InputLabel>
-              <Select labelId='hotel-category-label' id='hotel-category' label='Hotel Category' defaultValue=''>
-                {hotelCategries.map((category, index) => (
+              <Select
+                labelId='hotel-category-label'
+                id='hotel-category'
+                label='Hotel Category'
+                value={category}
+                onChange={e => setCategory(e.target.value)}
+              >
+                <MenuItem value=''>All</MenuItem>
+                {hotelCategories.map((category, index) => (
                   <MenuItem key={index} value={category}>
                     {category}
                   </MenuItem>
@@ -203,7 +227,8 @@ const ARHPrimeHotel = () => {
           <Grid item xs={12} md={6} sm={12}>
             <FormControl fullWidth>
               <InputLabel id='city-label'>City</InputLabel>
-              <Select labelId='city-label' id='city' label='City' defaultValue=''>
+              <Select labelId='city-label' id='city' label='City' value={city} onChange={e => setCity(e.target.value)}>
+                <MenuItem value=''>All</MenuItem>
                 {citiesList.map((city, index) => (
                   <MenuItem key={index} value={city}>
                     {city.length > 0 ? `${city[0].toUpperCase()}${city.slice(1)}` : ''}

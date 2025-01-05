@@ -163,7 +163,7 @@ const UserManagement = () => {
     if (clientType != 'admin') {
       router.push('/')
     } else {
-      // fetchUsersList();
+      fetchUsersList();
     }
   }, [])
 
