@@ -1637,7 +1637,15 @@ const QutationPreview = ({ id }) => {
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-file-download' />}
                 // onClick={() => toPDF()}
-                onClick={() => downloadPdf()}
+                onClick={() => {
+                  if (pdfUrl == undefined || pdfUrl.length == 0) {
+                    toast.error('Kindly save pdf first.')
+                    // return
+                  }
+                  else {
+                    downloadPdf()
+                  }
+                }}
                 variant='outlined'
               >
                 Download Pdf
@@ -1670,7 +1678,7 @@ const QutationPreview = ({ id }) => {
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-save-quote' />}
               >
-                Save
+                {quotationId.current.length > 0 ? 'Update' : 'Save'}
               </Button>
               <Button
                 fullWidth
