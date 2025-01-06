@@ -781,8 +781,8 @@ const QutationPreview = ({ id }) => {
       status
     }
 
-    console.log('dataToSend: ', dataToSend)
-    return
+    // console.log('dataToSend: ', dataToSend)
+    // return
     const createdClientType = localStorage.getItem('createdQuoteClientId')
       ? localStorage.getItem('createdQuoteClientId').split('_')[0]
       : clientType.current

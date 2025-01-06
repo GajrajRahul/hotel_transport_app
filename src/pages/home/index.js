@@ -99,6 +99,9 @@ const transformPackageData = data => {
   const headers = data[0]
 
   let result = []
+  let states = []
+  let nights = []
+  let persons = []
   data.slice(1).forEach((row, index) => {
     let obj = {}
     let packages = []
@@ -114,6 +117,16 @@ const transformPackageData = data => {
           obj[header.trim()] = [...new Set(places)]
         } else {
           obj[header.trim()] = row[idx]
+          if (header.trim() == 'state' && !states.includes(row[idx].trim())) {
+            states.push(row[idx].trim())
+          } else if (header.trim() == 'package_duration') {
+            const totalNights = row[idx].trim().split('Nights')[0]
+            if (!nights.includes(totalNights.trim())) {
+              nights.push(totalNights.trim())
+            }
+          } else if (header.trim() == 'no_of_person' && !persons.includes(row[idx].trim())) {
+            persons.push(row[idx].trim())
+          }
         }
       } else if (header.startsWith('package_') && header.endsWith('_price_per_person')) {
         if (row[idx - 2]) {
@@ -123,13 +136,10 @@ const transformPackageData = data => {
             [`package_${count}_name`]: row[idx - 2] || '',
             [`package_${count}_hotels`]: row[idx - 1]
               ? row[idx - 1].split('|').map((hotels_info, j) => {
-                  if (
-                    hotels_info.split(':')[0] &&
-                    hotels_info.split(':')[0] != '\n' &&
-                    hotels_info.split(':')[0] != '\n '
-                  ) {
-                    // console.log("hotels_info.split(':'): ", hotels_info.split(':'))
-                    return { city: hotels_info.split(':')[0], hotels: hotels_info.split(':')[1] }
+                  const hotelInfo = hotels_info.split(':')
+                  if (hotelInfo[0] && hotelInfo[0] != '\n' && hotelInfo[0] != '\n ') {
+                    // console.log("hotelInfo: ", hotelInfo)
+                    return { city: hotelInfo[0], hotels: hotelInfo[1] }
                   } else {
                     return { city: '', hotels: '' }
                   }
@@ -144,7 +154,7 @@ const transformPackageData = data => {
     obj.packages = packages
     result.push(obj)
   })
-  return result
+  return { states: states.sort(), nights: nights.sort(), persons: persons.sort(), travelPackage: result }
 }
 
 const MainHome = () => {
@@ -177,9 +187,9 @@ const MainHome = () => {
 
     try {
       const response = await axios.get(TRAVEL_PACKAGE_URL)
-      const travelPackageSheetData = transformPackageData(response.data.values)
-      // console.log(travelPackageSheetData)
-      dispatch(replaceTravelPackageData(travelPackageSheetData))
+      const { states, nights, persons, travelPackage } = transformPackageData(response.data.values)
+      // console.log({ states, nights, persons, travelPackage })
+      dispatch(replaceTravelPackageData({ states, nights, persons, travelPackage }))
       // return transformHotelData(response.data.values)
     } catch (error) {
       console.log(error)

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { useRouter } from 'next/router'
 
@@ -24,6 +25,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import Loader from 'src/components/common/Loader'
 import { getRequest, putRequest } from 'src/api-main-file/APIServices'
 import UserDetail from 'src/components/user-management/UserDetail'
+import { replaceUserData } from 'src/store/UserDataSlice'
 
 const defaultColumns = [
   {
@@ -54,7 +56,7 @@ const defaultColumns = [
       return (
         <Box sx={{ display: 'flex' }}>
           <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-            {row.userName ? `${row.userName.slice(0, 17)}${row.userName.length > 17 ? '...' : ''}` : ''}
+            {row.name ? `${row.name.slice(0, 17)}${row.name.length > 17 ? '...' : ''}` : ''}
           </Typography>
         </Box>
       )
@@ -122,12 +124,18 @@ const defaultColumns = [
 
 const UserManagement = () => {
   const clientType = localStorage.getItem('clientType') || 'admin'
+  const usersData = useSelector(state => state.usersData)
+
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState(null)
-  const [usersList, setUsersList] = useState([])
-  const [searchValue, setSearchValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedUser, setSelectedUser] = useState(null)
+
+  const [usersList, setUsersList] = useState([])
+  const [role, setRole] = useState('')
+  const [status, setStatus] = useState('')
+
   const router = useRouter()
+  const dispatch = useDispatch()
 
   const otherColumns = useMemo(
     () => [
@@ -167,17 +175,21 @@ const UserManagement = () => {
     }
   }, [])
 
+  useEffect(() => {
+    handleFilter()
+  }, [role, status])
+
   const fetchUsersList = async () => {
     setIsLoading(true)
     const response = await getRequest(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/fetch-users`)
     setIsLoading(false)
 
     if (response.status) {
-      setUsersList(
-        response.data.map((user, idx) => {
-          return { idx: idx + 1, ...user }
-        })
-      )
+      const responseData = response.data.map((user, idx) => {
+        return { idx: idx + 1, ...user }
+      })
+      dispatch(replaceUserData(responseData))
+      setUsersList(responseData)
     } else {
       toast.error(response.error)
     }
@@ -192,6 +204,13 @@ const UserManagement = () => {
       .catch(err => {
         toast.error('Unable to copy text to clipboard')
       })
+  }
+
+  const handleFilter = () => {
+    const updatedUserData = usersData
+      .filter(user => user.role.includes(role))
+      .filter(user => user.status.includes(status))
+    setUsersList(updatedUserData)
   }
 
   const handleOpenUserDetail = user => {
@@ -230,20 +249,31 @@ const UserManagement = () => {
           <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             <FormControl>
               <InputLabel size='small'>Role</InputLabel>
-              <Select size='small' value='' sx={{ mr: 4, mb: 2 }} label='Role'>
+              <Select
+                size='small'
+                value={role}
+                onChange={e => setRole(e.target.value)}
+                sx={{ mr: 4, mb: 2 }}
+                label='Role'
+              >
                 <MenuItem value=''>All</MenuItem>
-                <MenuItem value='Admin'>Admin</MenuItem>
                 <MenuItem value='Partner'>Partner</MenuItem>
                 <MenuItem value='Employee'>Employee</MenuItem>
               </Select>
             </FormControl>
             <FormControl>
               <InputLabel size='small'>Status</InputLabel>
-              <Select size='small' value='' sx={{ mr: 4, mb: 2 }} label='Status'>
+              <Select
+                size='small'
+                value={status}
+                onChange={e => setStatus(e.target.value)}
+                sx={{ mr: 4, mb: 2 }}
+                label='Status'
+              >
                 <MenuItem value=''>All</MenuItem>
-                <MenuItem value='Pending'>Pending</MenuItem>
-                <MenuItem value='Approved'>Approved</MenuItem>
-                <MenuItem value='Blocked'>Blocked</MenuItem>
+                <MenuItem value='pending'>Pending</MenuItem>
+                <MenuItem value='approved'>Approved</MenuItem>
+                <MenuItem value='blocked'>Blocked</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -261,7 +291,12 @@ const UserManagement = () => {
         //   onPaginationModelChange={setPaginationModel}
         //   onRowSelectionModelChange={rows => setSelectedRows(rows)}
       />
-      <UserDetail show={isUserDialogOpen} onClose={handleCloseUserDetail} selectedUserDetail={selectedUser} fetchUsersList={fetchUsersList} />
+      <UserDetail
+        show={isUserDialogOpen}
+        onClose={handleCloseUserDetail}
+        selectedUserDetail={selectedUser}
+        fetchUsersList={fetchUsersList}
+      />
     </Card>
   )
 }

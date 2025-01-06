@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import Box from '@mui/material/Box'
@@ -23,29 +23,27 @@ import Preview from './Preview'
 
 const Dashboard = () => {
   const travelPackageReduxData = useSelector(state => state.travelPackageData)
-  const [travelPackageData, setTravelPackageData] = useState(travelPackageReduxData)
+  // console.log(travelPackageReduxData)
+  const [travelPackageData, setTravelPackageData] = useState(travelPackageReduxData.travelPackage)
   const [selectedTravelPackage, setSelectedTravelPackage] = useState(null)
 
-  const [role, setRole] = useState('')
-  const [plan, setPlan] = useState('')
-  const [status, setStatus] = useState('')
+  const [states, setStates] = useState('')
+  const [nights, setNights] = useState('')
+  const [persons, setPersons] = useState('')
   const theme = useTheme()
 
-  const handleRoleChange = useCallback(e => {
-    setRole(e.target.value)
-  }, [])
+  useEffect(() => {
+    handleFilter()
+  }, [states, nights, persons])
 
-  const handlePlanChange = useCallback(e => {
-    setPlan(e.target.value)
-  }, [])
-
-  const handleStatusChange = useCallback(e => {
-    setStatus(e.target.value)
-  }, [])
-
-  const resetSelectedTravelPackage = useCallback(() => {
-    setSelectedTravelPackage(null)
-  }, [])
+  const handleFilter = () => {
+    setTravelPackageData(
+      travelPackageReduxData.travelPackage
+        .filter(travelPackage => travelPackage.state.includes(states))
+        .filter(travelPackage => travelPackage['package_duration'].split('Nights')[0].includes(nights))
+        .filter(travelPackage => travelPackage['no_of_person'].includes(persons))
+    )
+  }
 
   return (
     <>
@@ -62,8 +60,13 @@ const Dashboard = () => {
               textAlign: 'center'
             }}
           >
-            <Typography variant='h4' sx={{fontWeight: '900', mt: 4, mb: 2, textTransform:'uppercase', letterSpacing: '3px'}}>Your Gateway to Incredible Adventures</Typography>
-            <Divider sx={{ width: '100px',  mt: 2, mb: 4, backgroundColor: 'orange', height: '3px' }} />
+            <Typography
+              variant='h4'
+              sx={{ fontWeight: '900', mt: 4, mb: 2, textTransform: 'uppercase', letterSpacing: '3px' }}
+            >
+              Your Gateway to Incredible Adventures
+            </Typography>
+            <Divider sx={{ width: '100px', mt: 2, mb: 4, backgroundColor: 'orange', height: '3px' }} />
             <Typography>
               Unlock a world of unforgettable travel experiences! Browse through captivating travel packages designed to
               suit every wanderlust dream. From serene escapes to thrilling expeditions, manage and showcase your
@@ -74,67 +77,70 @@ const Dashboard = () => {
             <Grid container spacing={6}>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth>
-                  <InputLabel id='role-select'>Select Role</InputLabel>
+                  <InputLabel id='states-select'>State</InputLabel>
                   <Select
                     fullWidth
-                    value={role}
-                    id='select-role'
-                    label='Select Role'
-                    labelId='role-select'
-                    onChange={handleRoleChange}
-                    inputProps={{ placeholder: 'Select Role' }}
+                    value={states}
+                    id='select-states'
+                    label='State'
+                    labelId='states-select'
+                    onChange={e => setStates(e.target.value)}
+                    inputProps={{ placeholder: 'State' }}
                   >
-                    <MenuItem value=''>Select Role</MenuItem>
-                    <MenuItem value='admin'>Admin</MenuItem>
-                    <MenuItem value='author'>Author</MenuItem>
-                    <MenuItem value='editor'>Editor</MenuItem>
-                    <MenuItem value='maintainer'>Maintainer</MenuItem>
-                    <MenuItem value='subscriber'>Subscriber</MenuItem>
+                    <MenuItem value=''>All</MenuItem>
+                    {travelPackageReduxData.states.map(state => (
+                      <MenuItem key={state} value={state}>
+                        {state}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth>
-                  <InputLabel id='plan-select'>Select Plan</InputLabel>
+                  <InputLabel id='nights-select'>No of Nights</InputLabel>
                   <Select
                     fullWidth
-                    value={plan}
-                    id='select-plan'
-                    label='Select Plan'
-                    labelId='plan-select'
-                    onChange={handlePlanChange}
-                    inputProps={{ placeholder: 'Select Plan' }}
+                    value={nights}
+                    id='select-nights'
+                    label='No of Nights'
+                    labelId='nights-select'
+                    onChange={e => setNights(e.target.value)}
+                    inputProps={{ placeholder: 'No of Nights' }}
                   >
-                    <MenuItem value=''>Select Plan</MenuItem>
-                    <MenuItem value='basic'>Basic</MenuItem>
-                    <MenuItem value='company'>Company</MenuItem>
-                    <MenuItem value='enterprise'>Enterprise</MenuItem>
-                    <MenuItem value='team'>Team</MenuItem>
+                    <MenuItem value=''>All</MenuItem>
+                    {travelPackageReduxData.nights.map(night => (
+                      <MenuItem key={night} value={night}>
+                        {night}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth>
-                  <InputLabel id='status-select'>Select Status</InputLabel>
+                  <InputLabel id='persons-select'>No of Persons</InputLabel>
                   <Select
                     fullWidth
-                    value={status}
-                    id='select-status'
-                    label='Select Status'
-                    labelId='status-select'
-                    onChange={handleStatusChange}
-                    inputProps={{ placeholder: 'Select Role' }}
+                    value={persons}
+                    id='select-persons'
+                    label='No of Persons'
+                    labelId='persons-select'
+                    onChange={e => setPersons(e.target.value)}
+                    inputProps={{ placeholder: 'No of Persons' }}
                   >
-                    <MenuItem value=''>Select Role</MenuItem>
-                    <MenuItem value='pending'>Pending</MenuItem>
-                    <MenuItem value='active'>Active</MenuItem>
-                    <MenuItem value='inactive'>Inactive</MenuItem>
+                    <MenuItem value=''>All</MenuItem>
+                    {travelPackageReduxData.persons.map(person => (
+                      <MenuItem key={person} value={person}>
+                        {person}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
                 <Grid container spacing={6}>
-                  {travelPackageReduxData.map((travelPackage, index) => (
+                  {travelPackageData.map((travelPackage, index) => (
                     <Grid key={index} item xs={12} tablet={6} lg={4} desktopXs={3}>
                       <Card sx={{ cursor: 'pointer' }} onClick={() => setSelectedTravelPackage(travelPackage)}>
                         <CardMedia

@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const travelPackageDataSlice = createSlice({
   name: 'travelPackageData',
-  initialState: [],
+  initialState: { states: [], nights: [], persons: [], travelPackage: [] },
   reducers: {
     replaceTravelPackageData(state, action) {
       state = action.payload
