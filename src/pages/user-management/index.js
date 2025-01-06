@@ -22,7 +22,7 @@ import Icon from 'src/@core/components/icon'
 import CustomChip from 'src/@core/components/mui/chip'
 
 import Loader from 'src/components/common/Loader'
-import { getRequest } from 'src/api-main-file/APIServices'
+import { getRequest, putRequest } from 'src/api-main-file/APIServices'
 import UserDetail from 'src/components/user-management/UserDetail'
 
 const defaultColumns = [
@@ -163,7 +163,7 @@ const UserManagement = () => {
     if (clientType != 'admin') {
       router.push('/')
     } else {
-      fetchUsersList();
+      fetchUsersList()
     }
   }, [])
 
@@ -261,7 +261,7 @@ const UserManagement = () => {
         //   onPaginationModelChange={setPaginationModel}
         //   onRowSelectionModelChange={rows => setSelectedRows(rows)}
       />
-      <UserDetail show={isUserDialogOpen} onClose={handleCloseUserDetail} selectedUserDetail={selectedUser} />
+      <UserDetail show={isUserDialogOpen} onClose={handleCloseUserDetail} selectedUserDetail={selectedUser} fetchUsersList={fetchUsersList} />
     </Card>
   )
 }

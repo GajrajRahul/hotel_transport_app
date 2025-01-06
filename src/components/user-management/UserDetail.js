@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 import Box from '@mui/material/Box'
 import Fade from '@mui/material/Fade'
@@ -17,6 +18,8 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import { styled } from '@mui/material/styles'
 
 import Icon from 'src/@core/components/icon'
+import { putRequest } from 'src/api-main-file/APIServices'
+import Loader from '../common/Loader'
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Fade ref={ref} {...props} />
@@ -64,8 +67,9 @@ const BlockButtonStyled = styled(Button)(({ theme }) => ({
   }
 }))
 
-const UserDetail = ({ show, onClose, selectedUserDetail }) => {
+const UserDetail = ({ show, onClose, selectedUserDetail, fetchUsersList }) => {
   const [userDetail, setUserDetail] = useState(defaultUserDetail)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (selectedUserDetail) {
@@ -73,125 +77,160 @@ const UserDetail = ({ show, onClose, selectedUserDetail }) => {
     }
   }, [selectedUserDetail])
 
+  const updateStatus = async status => {
+    const { id, employeeId, partnerId, email } = selectedUserDetail
+    let dataToSend = { id, email, status }
+    setIsLoading(true)
+    const response = await putRequest(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/admin/update-status`,
+      employeeId ? { ...dataToSend, employeeId } : { ...dataToSend, partnerId }
+    )
+    setIsLoading(false)
+
+    if (response.status) {
+      onClose()
+      toast.success('Success')
+      fetchUsersList()
+    } else {
+      toast.error(response.error)
+    }
+  }
+
   return (
-    <Dialog
-      fullWidth
+    <>
+      <Dialog
+        fullWidth
         open={show}
-    //   open={true}
-      maxWidth='md'
-      scroll='body'
-      onClose={onClose}
-      TransitionComponent={Transition}
-      onBackdropClick={onClose}
-    >
-      <DialogContent
-        sx={{
-          position: 'relative',
-          pb: theme => `${theme.spacing(13)} !important`,
-          px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
-          pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
-        }}
+        //   open={true}
+        maxWidth='md'
+        scroll='body'
+        onClose={onClose}
+        TransitionComponent={Transition}
+        onBackdropClick={onClose}
       >
-        <IconButton size='small' onClick={onClose} sx={{ position: 'absolute', right: '1rem', top: '1rem' }}>
-          <Icon icon='mdi:close' />
-        </IconButton>
-        <Box sx={{ mb: 8, textAlign: 'center' }}>
-          <Typography variant='h5' sx={{ mb: 3 }}>
-            Manage User Access
-          </Typography>
-          <Typography variant='body2'>
-            Take control with ease! Block or unblock user access in a click and stay informed with all essential user
-            details like email, phone, and more—all in one place.
-          </Typography>
-        </Box>
-        <Grid container spacing={6}>
-          <Grid item xs={12}>
-            <Box
-              sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3 }}
-            >
-              <ImgStyled src={userDetail.logo} alt='Profile Pic' />
-              {userDetail.status == 'pending' ? (
-                <Box sx={{ textAlign: 'center' }}>
-                  <ApproveButtonStyled
-                    color='success'
-                    component='label'
-                    variant='contained'
-                    htmlFor='account-settings-upload-image'
-                  >
-                    Approve
-                  </ApproveButtonStyled>
-                  <BlockButtonStyled color='error' variant='contained'>
-                    Block
-                  </BlockButtonStyled>
-                  <Typography variant='body2' sx={{ marginTop: 2 }}>
-                    Action needed: User awaits approval.
-                  </Typography>
-                </Box>
-              ) : userDetail.status == 'blocked' ? (
-                <Box sx={{ textAlign: 'center' }}>
-                  <ApproveButtonStyled
-                    color='success'
-                    component='label'
-                    variant='contained'
-                    htmlFor='account-settings-upload-image'
-                    sx={{ ml: 0 }}
-                  >
-                    Unblock
-                  </ApproveButtonStyled>
-                  <Typography variant='body2' sx={{ marginTop: 2 }}>
-                    Click to unblock and restore user access.
-                  </Typography>
-                </Box>
-              ) : (
-                <Box sx={{ textAlign: 'center' }}>
-                  <BlockButtonStyled sx={{ ml: 0 }} color='error' variant='contained'>
-                    Block
-                  </BlockButtonStyled>
-                  <Typography variant='body2' sx={{ marginTop: 2 }}>
-                    Click to block and revoke user access.
-                  </Typography>
-                </Box>
-              )}
-            </Box>
+        <DialogContent
+          sx={{
+            position: 'relative',
+            pb: theme => `${theme.spacing(13)} !important`,
+            px: theme => [`${theme.spacing(5)} !important`, `${theme.spacing(15)} !important`],
+            pt: theme => [`${theme.spacing(8)} !important`, `${theme.spacing(12.5)} !important`]
+          }}
+        >
+          <IconButton size='small' onClick={onClose} sx={{ position: 'absolute', right: '1rem', top: '1rem' }}>
+            <Icon icon='mdi:close' />
+          </IconButton>
+          <Box sx={{ mb: 8, textAlign: 'center' }}>
+            <Typography variant='h5' sx={{ mb: 3 }}>
+              Manage User Access
+            </Typography>
+            <Typography variant='body2'>
+              Take control with ease! Block or unblock user access in a click and stay informed with all essential user
+              details like email, phone, and more—all in one place.
+            </Typography>
+          </Box>
+          <Grid container spacing={6}>
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 3
+                }}
+              >
+                <ImgStyled src={userDetail.logo} alt='Profile Pic' />
+                {userDetail.status == 'pending' ? (
+                  <Box sx={{ textAlign: 'center' }}>
+                    <ApproveButtonStyled
+                      color='success'
+                      component='label'
+                      variant='contained'
+                      htmlFor='account-settings-upload-image'
+                      onClick={() => updateStatus('approved')}
+                    >
+                      Approve
+                    </ApproveButtonStyled>
+                    <BlockButtonStyled color='error' variant='contained' onClick={() => updateStatus('blocked')}>
+                      Block
+                    </BlockButtonStyled>
+                    <Typography variant='body2' sx={{ marginTop: 2 }}>
+                      Action needed: User awaits approval.
+                    </Typography>
+                  </Box>
+                ) : userDetail.status == 'blocked' ? (
+                  <Box sx={{ textAlign: 'center' }}>
+                    <ApproveButtonStyled
+                      color='success'
+                      component='label'
+                      variant='contained'
+                      htmlFor='account-settings-upload-image'
+                      sx={{ ml: 0 }}
+                      onClick={() => updateStatus('approved')}
+                    >
+                      Unblock
+                    </ApproveButtonStyled>
+                    <Typography variant='body2' sx={{ marginTop: 2 }}>
+                      Click to unblock and restore user access.
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Box sx={{ textAlign: 'center' }}>
+                    <BlockButtonStyled
+                      sx={{ ml: 0 }}
+                      color='error'
+                      variant='contained'
+                      onClick={() => updateStatus('blocked')}
+                    >
+                      Block
+                    </BlockButtonStyled>
+                    <Typography variant='body2' sx={{ marginTop: 2 }}>
+                      Click to block and revoke user access.
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField disabled fullWidth defaultValue={userDetail.name} label='Name' />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField fullWidth label='Email' defaultValue={userDetail.email} disabled />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField disabled fullWidth label='Phone' defaultValue={userDetail.mobile} />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <FormLabel sx={{ fontSize: '0.875rem' }}>Gender</FormLabel>
+              <RadioGroup row defaultValue={userDetail.gender} aria-label='gender' name='account-settings-info-radio'>
+                <FormControlLabel disabled value='male' label='Male' control={<Radio />} />
+                <FormControlLabel disabled value='female' label='Female' control={<Radio />} />
+                <FormControlLabel disabled value='other' label='Other' control={<Radio />} />
+              </RadioGroup>
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField disabled fullWidth label='Company Name' defaultValue={userDetail.company} />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField disabled fullWidth label='Designation' defaultValue={userDetail.designation} />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField multiline rows={2} disabled fullWidth label='Tagline' defaultValue={userDetail.tagline} />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField multiline rows={2} disabled fullWidth label='Title' defaultValue={userDetail.title} />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField multiline rows={2} disabled fullWidth label='About' defaultValue={userDetail.about} />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField multiline rows={2} disabled fullWidth label='Address' defaultValue={userDetail.address} />
+            </Grid>
           </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField disabled fullWidth defaultValue={userDetail.name} label='Name' />
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField fullWidth label='Email' defaultValue={userDetail.email} disabled />
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField disabled fullWidth label='Phone' defaultValue={userDetail.mobile} />
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <FormLabel sx={{ fontSize: '0.875rem' }}>Gender</FormLabel>
-            <RadioGroup row defaultValue={userDetail.gender} aria-label='gender' name='account-settings-info-radio'>
-              <FormControlLabel disabled value='male' label='Male' control={<Radio />} />
-              <FormControlLabel disabled value='female' label='Female' control={<Radio />} />
-              <FormControlLabel disabled value='other' label='Other' control={<Radio />} />
-            </RadioGroup>
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField disabled fullWidth label='Company Name' defaultValue={userDetail.company} />
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField disabled fullWidth label='Designation' defaultValue={userDetail.designation} />
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField multiline rows={2} disabled fullWidth label='Tagline' defaultValue={userDetail.tagline} />
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField multiline rows={2} disabled fullWidth label='Title' defaultValue={userDetail.title} />
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField multiline rows={2} disabled fullWidth label='About' defaultValue={userDetail.about} />
-          </Grid>
-          <Grid item sm={6} xs={12}>
-            <TextField multiline rows={2} disabled fullWidth label='Address' defaultValue={userDetail.address} />
-          </Grid>
-        </Grid>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+      <Loader open={isLoading} />
+    </>
   )
 }
 
