@@ -913,7 +913,7 @@ const QutationPreview = ({ id }) => {
               : clientType.current == 'employee'
               ? origin == destination
                 ? Math.floor(Number(totalTransportAmount) * 1.44)
-                : Math.floor(Number(totalHotelAmount) * 1.3)
+                : Math.floor(Number(totalTransportAmount) * 1.3)
               : Math.floor(Number(totalTransportAmount) * 0.95)
 
           if (clientType.current == 'employee' && origin == destination) {
