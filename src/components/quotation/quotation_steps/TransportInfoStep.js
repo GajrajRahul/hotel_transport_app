@@ -3,6 +3,7 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
 import { addDays } from 'date-fns'
 import { useSelector } from 'react-redux'
+import { useLoadScript } from '@react-google-maps/api'
 
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
@@ -24,12 +25,19 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import LocationAutocomplete from './LocationAutocomplete'
 import CustomInput from 'src/components/common/CustomInput'
 
+const libraries = ['places']
+
 const TransportInfoStep = ({ handleBack, onSubmit }) => {
   const transportSheetData = useSelector(state => state.transportRateData)
 
   const cities = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
   const transportData = localStorage.getItem('transport') ? JSON.parse(localStorage.getItem('transport')) : null
   const travelBasicData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries
+  })
 
   const {
     reset: transportReset,
@@ -69,6 +77,8 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
     name: 'additionalStops'
   })
   const theme = useTheme()
+
+  if (!isLoaded) return <div>Loading...</div>
 
   return (
     <DatePickerWrapper>
@@ -144,28 +154,11 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth>
-                {/* <InputLabel htmlFor='stepper-linear-account-name' error={Boolean(transportErrors.from)}>
-                From
-              </InputLabel> */}
                 <Controller
                   name='from'
                   control={transportControl}
                   rules={{ required: 'This field is required' }}
                   render={({ field: { value, onChange } }) => (
-                    // <OutlinedInput
-                    //   label='From'
-                    //   fullWidth
-                    //   value={value}
-                    //   disabled={cities.length == 1}
-                    //   variant='outlined'
-                    //   onChange={onChange}
-                    //   startAdornment={
-                    //     <InputAdornment position='start'>
-                    //       <Icon icon='mdi:location-outline' color={theme.palette.primary.main} />
-                    //     </InputAdornment>
-                    //   }
-                    //   error={Boolean(transportErrors.from)}
-                    // />
                     <LocationAutocomplete
                       label='From'
                       name='from'
@@ -191,29 +184,11 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
                   <Grid container spacing={5} key={item.id}>
                     <Grid item xs={10.75} sx={{ mb: index != fields.length - 1 ? 5 : 0 }}>
                       <FormControl fullWidth>
-                        {/* <InputLabel
-                        htmlFor='stepper-linear-account-name'
-                        error={Boolean(transportErrors.additionalStops?.[index])}
-                      >
-                        Stop Added
-                      </InputLabel> */}
                         <Controller
                           name={`additionalStops.${index}`}
                           control={transportControl}
                           rules={{ required: 'This field is required' }}
                           render={({ field: { value, onChange } }) => (
-                            // <OutlinedInput
-                            //   label='Stop Added'
-                            //   value={value}
-                            //   variant='outlined'
-                            //   onChange={onChange}
-                            //   startAdornment={
-                            //     <InputAdornment position='start'>
-                            //       <Icon icon='mdi:location-add-outline' color={theme.palette.primary.main} />
-                            //     </InputAdornment>
-                            //   }
-                            //   error={Boolean(transportErrors.additionalStops?.[index])}
-                            // />
                             <LocationAutocomplete
                               label='Stop Added'
                               name={`additionalStops.${index}`}
@@ -288,28 +263,11 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth>
-                {/* <InputLabel htmlFor='stepper-linear-account-name' error={Boolean(transportErrors.to)}>
-                To
-              </InputLabel> */}
                 <Controller
                   name='to'
                   control={transportControl}
                   rules={{ required: 'This field is required' }}
                   render={({ field: { value, onChange } }) => (
-                    // <OutlinedInput
-                    //   label='To'
-                    //   fullWidth
-                    //   value={value}
-                    //   disabled={cities.length == 1}
-                    //   variant='outlined'
-                    //   onChange={onChange}
-                    //   startAdornment={
-                    //     <InputAdornment position='start'>
-                    //       <Icon icon='mdi:flag-outline' color={theme.palette.primary.main} />
-                    //     </InputAdornment>
-                    //   }
-                    //   error={Boolean(transportErrors.to)}
-                    // />
                     <LocationAutocomplete
                       label='To'
                       name='to'

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { useRouter } from 'next/router'
 
@@ -121,6 +122,7 @@ const defaultColumns = [
 
 const QuotationsHistory = () => {
   const clientType = localStorage.getItem('clientType') || 'admin'
+  const quotationHistoryReduxData = useSelector(state => state.quotationHistoryData)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedQuotation, setSelectedQuotation] = useState(null)
   const [apiQuotationHistoryList, setApiQuotationHistoryList] = useState([])
@@ -128,7 +130,12 @@ const QuotationsHistory = () => {
   const [searchValue, setSearchValue] = useState('')
   const [statesList, setStatesList] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+
+  const [role, setRole] = useState('')
+  const [status, setStatus] = useState('')
+
   const router = useRouter()
+  const dispatch = useDispatch()
 
   const adminColumns = useMemo(
     () => [
@@ -424,6 +431,10 @@ const QuotationsHistory = () => {
     fetchQuotationList()
   }, [])
 
+  useEffect(() => {
+    handleFilter()
+  }, [role, status])
+
   const handleSearchQuotation = newValue => {
     setSearchValue(newValue)
     if (newValue.length == 0) {
@@ -434,6 +445,15 @@ const QuotationsHistory = () => {
       )
       setQuotationsHisotry(filteredData)
     }
+  }
+
+  const handleFilter = () => {
+    // console.log(apiQuotationHistoryList)
+    const filteredData = apiQuotationHistoryList.filter(quote => quote.clientType.includes(role)).filter(quote => quote.status.includes(status))
+    // console.log(filteredData)
+    setQuotationsHisotry(
+      filteredData
+    )
   }
 
   const openDeleteDialog = row => {
@@ -770,17 +790,23 @@ const QuotationsHistory = () => {
             Create Itinerary
           </Button>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-            <TextField
+            {/* <TextField
               size='small'
               value={searchValue}
               sx={{ mr: 4, mb: 2 }}
               placeholder='Search Quote'
               onChange={e => handleSearchQuotation(e.target.value)}
-            />
+            /> */}
             {clientType == 'admin' && (
               <FormControl>
                 <InputLabel size='small'>Role</InputLabel>
-                <Select size='small' value='' sx={{ mr: 4, mb: 2 }} label='Role'>
+                <Select
+                  size='small'
+                  value={role}
+                  onChange={e => setRole(e.target.value)}
+                  sx={{ mr: 4, mb: 2 }}
+                  label='Role'
+                >
                   <MenuItem value=''>All</MenuItem>
                   <MenuItem value='Admin'>Admin</MenuItem>
                   <MenuItem value='Partner'>Partner</MenuItem>
@@ -792,17 +818,18 @@ const QuotationsHistory = () => {
               <InputLabel size='small'>Status</InputLabel>
               <Select
                 size='small'
-                value=''
+                value={status}
+                onChange={e => setStatus(e.target.value)}
                 sx={{ mr: 4, mb: 2 }}
                 label='Status'
                 // disabled={selectedRows && selectedRows.length === 0}
                 // renderValue={selected => (selected.length === 0 ? 'Actions' : selected)}
               >
                 <MenuItem value=''>All</MenuItem>
-                <MenuItem value='Approved'>Approved</MenuItem>
-                <MenuItem value='Pending'>Pending</MenuItem>
-                <MenuItem value='Rejected'>Rejected</MenuItem>
-                <MenuItem value='Draft'>Draft</MenuItem>
+                <MenuItem value='approved'>Approved</MenuItem>
+                <MenuItem value='pending'>Pending</MenuItem>
+                <MenuItem value='rejected'>Rejected</MenuItem>
+                <MenuItem value='draft'>Draft</MenuItem>
               </Select>
             </FormControl>
           </Box>

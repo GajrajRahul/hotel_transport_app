@@ -36,6 +36,10 @@ const Dashboard = () => {
     handleFilter()
   }, [states, nights, persons])
 
+  useEffect(() => {
+    setTravelPackageData(travelPackageReduxData.travelPackage)
+  }, [travelPackageReduxData])
+
   const handleFilter = () => {
     setTravelPackageData(
       travelPackageReduxData.travelPackage

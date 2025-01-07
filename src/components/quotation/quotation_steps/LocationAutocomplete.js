@@ -11,6 +11,7 @@ import Icon from 'src/@core/components/icon'
 
 import parse from 'autosuggest-highlight/parse'
 import { debounce } from '@mui/material/utils'
+import { extractLocationDetails } from 'src/utils/function'
 
 const autocompleteService = { current: null }
 
@@ -62,6 +63,70 @@ const LocationAutocomplete = ({ label, name, value, cities, onChange, error, the
     }
   }, [inputValue, fetch])
 
+  const handleInputChange = async (_, newInputValue) => {
+    // console.log("newInputValue: ", newInputValue)
+    setInputValue(newInputValue)
+
+    if (newInputValue) {
+      const service = new window.google.maps.places.AutocompleteService()
+      service.getPlacePredictions({ input: newInputValue }, (predictions, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+          setOptions(predictions)
+        } else {
+          setOptions([])
+        }
+      })
+    } else {
+      setOptions([])
+    }
+  }
+
+  const handlePlaceSelect = (_, value) => {
+      if (value) {
+        const selectedPrediction = options.find(option => option.description === value)
+  
+        if (selectedPrediction) {
+          const service = new window.google.maps.places.PlacesService(document.createElement('div'))
+          const request = {
+            placeId: selectedPrediction.place_id
+          }
+  
+          service.getDetails(request, (placeDetails, status) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+              // console.log('placeDetails: ', placeDetails)
+              const { city, state, country } = extractLocationDetails(placeDetails)
+              // onChange({ place: value, city, state, country })
+              onChange(value)
+            } else {
+              // onChange({
+              //   place: '',
+              //   city: '',
+              //   state: '',
+              //   country: ''
+              // })
+              onChange('')
+            }
+          })
+        } else {
+          // onChange({
+          //   place: '',
+          //   city: '',
+          //   state: '',
+          //   country: ''
+          // })
+          console.log('')
+        }
+      } else {
+        // onChange({
+        //   place: '',
+        //   city: '',
+        //   state: '',
+        //   country: ''
+        // })
+        console.log('')
+      }
+    }
+
   return (
     <Autocomplete
       id='google-map-demo'
@@ -69,6 +134,7 @@ const LocationAutocomplete = ({ label, name, value, cities, onChange, error, the
       getOptionLabel={option => (typeof option === 'string' ? option : option.description)}
       isOptionEqualToValue={option => (typeof option === 'string' ? option : option.description)}
       filterOptions={x => x}
+      freeSolo
       options={options}
       autoComplete
       includeInputInList
@@ -78,6 +144,7 @@ const LocationAutocomplete = ({ label, name, value, cities, onChange, error, the
       onChange={(event, newValue) => {
         setOptions(newValue ? [newValue, ...options] : options)
         // console.log(newValue)
+        console.log(newValue)
         onChange(newValue)
       }}
       onInputChange={(event, newInputValue) => {
@@ -128,6 +195,17 @@ const LocationAutocomplete = ({ label, name, value, cities, onChange, error, the
         )
       }}
     />
+    // <Autocomplete
+    //   options={options.map(option => option.description)}
+    //   value={value}
+    //   freeSolo
+    //   getOptionLabel={option => (typeof option == 'object' ? option.place : option)}
+    //   inputValue={inputValue}
+    //   onInputChange={handleInputChange} // Handle input change here
+    //   onChange={handlePlaceSelect} // Handle place selection here
+    //   isOptionEqualToValue={(option, value) => option.place == value.place} // Compare option and value directly
+    //   renderInput={params => <TextField {...params} label={label} variant='outlined' />}
+    // />
   )
 }
 

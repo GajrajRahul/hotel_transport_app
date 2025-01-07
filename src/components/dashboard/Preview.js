@@ -169,9 +169,11 @@ const getDayWiseItinerary = (selectedTravelPackage, monuments) => {
     if (i == 0) {
       title = `Day ${i + 1} | Arrival In ${stayData[i].city}`
 
-      description = `Upon your arrival in ${stayData[i].city}, ${monuments[cityName]?.cityIntro ?? ''
-        } you will be transferred to your hotel in a comfortable ${vehicle} Vehicle. Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${stayData[i].city
-        }`
+      description = `Upon your arrival in ${stayData[i].city}, ${
+        monuments[cityName]?.cityIntro ?? ''
+      } you will be transferred to your hotel in a comfortable ${vehicle} Vehicle. Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${
+        stayData[i].city
+      }`
 
       if (meals.includes('Lunch')) {
         description += ` Return to the hotel for a delightful lunch, experiencing authentic flavors.`
@@ -207,10 +209,13 @@ const getDayWiseItinerary = (selectedTravelPackage, monuments) => {
         description += 'Enjoy a delicious breakfast at the hotel.'
       }
 
-      description += `Complete the check-out formalities and proceed to your onward journey. Upon your arrival in ${stayData[i].city
-        }, ${monuments[cityName]?.cityIntro ?? ''
-        } you will be transferred to your hotel in a comfortable ${vehicle} Vehicle. Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${stayData[i].city
-        }`
+      description += `Complete the check-out formalities and proceed to your onward journey. Upon your arrival in ${
+        stayData[i].city
+      }, ${
+        monuments[cityName]?.cityIntro ?? ''
+      } you will be transferred to your hotel in a comfortable ${vehicle} Vehicle. Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${
+        stayData[i].city
+      }`
 
       if (meals.includes('Lunch')) {
         description += ` Return to the hotel for a delightful lunch, experiencing authentic flavors.`
@@ -230,7 +235,8 @@ const getDayWiseItinerary = (selectedTravelPackage, monuments) => {
       meals,
       description,
       attractions: stayData[i].attractions,
-      footer
+      footer,
+      cityName
     })
   }
 
@@ -270,23 +276,65 @@ const getDayWiseItinerary = (selectedTravelPackage, monuments) => {
   return { itineraries: dayWiseItinerary, cityInclusions, cityExclusions, cityKnowBefores }
 }
 
+const getDayWiseItineryStyle = itineraryDayWiseData => {
+  let background = ['url(https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/background-image.jpg)']
+  let backgroundPosition = ['0px 0px']
+  let backgroundSize = ['100%']
+  let prevCity = ''
+  let currIndex = 0
+  itineraryDayWiseData.map((itinerary, index) => {
+    if (prevCity && (prevCity.length == 0 || prevCity != itinerary.cityName)) {
+      prevCity = itinerary.cityName
+      currIndex = 0
+    } else {
+      currIndex += 1
+    }
+    background.push(
+      `url(https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/pdf-image/${itinerary.cityName}/${
+        itinerary.cityName.toLowerCase()
+      }00${currIndex + 1}.jpg)`
+    )
+    backgroundPosition.push(`0px ${(index + 1) * 1120}px`)
+    backgroundSize.push('100%')
+  })
+
+  background.push('url(https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/background-image.jpg)')
+  backgroundPosition.push(`0px ${(itineraryDayWiseData.length + 1) * 1120}px`)
+  backgroundSize.push('100%')
+
+  return {
+    background: background.join(', '),
+    backgroundPosition: backgroundPosition.join(', '),
+    backgroundSize: backgroundSize.join(', ')
+  }
+}
+
 const Preview = ({ selectedTravelPackage, onClose }) => {
   const monumentSheetData = useSelector(state => state.monumentRateData)
   const [dayWiseItinerary, setDayWiseItinerary] = useState(
     getDayWiseItinerary(selectedTravelPackage, monumentSheetData)
   )
-
+  const [dayWiseItineryStyle, setDayWiseItineryStyle] = useState(
+    getDayWiseItineryStyle(dayWiseItinerary.itineraries) ?? {
+      background: '',
+      backgroundSize: '',
+      backgroundPosition: ''
+    }
+  )
+  // console.log(dayWiseItineryStyle)
   const { user } = useAuth()
   // console.log(dayWiseItinerary)
 
   return (
     <>
-      <Button sx={{ mb: 10 }} variant='contained' onClick={onClose}>Back</Button>
+      <Button sx={{ mb: 10 }} variant='contained' onClick={onClose}>
+        Back
+      </Button>
       <div
         style={{
-          backgroundImage: 'url(/images/pdf-image/jaipur/jaipur002.jpg), url(/images/pdf-image/jaipur/jaipur002.jpg)',
-          backgroundPosition: '0px 0px, 0px 1120px',
-          backgroundSize: '100%, 100%',
+          backgroundImage: `${dayWiseItineryStyle.background}`,
+          backgroundPosition: `${dayWiseItineryStyle.backgroundPosition}`,
+          backgroundSize: `${dayWiseItineryStyle.backgroundSize}`,
           backgroundRepeat: 'no-repeat',
           boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
           width: '210mm',
@@ -309,7 +357,10 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
         <div className='title-description'>
           <div className='tag-line'>{user.tagline || 'Your Gateway to Memorable Journeys'}</div>
           <h1 className='title'>{user.title || 'Your Journey, Our Expertise'}</h1>
-          <p className='description'>{user.about || 'Travel with with trust! Offering tailored domestic and international tours for individuals,groups, and corporate clients. Adventure and relaxation, all perfectly planned.'}</p>
+          <p className='description'>
+            {user.about ||
+              'Travel with with trust! Offering tailored domestic and international tours for individuals,groups, and corporate clients. Adventure and relaxation, all perfectly planned.'}
+          </p>
         </div>
 
         <div className='route'>
@@ -326,7 +377,6 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
           <div className='accommodation-section'>
             <h3 className='accommodation-title'>Accommodation Overview</h3>
             <div className='travel-basic-details'>
-
               <div className='div-for-accomodations' style={{ width: '25%' }}>
                 <label
                   style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
@@ -354,7 +404,8 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
               </div>
 
               <div className='div-for-accomodations' style={{ width: '15%' }}>
-                <label style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
+                <label
+                  style={{ textAlign: 'left', color: 'white', padding: '0px 0px 5px 10px' }}
                   htmlFor='traveller-count'
                 >
                   Rooms
@@ -364,7 +415,6 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
                   <span>{selectedTravelPackage['no_of_room']}</span>
                 </div>
               </div>
-
 
               <div className='div-for-accomodations' style={{ width: '30%' }}>
                 <label
@@ -378,11 +428,7 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
                   <span>{selectedTravelPackage['food']}</span>
                 </div>
               </div>
-
-
             </div>
-
-
           </div>
         </div>
 
@@ -419,7 +465,9 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
               {selectedTravelPackage['packages'].map((amount, j) => (
                 <Fragment key={j}>
                   <span>{amount[`package_${j + 1}_price_per_person`]}</span>
-                  {j != selectedTravelPackage['packages'].length - 1 && <span style={{ color: 'white', fontSize: '15px' }}> to </span>}
+                  {j != selectedTravelPackage['packages'].length - 1 && (
+                    <span style={{ color: 'white', fontSize: '15px' }}> to </span>
+                  )}
                 </Fragment>
               ))}
             </span>
@@ -476,52 +524,41 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
           </div>
         </div>
 
-
-
         {selectedTravelPackage['packages'].map((packageData, index) => (
-          <div key={index} className="package-rate-section-bg">
+          <div key={index} className='package-rate-section-bg'>
             {packageData[`package_${index + 1}_name`] && (
               <>
                 {/* Package Rate Section */}
-                <div className="package-rate-section">
-                  <h3 className="package-rate-section-title">{packageData[`package_${index + 1}_name`]}</h3>
-                  <h4 className="package-rate-section-Price">
+                <div className='package-rate-section'>
+                  <h3 className='package-rate-section-title'>{packageData[`package_${index + 1}_name`]}</h3>
+                  <h4 className='package-rate-section-Price'>
                     ₹ {packageData[`package_${index + 1}_price_per_person`]} / Person
                   </h4>
                 </div>
 
                 {/* Package Destination Section */}
 
-                <div className="package-rate-Destination-section">
+                <div className='package-rate-Destination-section'>
                   {packageData[`package_${index + 1}_hotels`].map((hotelInfo, idx) => (
                     <div key={idx} className='package-rate-Destination-section-2'>
-                      <h6 className="package-rate-Destination-section-city">{hotelInfo['city']}</h6>
+                      <h6 className='package-rate-Destination-section-city'>{hotelInfo['city']}</h6>
                       <span className='package-rate-Destination-section-hotel' style={{ fontSize: 13 }}>
-                        {hotelInfo['hotels']
-                          .split(',')
-                          .map((hotel, index, array) => {
-                            return (
-                              <>
-                                {hotel}
-                                {index < array.length - 1 && (
-                                  <span style={{ color: 'orange' }}> | </span>
-                                )}
-                              </>
-                            );
-                          })}
-
+                        {hotelInfo['hotels'].split(',').map((hotel, index, array) => {
+                          return (
+                            <>
+                              {hotel}
+                              {index < array.length - 1 && <span style={{ color: 'orange' }}> | </span>}
+                            </>
+                          )
+                        })}
                       </span>
                     </div>
                   ))}
                 </div>
-
               </>
             )}
           </div>
         ))}
-
-
-
 
         <div className='itinerary-section'>
           <h3 className='itinerary-title'>Day Wise Itinerary</h3>
