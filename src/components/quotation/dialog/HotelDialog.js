@@ -232,7 +232,6 @@ const HotelDialog = ({
   }
 
   const handleOpenRoomDialog = hotel => {
-    console.log("hotel is: ", hotel)
     setSelectedHotel(hotel)
     setOpenRoomDialog(true)
   }

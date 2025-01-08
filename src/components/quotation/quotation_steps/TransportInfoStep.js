@@ -5,19 +5,21 @@ import { addDays } from 'date-fns'
 import { useSelector } from 'react-redux'
 import { useLoadScript } from '@react-google-maps/api'
 
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import InputLabel from '@mui/material/InputLabel'
-import FormControl from '@mui/material/FormControl'
-import FormHelperText from '@mui/material/FormHelperText'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import InputAdornment from '@mui/material/InputAdornment'
+import FormHelperText from '@mui/material/FormHelperText'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
-import Box from '@mui/material/Box'
-import Fab from '@mui/material/Fab'
+import Checkbox from '@mui/material/Checkbox'
+import Button from '@mui/material/Button'
+import Select from '@mui/material/Select'
 import { useTheme } from '@mui/material'
+import Grid from '@mui/material/Grid'
+import Fab from '@mui/material/Fab'
+import Box from '@mui/material/Box'
 
 import Icon from 'src/@core/components/icon'
 
@@ -44,6 +46,7 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
     setValue: setTransportValue,
     getValues: getTransportValues,
     control: transportControl,
+    watch: transportWatch,
     handleSubmit: handleTransportSubmit,
     formState: { errors: transportErrors }
   } = useForm({
@@ -60,17 +63,14 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
           departureReturnDate: travelBasicData
             ? [new Date(travelBasicData.dates[0]), new Date(travelBasicData.dates[1])]
             : [new Date(), addDays(new Date(), 45)],
-          from:
-            cities.length > 1 || cities.length == 0
-              ? ''
-              : `${cities[0].label[0].toUpperCase()}${cities[0].label.slice(1)}`,
+          from: { place: '', city: '', state: '' },
+          isLocal: false,
           additionalStops: [],
-          to:
-            cities.length > 1 || cities.length == 0
-              ? ''
-              : `${cities[0].label[0].toUpperCase()}${cities[0].label.slice(1)}`
+          to: { place: '', city: '', state: '' }
         }
   })
+
+  const isLocal = transportWatch('isLocal')
 
   const { fields, append, remove } = useFieldArray({
     control: transportControl,
@@ -163,11 +163,8 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
                       label='From'
                       name='from'
                       value={value}
-                      cities={cities}
+                      disabled={isLocal}
                       onChange={onChange}
-                      error={transportErrors.to}
-                      theme={theme}
-                      icon='location'
                     />
                   )}
                 />
@@ -177,6 +174,36 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
                   </FormHelperText>
                 )}
               </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name='isLocal'
+                control={transportControl}
+                rules={{ required: false }}
+                render={({ field: { value, onChange } }) => (
+                  <FormControlLabel
+                    value={value}
+                    checked={value}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setTransportValue('to', getTransportValues('from'))
+                      }
+                      onChange(e.target.checked)
+                    }}
+                    control={<Checkbox size='small' />}
+                    label='Book Taxi for local sight seeing'
+                    sx={{
+                      '& .MuiFormControlLabel-label': {
+                        fontSize: { xs: '13px', mobileMd: '1 rem' }
+                      },
+                      '& .MuiFormControlLabel-root': {
+                        ml: 0,
+                        mr: 0
+                      }
+                    }}
+                  />
+                )}
+              />
             </Grid>
             {fields.length > 0 && (
               <Grid item xs={12}>
@@ -193,11 +220,7 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
                               label='Stop Added'
                               name={`additionalStops.${index}`}
                               value={value}
-                              cities={cities}
                               onChange={onChange}
-                              error={transportErrors.additionalStops?.[index]}
-                              theme={theme}
-                              icon='location-add'
                             />
                           )}
                         />
@@ -268,16 +291,7 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
                   control={transportControl}
                   rules={{ required: 'This field is required' }}
                   render={({ field: { value, onChange } }) => (
-                    <LocationAutocomplete
-                      label='To'
-                      name='to'
-                      value={value}
-                      cities={cities}
-                      onChange={onChange}
-                      error={transportErrors.to}
-                      theme={theme}
-                      icon='flag'
-                    />
+                    <LocationAutocomplete label='To' name='to' value={value} disabled={isLocal} onChange={onChange} />
                   )}
                 />
                 {transportErrors.to && (

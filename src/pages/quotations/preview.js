@@ -755,15 +755,9 @@ const QutationPreview = ({ id }) => {
       transportInfo: transportData
         ? {
             vehicleType: transportData.current.vehicleType,
-            from:
-              typeof transportData.current.from == 'object'
-                ? transportData.current.from.description
-                : transportData.current.from,
-            to:
-              typeof transportData.current.to == 'object'
-                ? transportData.current.to.description
-                : transportData.current.from,
-            checkpoints: transportData.current.additionalStops.map(stop => stop.description),
+            from: transportData.current.from,
+            to: transportData.current.to,
+            checkpoints: transportData.current.additionalStops,
             transportStartDate: transportData.current.departureReturnDate[0],
             transportEndDate: transportData.current.departureReturnDate[1]
           }
@@ -839,8 +833,8 @@ const QutationPreview = ({ id }) => {
       return
     }
     const { from, to, additionalStops, departureReturnDate } = transportData.current
-    const origin = typeof from == 'object' ? from.description : from
-    const destination = typeof from == 'object' ? to.description : to
+    const origin = from.place
+    const destination = to.place
 
     const date1 = new Date(departureReturnDate[0])
     const date2 = new Date(departureReturnDate[1])
@@ -854,7 +848,7 @@ const QutationPreview = ({ id }) => {
     let waypoints =
       additionalStops.length > 0
         ? additionalStops.map((item, index) => {
-            return { location: item.description, stopover: true }
+            return { location: item.place, stopover: true }
           })
         : []
 
@@ -863,9 +857,10 @@ const QutationPreview = ({ id }) => {
       destination,
       travelMode: window.google.maps.TravelMode.DRIVING
     }
-
+    // console.log(waypoints)
     if (origin != destination) {
       waypoints = [...waypoints, { location: origin, stopover: true }]
+      // waypoints = [...waypoints, origin]
       distanceObj = { ...distanceObj, destination: destination }
     }
 
@@ -878,6 +873,7 @@ const QutationPreview = ({ id }) => {
         : distanceObj,
       (result, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
+          console.log(result)
           const totalDist = result.routes[0].legs.reduce((acc, leg) => acc + leg.distance.value, 0)
           const totalDistance = (totalDist / 1000).toFixed(2)
           // const totalTransportAmount = 0
@@ -1165,11 +1161,7 @@ const QutationPreview = ({ id }) => {
                           </label>
                           <div className='pick-up-location'>
                             {PickupLocation}
-                            <span>
-                              {typeof transportData.current.from == 'object'
-                                ? transportData.current.from.description
-                                : transportData.current.from}
-                            </span>
+                            <span>{transportData.current.from.place}</span>
                           </div>
                         </div>
                         <div className='div-for-accomodations' style={{ width: '45%' }}>
@@ -1181,11 +1173,7 @@ const QutationPreview = ({ id }) => {
                           </label>
                           <div className='drop-location'>
                             {DropLocation}
-                            <span>
-                              {typeof transportData.current.to == 'object'
-                                ? transportData.current.to.description
-                                : transportData.current.to}
-                            </span>
+                            <span>{transportData.current.to.place}</span>
                           </div>
                         </div>
 
@@ -1316,10 +1304,10 @@ const QutationPreview = ({ id }) => {
                         <h3 className='itinerary-title'>Additional Stops</h3>
                         <p className='day-description'>
                           Your journey will take you through some of the most captivating destinations, including{' '}
-                          {transportData.current.additionalStops.map(stop => stop.description).join(' | ')}. Each
-                          location offers its own unique charm, from vibrant streets and cultural landmarks to serene
-                          landscapes and artistic wonders. Together, they form a rich tapestry of experiences, ensuring
-                          that your trip is unforgettable and full of adventure.
+                          {transportData.current.additionalStops.map(stop => stop.place).join(' | ')}. Each location
+                          offers its own unique charm, from vibrant streets and cultural landmarks to serene landscapes
+                          and artistic wonders. Together, they form a rich tapestry of experiences, ensuring that your
+                          trip is unforgettable and full of adventure.
                         </p>
                       </div>
                     </div>
@@ -1678,7 +1666,7 @@ const QutationPreview = ({ id }) => {
                   if (pdfUrl == undefined) {
                     toast.error('Kindly save pdf first.')
                     // return
-                  } else if(pdfUrl.length == 0) {
+                  } else if (pdfUrl.length == 0) {
                     toast.error('Kindly save pdf first.')
                   } else {
                     setIsShareDialogOpen(true)
