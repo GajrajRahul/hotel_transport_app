@@ -159,6 +159,7 @@ const transformPackageData = data => {
 
 const MainHome = () => {
   const [isLoading, setIsLoading] = useState(false)
+  const clientType = localStorage.getItem('clientType')
 
   const router = useRouter()
   const dispatch = useDispatch()
@@ -202,44 +203,47 @@ const MainHome = () => {
     <>
       <Loader open={isLoading} />
       <Grid container sx={{ justifyContent: 'center' }}>
-        {data.map((item, index) => (
-          <Grid key={index} item xs={12} sm={6} md={4} lg={3} sx={{ padding: '10px 10px' }}>
-            <Card
-              sx={{
-                width: '100% !important',
-                borderRadius: '17px',
-                backgroundColor: item.color,
-                cursor: 'pointer'
-              }}
-              key={index}
-              onClick={() => router.push(item.href)}
-            >
-              <CardContent
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  pt: 3,
-                  '&.MuiCardContent-root': {
-                    pb: 3
-                  }
-                }}
-              >
-                <Box>
-                  <Typography fontWeight={600} fontSize={14} sx={{ mb: 1 }}>
-                    {item.title}
-                  </Typography>
-                  <Box sx={{ rowGap: 1, display: 'flex', flexWrap: 'wrap' }}>
-                    <Typography variant='caption' fontSize={10}>
-                      {item.subtitle}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Img src={item.src} alt={item.title} />
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+        {data.map(
+          (item, index) =>
+            (clientType != 'employee' || (clientType == 'employee' && item.title != 'Book a Taxi')) && (
+              <Grid key={index} item xs={12} sm={6} md={4} lg={3} sx={{ padding: '10px 10px' }}>
+                <Card
+                  sx={{
+                    width: '100% !important',
+                    borderRadius: '17px',
+                    backgroundColor: item.color,
+                    cursor: 'pointer'
+                  }}
+                  key={index}
+                  onClick={() => router.push(item.href)}
+                >
+                  <CardContent
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      pt: 3,
+                      '&.MuiCardContent-root': {
+                        pb: 3
+                      }
+                    }}
+                  >
+                    <Box>
+                      <Typography fontWeight={600} fontSize={14} sx={{ mb: 1 }}>
+                        {item.title}
+                      </Typography>
+                      <Box sx={{ rowGap: 1, display: 'flex', flexWrap: 'wrap' }}>
+                        <Typography variant='caption' fontSize={10}>
+                          {item.subtitle}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Img src={item.src} alt={item.title} />
+                  </CardContent>
+                </Card>
+              </Grid>
+            )
+        )}
       </Grid>
 
       <Grid container spacing={6} className='match-height' sx={{ mt: 0 }}>
