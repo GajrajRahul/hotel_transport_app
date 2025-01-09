@@ -756,13 +756,9 @@ const QuotationsHistory = () => {
       'transport',
       JSON.stringify({
         vehicleType,
-        from: { description: from },
-        to: { description: to },
-        additionalStops: checkpoints.map(checkpoint => {
-          return {
-            description: checkpoint
-          }
-        }),
+        from,
+        to,
+        additionalStops: checkpoints,
         departureReturnDate: [new Date(transportStartDate), new Date(transportEndDate)]
       })
     )
