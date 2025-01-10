@@ -275,7 +275,7 @@ const BookTaxi = () => {
       : 'admin'
     const api_url = `${BASE_URL}/${clientType}`
 
-    const { pickup, drop, days, stops, vehicleType, amount, distance, killoFare, tripDate } = previewTaxi
+    const { pickup, drop, days, stops, vehicleType, amount, distance, killoFare, tripDate, isLocal } = previewTaxi
 
     const dataToSend = {
       pickup,
@@ -286,6 +286,7 @@ const BookTaxi = () => {
       amount,
       distance,
       killoFare,
+      isLocal,
       tripDate,
       companyName: user.companyName,
       userName: user.name
@@ -323,6 +324,7 @@ const BookTaxi = () => {
         days: getDayNightCount(data.departureReturnDate) + 1,
         tripDate: data.departureReturnDate[0],
         returnDate: data.departureReturnDate[1],
+        isLocal: data.isLocal,
         stops,
         vehicleType: data.vehicleType,
         distance: amountData.distance,
