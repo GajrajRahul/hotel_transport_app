@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 
 import { useLoadScript } from '@react-google-maps/api'
 
+import FormControlLabel from '@mui/material/FormControlLabel'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import InputLabel from '@mui/material/InputLabel'
@@ -19,6 +20,7 @@ import Typography from '@mui/material/Typography'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import CardContent from '@mui/material/CardContent'
+import Checkbox from '@mui/material/Checkbox'
 import Card from '@mui/material/Card'
 import Box from '@mui/material/Box'
 import Fab from '@mui/material/Fab'
@@ -33,6 +35,8 @@ import CustomInput from 'src/components/common/CustomInput'
 import { ArrowHead, Dot, HighPrice, DefaultLocationIcon, RouteMapFilled, CancelTimeIcon } from 'src/utils/icons'
 import LocationAutocomplete from 'src/components/common/LocationAutocomplete'
 import { getDayNightCount } from 'src/utils/function'
+import Loader from 'src/components/common/Loader'
+import { postRequest } from 'src/api-main-file/APIServices'
 
 const libraries = ['places']
 
@@ -188,6 +192,7 @@ const getTotalAmount = async (transportData, transportSheetData) => {
 const BookTaxi = () => {
   const transportSheetData = useSelector(state => state.transportRateData)
   const [previewTaxi, setPreviewTaxi] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries
@@ -200,6 +205,7 @@ const BookTaxi = () => {
     setValue,
     getValues,
     control,
+    watch,
     handleSubmit,
     formState: { errors }
   } = useForm({
@@ -212,6 +218,7 @@ const BookTaxi = () => {
         state: '',
         country: ''
       },
+      isLocal: false,
       additionalStops: [],
       to: {
         place: '',
@@ -222,6 +229,8 @@ const BookTaxi = () => {
     }
   })
 
+  const isLocal = watch('isLocal')
+
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: 'additionalStops'
@@ -229,19 +238,19 @@ const BookTaxi = () => {
   const theme = useTheme()
 
   const handleWhatsApp = () => {
-    const { pickup, drop, days, vehicleType, distance, amount } = previewTaxi
+    const { pickup, drop, days, stops, vehicleType, distance, amount, tripDate, returnDate } = previewTaxi
     const link = document.createElement('a')
 
     const message =
       `Hi Team Adventure Richa Holidays,%0A%0A` +
       `I have some questions about the road trip mentioned below.%0A%0A` +
-      `Pick-up Location: ${pickup}:%0A%0A` +
-      `Trip Date: ${days[0]}:%0A%0A` +
-      `Drop-off Location: ${drop}:%0A%0A` +
-      `Return Date: ${days[1]}:%0A%0A` +
-      // `Route: ${pickup}:%0A%0A` +
+      `Pick-up Location: ${pickup?.place || ''}:%0A%0A` +
+      `Trip Date: ${tripDate}:%0A%0A` +
+      `Drop-off Location: ${drop?.place || ''}:%0A%0A` +
+      `Return Date: ${returnDate}:%0A%0A` +
+      `Route: ${stops}:%0A%0A` +
       `Car Type: ${vehicleType}:%0A%0A` +
-      // `Trip Duration: ${pickup}:%0A%0A` +
+      `Trip Duration: ${days}:%0A%0A` +
       `Total Amount: ${amount}`
 
     // link.href = `https://wa.me/${data.whatsapp}/?text=${message}`
@@ -251,36 +260,77 @@ const BookTaxi = () => {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    setPreviewTaxi(null)
+  }
+
+  const handleBookTaxi = async sendToWhatsapp => {
+    setIsLoading(true)
+
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    const clientType = ['admin', 'partner', 'employee'].includes(localStorage.getItem('clientType'))
+      ? localStorage.getItem('clientType')
+      : 'admin'
+    const api_url = `${BASE_URL}/${clientType}`
+
+    setIsLoading(false)
+    const { pickup, drop, days, stops, vehicleType, amount, distance, killoFare } = previewTaxi
+
+    const response = await postRequest(`${api_url}/create-taxi`, {
+      pickup,
+      drop,
+      tripDays: days,
+      route: stops,
+      vehicleType,
+      amount,
+      distance,
+      killoFare
+    })
+    setIsLoading(false)
+
+    if (response.status) {
+      if (sendToWhatsapp) {
+        handleWhatsApp()
+      } else {
+        setPreviewTaxi(null)
+      }
+      toast.success('Sccess')
+    } else {
+      toast.error(response.error)
+    }
   }
 
   const onSubmit = async data => {
-    let stops = [data.from.city || '']
+    let stops = [data.from]
     data.additionalStops.map(stop => {
-      stops.push(stop.city || '')
+      stops.push(stop)
     })
-    stops.push(data.to.city || '')
+    stops.push(data.to)
 
     const amountData = await getTotalAmount(data, transportSheetData)
     // console.log('amountData: ', amountData)
     if (amountData.status) {
       setPreviewTaxi({
-        pickup: `${data.from?.city || ''}, ${data.from?.state}`,
-        drop: `${data.to?.city || ''}, ${data.to?.state}`,
+        pickup: data.from,
+        drop: data.to,
         days: getDayNightCount(data.departureReturnDate) + 1,
+        tripDate: data.departureReturnDate[0],
+        returnDate: data.departureReturnDate[1],
         stops,
         vehicleType: data.vehicleType,
         distance: amountData.distance,
-        amount: amountData.amount
+        amount: amountData.amount,
+        killoFare: transportSheetData[data.vehicleType].amount_per_km
       })
     } else {
       setPreviewTaxi({
-        pickup: `${data.from?.city || ''}, ${data.from?.state}`,
-        drop: `${data.to?.city || ''}, ${data.to?.state}`,
+        pickup: { from: '', city: '', state: '' },
+        drop: { from: '', city: '', state: '' },
         days: getDayNightCount(data.departureReturnDate) + 1,
         stops,
         vehicleType: data.vehicleType,
         distance: 0,
-        amount: 0
+        amount: 0,
+        killoFare: 0
       })
     }
   }
@@ -289,10 +339,11 @@ const BookTaxi = () => {
     router.push('/')
   }
 
-  if (!isLoaded) return <div>Loading...</div>
+  // if (!isLoaded) return <div>Loading...</div>
 
   return (
     <DatePickerWrapper>
+      <Loader open={!isLoaded || isLoading} />
       <Typography className='main-title' variant='h3'>
         {' '}
         Why Book Taxi From US ?
@@ -472,8 +523,38 @@ const BookTaxi = () => {
                     )}
                   </FormControl>
                 </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name='isLocal'
+                    control={control}
+                    rules={{ required: false }}
+                    render={({ field: { value, onChange } }) => (
+                      <FormControlLabel
+                        value={value}
+                        checked={value}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setValue('to', getValues('from'))
+                          }
+                          onChange(e.target.checked)
+                        }}
+                        control={<Checkbox size='small' />}
+                        label='Book Taxi for local sight seeing'
+                        sx={{
+                          '& .MuiFormControlLabel-label': {
+                            fontSize: { xs: '13px', mobileMd: '1 rem' }
+                          },
+                          '& .MuiFormControlLabel-root': {
+                            ml: 0,
+                            mr: 0
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
                 {fields.length > 0 && (
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sx={{ maxHeight: '300px', overflow: 'auto' }}>
                     {fields.map((item, index) => (
                       <Grid container spacing={5} key={item.id}>
                         <Grid item xs={10.75} sx={{ mb: index != fields.length - 1 ? 5 : 0 }}>
@@ -621,7 +702,7 @@ const BookTaxi = () => {
                       >
                         <Box sx={{ paddingRight: '10px' }}>{DefaultLocationIcon}</Box>
                         <Typography variant='body1' sx={{ color: '#333333', fontWeight: 600 }}>
-                          {previewTaxi.pickup}
+                          {`${previewTaxi.pickup.city}, ${previewTaxi.pickup.state}`}
                         </Typography>
                       </Box>
                     </Box>
@@ -639,7 +720,7 @@ const BookTaxi = () => {
                       >
                         <Box sx={{ paddingRight: '10px' }}>{DefaultLocationIcon}</Box>
                         <Typography variant='body1' sx={{ color: '#333333', fontWeight: 600 }}>
-                          {previewTaxi.drop}
+                          {`${previewTaxi.drop.city}, ${previewTaxi.drop.state}`}
                         </Typography>
                       </Box>
                     </Box>
@@ -666,7 +747,7 @@ const BookTaxi = () => {
                     {previewTaxi.stops.map((stop, index) => (
                       <Fragment key={index}>
                         <Typography variant='body1' sx={{ color: '#333333', fontWeight: 600 }}>
-                          {stop}
+                          {stop.city}
                         </Typography>
                         {index != previewTaxi.stops.length - 1 && ArrowHead}
                       </Fragment>
@@ -713,8 +794,7 @@ const BookTaxi = () => {
                         Extra Km Fare :
                       </Typography>
                       <Typography variant='body1' sx={{ color: '#333333', fontWeight: 600 }}>
-                        Rs {transportSheetData[previewTaxi.vehicleType].amount_per_km}/km after {previewTaxi.distance}{' '}
-                        Kms
+                        Rs {previewTaxi.killoFare}/km after {previewTaxi.distance} Kms
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -745,12 +825,13 @@ const BookTaxi = () => {
                         fontWeight: '900'
                       }}
                       variant='contained'
+                      onClick={() => handleBookTaxi(false)}
                     >
                       Book Now
                     </Button>
                     <Button
                       fullWidth
-                      onClick={handleWhatsApp}
+                      onClick={() => handleBookTaxi(true)}
                       sx={{
                         textTransform: 'none',
                         justifyContent: 'center',
