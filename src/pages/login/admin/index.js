@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -52,12 +52,24 @@ const CustomLinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none'
 }))
 
+const images = ['/images/login_slider1.jpg', '/images/login_slider2.jpg']
+
 const AdminLoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
 
+  const [currentImage, setCurrentImage] = useState(0)
+
   const auth = useAuth()
+
+  useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentImage(prevImage => (prevImage + 1) % images.length)
+      }, 5000) // 5000ms = 5 seconds
+  
+      return () => clearInterval(interval) // Clean up on unmount
+    }, [])
 
   const {
     control,
@@ -103,7 +115,9 @@ const AdminLoginPage = () => {
         >
           {!hidden && (
             <Grid item xs={12} md={6}>
-              <Card className='inner-card'></Card>
+              <Card sx={{ background: 'none', height: '500px' }}>
+                <img src={images[currentImage]} alt='carousel' width={'100%'} height={'100%'} style={{ borderRadius: '10px' }} />
+              </Card>
             </Grid>
           )}
           <Grid item xs={12} md={6}>
@@ -249,7 +263,9 @@ const AdminLoginPage = () => {
           </Grid>
           {hidden && (
             <Grid item xs={12} md={6} sx={{ mb: 7 }}>
-              <Card className='inner-card'></Card>
+              <Card sx={{ background: 'none' }}>
+                <img src={images[currentImage]} alt='carousel' width={'100%'} style={{ borderRadius: '10px' }} />
+              </Card>
             </Grid>
           )}
         </Grid>

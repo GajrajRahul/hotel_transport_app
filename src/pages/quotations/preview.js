@@ -529,11 +529,11 @@ const getHotelFare = (cities, hotelSheetData) => {
   return { hotelAmount: hotelAmount, totalNights }
 }
 
-const getTransportFare = (data, cities, transportSheetData) => {
-  const { totalDays, totalDistance, vehicleType, additionalStops } = data
+const getTransportFare = (data, transportSheetData) => {
+  const { totalDays, totalDistance, vehicleType, additionalStops, isLocal } = data
   const vehicleRates = transportSheetData[vehicleType]
 
-  if (cities.current.length == 1) {
+  if (isLocal) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
     if (additionalStops.length > 0) {
       totalAmount = Number(vehicleRates['city_local_fare'] * (Number(totalDays) - 1))
@@ -756,6 +756,7 @@ const QutationPreview = ({ id }) => {
         ? {
             vehicleType: transportData.current.vehicleType,
             from: transportData.current.from,
+            isLocal: transportData.current.isLocal,
             to: transportData.current.to,
             checkpoints: transportData.current.additionalStops,
             transportStartDate: transportData.current.departureReturnDate[0],
@@ -885,7 +886,6 @@ const QutationPreview = ({ id }) => {
                 totalDays: totalDays + 1,
                 additionalStops
               },
-              cities,
               transportSheetData
             ) ?? 0
           // console.log('totalTransportAmount: ', totalTransportAmount)

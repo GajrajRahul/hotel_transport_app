@@ -228,6 +228,31 @@ const BookTaxi = () => {
   })
   const theme = useTheme()
 
+  const handleWhatsApp = () => {
+    const { pickup, drop, days, vehicleType, distance, amount } = previewTaxi
+    const link = document.createElement('a')
+
+    const message =
+      `Hi Team Adventure Richa Holidays,%0A%0A` +
+      `I have some questions about the road trip mentioned below.%0A%0A` +
+      `Pick-up Location: ${pickup}:%0A%0A` +
+      `Trip Date: ${days[0]}:%0A%0A` +
+      `Drop-off Location: ${drop}:%0A%0A` +
+      `Return Date: ${days[1]}:%0A%0A` +
+      // `Route: ${pickup}:%0A%0A` +
+      `Car Type: ${vehicleType}:%0A%0A` +
+      // `Trip Duration: ${pickup}:%0A%0A` +
+      `Total Amount: ${amount}`
+
+    // link.href = `https://wa.me/${data.whatsapp}/?text=${message}`
+    link.href = `https://wa.me/7568901443/?text=${message}`
+
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const onSubmit = async data => {
     let stops = [data.from.city || '']
     data.additionalStops.map(stop => {
@@ -711,18 +736,31 @@ const BookTaxi = () => {
                       Excluding Taxes
                     </Typography>
                   </Box>
-                  <Button
-                    sx={{
-                      width: '50%', // Set width to 50%
-                      mb: 3.5,
-                      textTransform: 'none',
-                      justifyContent: 'center',
-                      fontWeight: '900'
-                    }}
-                    variant='contained'
-                  >
-                    Book Now
-                  </Button>
+                  <Box sx={{ display: 'flex', gap: 5 }}>
+                    <Button
+                      fullWidth
+                      sx={{
+                        textTransform: 'none',
+                        justifyContent: 'center',
+                        fontWeight: '900'
+                      }}
+                      variant='contained'
+                    >
+                      Book Now
+                    </Button>
+                    <Button
+                      fullWidth
+                      onClick={handleWhatsApp}
+                      sx={{
+                        textTransform: 'none',
+                        justifyContent: 'center',
+                        fontWeight: '900'
+                      }}
+                      variant='outlined'
+                    >
+                      Chat With Us
+                    </Button>
+                  </Box>
                 </Box>
               )}
             </CardContent>

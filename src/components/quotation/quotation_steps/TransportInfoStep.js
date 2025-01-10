@@ -32,7 +32,6 @@ const libraries = ['places']
 const TransportInfoStep = ({ handleBack, onSubmit }) => {
   const transportSheetData = useSelector(state => state.transportRateData)
 
-  const cities = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
   const transportData = localStorage.getItem('transport') ? JSON.parse(localStorage.getItem('transport')) : null
   const travelBasicData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
 

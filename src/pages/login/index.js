@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -13,9 +14,21 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 import LoginRight from 'src/components/login/LoginRight'
 
+const images = ['/images/login_slider1.jpg', '/images/login_slider2.jpg']
+
 const LoginPage = () => {
+  const [currentImage, setCurrentImage] = useState(0)
+
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage(prevImage => (prevImage + 1) % images.length)
+    }, 5000) // 5000ms = 5 seconds
+
+    return () => clearInterval(interval) // Clean up on unmount
+  }, [])
 
   return (
     <Box className='content-right'>
@@ -40,7 +53,15 @@ const LoginPage = () => {
         >
           {!hidden && (
             <Grid item xs={12} md={6}>
-              <Card className='inner-card'></Card>
+              <Card sx={{ background: 'none', height: '500px' }}>
+                <img
+                  src={images[currentImage]}
+                  alt='carousel'
+                  width={'100%'}
+                  height={'100%'}
+                  style={{ borderRadius: '10px' }}
+                />
+              </Card>
             </Grid>
           )}
           <Grid item xs={12} md={6}>
@@ -50,7 +71,9 @@ const LoginPage = () => {
           </Grid>
           {hidden && (
             <Grid item xs={12} md={6} sx={{ mb: 7 }}>
-              <Card className='inner-card'></Card>
+              <Card sx={{ background: 'none' }}>
+                <img src={images[currentImage]} alt='carousel' width={'100%'} style={{ borderRadius: '10px' }} />
+              </Card>
             </Grid>
           )}
         </Grid>

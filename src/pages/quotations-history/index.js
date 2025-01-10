@@ -751,12 +751,13 @@ const QuotationsHistory = () => {
     })
     localStorage.setItem('citiesHotels', JSON.stringify(citiesData))
 
-    const { vehicleType, from, to, checkpoints, transportStartDate, transportEndDate } = transport
+    const { vehicleType, from, to, checkpoints, transportStartDate, transportEndDate, isLocal } = transport
     localStorage.setItem(
       'transport',
       JSON.stringify({
         vehicleType,
         from,
+        isLocal,
         to,
         additionalStops: checkpoints,
         departureReturnDate: [new Date(transportStartDate), new Date(transportEndDate)]
