@@ -46,7 +46,7 @@ const History = () => {
         <QuotationsHistory />
       </TabPanel>
       <TabPanel sx={{ p: 0 }} value='taxi'>
-        {/* <TaxisHistory /> */}
+        <TaxisHistory />
       </TabPanel>
     </TabContext>
   ) : (

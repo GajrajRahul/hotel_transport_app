@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
-import { addDays } from 'date-fns'
+import { addDays, format } from 'date-fns'
 import { useRouter } from 'next/router'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
@@ -37,13 +37,14 @@ import LocationAutocomplete from 'src/components/common/LocationAutocomplete'
 import { getDayNightCount } from 'src/utils/function'
 import Loader from 'src/components/common/Loader'
 import { postRequest } from 'src/api-main-file/APIServices'
+import { useAuth } from 'src/hooks/useAuth'
 
 const libraries = ['places']
 
 const getTransportFare = (data, cities, transportSheetData) => {
   const { totalDays, totalDistance, vehicleType, additionalStops, from, to } = data
   const vehicleRates = transportSheetData[vehicleType]
-  console.log('cities: ', cities)
+  // console.log('cities: ', cities)
 
   if (from.place == to.place) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
@@ -199,6 +200,7 @@ const BookTaxi = () => {
   })
 
   const router = useRouter()
+  const { user } = useAuth()
 
   const {
     reset,
@@ -244,17 +246,17 @@ const BookTaxi = () => {
     const message =
       `Hi Team Adventure Richa Holidays,%0A%0A` +
       `I have some questions about the road trip mentioned below.%0A%0A` +
-      `Pick-up Location: ${pickup?.place || ''}:%0A%0A` +
-      `Trip Date: ${tripDate}:%0A%0A` +
-      `Drop-off Location: ${drop?.place || ''}:%0A%0A` +
-      `Return Date: ${returnDate}:%0A%0A` +
-      `Route: ${stops}:%0A%0A` +
-      `Car Type: ${vehicleType}:%0A%0A` +
-      `Trip Duration: ${days}:%0A%0A` +
+      `Pick-up Location: ${pickup?.place || ''}%0A%0A` +
+      `Trip Date: ${format(new Date(tripDate), 'dd MMM yyyy')}%0A%0A` +
+      `Drop-off Location: ${drop?.place || ''}%0A%0A` +
+      `Return Date: ${format(new Date(returnDate), 'dd MMM yyyy')}%0A%0A` +
+      `Route: ${stops.map(stop => stop.city).join(', ')}%0A%0A` +
+      `Car Type: ${vehicleType}%0A%0A` +
+      `Trip Duration: ${days} Days%0A%0A` +
       `Total Amount: ${amount}`
 
     // link.href = `https://wa.me/${data.whatsapp}/?text=${message}`
-    link.href = `https://wa.me/7568901443/?text=${message}`
+    link.href = `https://wa.me/9664478073/?text=${message}`
 
     link.target = '_blank'
     document.body.appendChild(link)
@@ -266,16 +268,16 @@ const BookTaxi = () => {
   const handleBookTaxi = async sendToWhatsapp => {
     setIsLoading(true)
 
-    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    const BASE_URL = 'http://localhost:4000/api'
     const clientType = ['admin', 'partner', 'employee'].includes(localStorage.getItem('clientType'))
       ? localStorage.getItem('clientType')
       : 'admin'
     const api_url = `${BASE_URL}/${clientType}`
 
-    setIsLoading(false)
-    const { pickup, drop, days, stops, vehicleType, amount, distance, killoFare } = previewTaxi
+    const { pickup, drop, days, stops, vehicleType, amount, distance, killoFare, tripDate } = previewTaxi
 
-    const response = await postRequest(`${api_url}/create-taxi`, {
+    const dataToSend = {
       pickup,
       drop,
       tripDays: days,
@@ -283,8 +285,13 @@ const BookTaxi = () => {
       vehicleType,
       amount,
       distance,
-      killoFare
-    })
+      killoFare,
+      tripDate,
+      companyName: user.companyName,
+      userName: user.name
+    }
+
+    const response = await postRequest(`${api_url}/create-taxi`, dataToSend)
     setIsLoading(false)
 
     if (response.status) {
@@ -293,6 +300,7 @@ const BookTaxi = () => {
       } else {
         setPreviewTaxi(null)
       }
+      router.push('/quotations-history')
       toast.success('Sccess')
     } else {
       toast.error(response.error)
@@ -322,16 +330,16 @@ const BookTaxi = () => {
         killoFare: transportSheetData[data.vehicleType].amount_per_km
       })
     } else {
-      setPreviewTaxi({
-        pickup: { from: '', city: '', state: '' },
-        drop: { from: '', city: '', state: '' },
-        days: getDayNightCount(data.departureReturnDate) + 1,
-        stops,
-        vehicleType: data.vehicleType,
-        distance: 0,
-        amount: 0,
-        killoFare: 0
-      })
+      // setPreviewTaxi({
+      //   pickup: { from: '', city: '', state: '' },
+      //   drop: { from: '', city: '', state: '' },
+      //   days: getDayNightCount(data.departureReturnDate) + 1,
+      //   stops,
+      //   vehicleType: data.vehicleType,
+      //   distance: 0,
+      //   amount: 0,
+      //   killoFare: 0
+      // })
     }
   }
 
