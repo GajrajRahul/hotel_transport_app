@@ -268,8 +268,8 @@ const BookTaxi = () => {
   const handleBookTaxi = async sendToWhatsapp => {
     setIsLoading(true)
 
-    // const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-    const BASE_URL = 'http://localhost:4000/api'
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = 'http://localhost:4000/api'
     const clientType = ['admin', 'partner', 'employee'].includes(localStorage.getItem('clientType'))
       ? localStorage.getItem('clientType')
       : 'admin'
