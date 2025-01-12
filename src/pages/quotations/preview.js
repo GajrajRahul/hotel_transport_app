@@ -200,7 +200,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
           roomTypes.push(h)
         }
       })
-      console.log('roomTypes is: ', roomTypes)
+      // console.log('roomTypes is: ', roomTypes)
 
       while (currentDate < checkOut) {
         const day = itinerary.length + 1
@@ -503,28 +503,29 @@ const getHotelFare = (cities, hotelSheetData) => {
           // console.log('hotelInfo: ', hotelInfo)
           // console.log('hotelInfo[data]: ', hotelInfo[data])
           // console.log('hotelSheetData.roomsList: ', hotelSheetData.roomsList)
-          // console.log('room: ', Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight)
+          console.log('room: ', Number(hotel[data]) * Number(hotelInfo[data]) * totalDayNight)
         }
       })
 
       if (breakfast) {
         hotelAmount += Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight
-        // console.log('breakfast: ', Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight)
+        console.log('breakfast: ', Number(hotelInfo['breakfast']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (lunch) {
         hotelAmount += Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight
-        // console.log('lunch: ', Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight)
+        console.log('lunch: ', Number(hotelInfo['lunch']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (dinner) {
         hotelAmount += Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight
-        // console.log('dinner: ', Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight)
+        console.log('dinner: ', Number(hotelInfo['dinner']) * (Number(adult) + Number(child)) * totalDayNight)
       }
       if (extraBed) {
         hotelAmount += Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight
-        // console.log('extrabed: ', Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight)
+        console.log('extrabed: ', Number(extraBed) * Number(hotelInfo['extrabed']) * totalDayNight)
       }
     })
   })
+  console.log('hotelAmount: ', hotelAmount)
 
   return { hotelAmount: hotelAmount, totalNights }
 }
@@ -550,8 +551,78 @@ const getTransportFare = (data, transportSheetData) => {
   } else {
     const distanceAmount =
       Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
+    console.log('totalDays: ', totalDays)
+    console.log('minimum_km_charge: ', vehicleRates['minimum_km_charge'])
+    console.log('amount_per_km: ', vehicleRates['amount_per_km'])
+    console.log('distanceAmount: ', distanceAmount)
 
     let distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
+    console.log('totalDistance: ', totalDistance)
+    console.log('distanceAmount2: ', distanceAmount2)
+
+    if (totalDistance >= 1500) {
+      distanceAmount2 = distanceAmount2 * 1.32
+    }
+
+    const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
+    console.log('tollAmount: ', tollAmount)
+    const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
+    console.log('driver_charges_per_day: ', driverAmount)
+    const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
+    console.log('parking_charges_per_day: ', parkingCharges)
+    const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
+    console.log('service_cleaning_charge_one_time: ', cleaningAmount)
+
+    const totalAmount =
+      (distanceAmount > distanceAmount2 ? distanceAmount : Math.floor(distanceAmount2)) +
+      Number(tollAmount) +
+      Number(driverAmount) +
+      Number(parkingCharges) +
+      Number(cleaningAmount)
+    console.log('final totalAmount is: ', totalAmount)
+
+    return totalAmount
+  }
+}
+
+const getTransportFare2 = (data, transportSheetData) => {
+  const { totalDays, totalDistance, vehicleType, additionalStops, isLocal, from, to } = data
+  // console.log("dayWiseItinerary: ", dayWiseItinerary)
+  // console.log('my selected taxi Data: ', data)
+  // console.log('transportSheetData: ', transportSheetData)
+  // console.log(from.state)
+  // console.log('vehicleType: ', vehicleType)
+
+  const fromState = transportSheetData[from.state] || transportSheetData['other']
+  // console.log('fromState: ', fromState)
+  const vehicleRates = fromState[vehicleType]
+  console.log('totalDays: ', totalDays)
+  // console.log('vehicleRates: ', vehicleRates)
+  if (isLocal) {
+    let totalAmount = Number(vehicleRates['city_local_fare']) * Number(totalDays)
+    // console.log("city_local_fare * totalDays: ", Number(vehicleRates['city_local_fare']) * Number(totalDays))
+    if (additionalStops.length > 0) {
+      totalAmount = Number(vehicleRates['city_local_fare']) * (Number(totalDays) - 1)
+      // console.log("city_local_fare * totalDays: ", Number(vehicleRates['city_local_fare']) * Number(totalDays)-1)
+      const tempTotalDistance = totalDistance < 280 ? 280 : totalDistance
+      const remainingAmount =
+        tempTotalDistance * Number(vehicleRates['amount_per_km']) +
+        Number(vehicleRates['toll_charges_per_day']) +
+        Number(vehicleRates['driver_charges_per_day']) +
+        Number(vehicleRates['parking_charges_per_day']) +
+        Number(vehicleRates['service_cleaning_charge_one_time'])
+      totalAmount += remainingAmount
+      console.log('distance by google api * amount_per_km: ', tempTotalDistance * Number(vehicleRates['amount_per_km']))
+    }
+    return totalAmount
+  } else {
+    const distanceAmount =
+      Number(totalDays) * Number(vehicleRates['minimum_km_charge']) * Number(vehicleRates['amount_per_km'])
+    console.log('totalDays * minimum_km_charge * amount_per_km: ', distanceAmount)
+
+    let distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
+    console.log("distance by google api: ", totalDistance)
+    console.log("distance by google api * amount_per_km: ", distanceAmount2)
 
     if (totalDistance >= 1500) {
       distanceAmount2 = distanceAmount2 * 1.32
@@ -874,21 +945,22 @@ const QutationPreview = ({ id }) => {
         : distanceObj,
       (result, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
-          console.log(result)
+          // console.log(result)
           const totalDist = result.routes[0].legs.reduce((acc, leg) => acc + leg.distance.value, 0)
           const totalDistance = (totalDist / 1000).toFixed(2)
           // const totalTransportAmount = 0
           const totalTransportAmount =
-            getTransportFare(
+            getTransportFare2(
               {
                 ...transportData.current,
                 totalDistance,
                 totalDays: totalDays + 1,
                 additionalStops
               },
-              transportSheetData
+              transportSheetData,
+              // dayWiseItinerary
             ) ?? 0
-          // console.log('totalTransportAmount: ', totalTransportAmount)
+          console.log('totalTransportAmount: ', totalTransportAmount)
           const { hotelAmount: totalHotelAmount, totalNights: totalNightCount } = getHotelFare(
             cities.current,
             hotelSheetData
@@ -901,7 +973,7 @@ const QutationPreview = ({ id }) => {
                 ? Math.floor(Number(totalHotelAmount) * 1.44)
                 : Math.floor(Number(totalHotelAmount) * 1.3)
               : Math.floor(Number(totalHotelAmount) * 0.95)
-          // console.log('totalHotelAmount: ', totalHotelAmount)
+          console.log('totalHotelAmount: ', totalHotelAmount)
 
           const transportFinalAmount =
             clientType.current == 'admin'
@@ -912,13 +984,13 @@ const QutationPreview = ({ id }) => {
                 : Math.floor(Number(totalTransportAmount) * 1.3)
               : Math.floor(Number(totalTransportAmount) * 0.95)
 
-          if (clientType.current == 'employee' && origin == destination) {
-            setTotalAmount(
-              Math.floor(Number(hotelFinalAmount) * 1.235) + Math.floor(Number(transportFinalAmount) * 1.235)
-            )
-          } else {
-            setTotalAmount(Number(hotelFinalAmount) + Number(transportFinalAmount))
-          }
+          // if (clientType.current == 'employee' && origin == destination) {
+          //   setTotalAmount(
+          //     Math.floor(Number(hotelFinalAmount) * 1.235) + Math.floor(Number(transportFinalAmount) * 1.235)
+          //   )
+          // } else {
+          setTotalAmount(Number(hotelFinalAmount) + Number(transportFinalAmount))
+          // }
           setTotalNights(totalNightCount)
         } else {
           toast.error(`error fetching distance: ${result?.status}`)

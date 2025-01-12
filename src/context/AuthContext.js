@@ -116,6 +116,7 @@ const AuthProvider = ({ children }) => {
     }
 
     if (transportData) {
+      // console.log('transportData: ', transportData)
       dispatch(replaceTransportData(transportData))
     }
 
@@ -142,15 +143,56 @@ const AuthProvider = ({ children }) => {
   const fetchTransportData = async () => {
     const TRANSPORT_SHEET_ID = process.env.NEXT_PUBLIC_TRANSPORT_SHEET_ID
     const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    const TRANSPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/${TRANSPORT_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+    // const TRANSPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/${TRANSPORT_SHEET_ID}/values/Sheet1?key=${API_KEY}`
+    const TRANSPORT_URL = `https://sheets.googleapis.com/v4/spreadsheets/1fDSoIJenm9OVHSBmAm9qojgLHapQ1od_m5zfB7gDkH0/values/Sheet1?key=${API_KEY}`
 
     try {
       const response = await axios.get(TRANSPORT_URL)
-      return transformTransportData(response.data.values)
+      // console.log('response.data.values: ', response.data.values)
+      // return transformTransportData(response.data.values)
+      return getProparTransformData(response.data.values)
     } catch (error) {
       toast.error('Failded fetching quotation data')
       return {}
     }
+  }
+
+  const getProparTransformData = async data => {
+    const headers = data[0] // Extract headers
+    const result = {}
+    let states = []
+
+    data.slice(1).forEach(row => {
+      if (row.length > 0) {
+        const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
+        // console.log('rowData.state: ', rowData.state)
+
+        const state = rowData.state // Default state if not specified
+        const carName = `${rowData.car_name}`
+
+        
+        if (state.length != 0 && !states.includes(state)) {
+          if (!result[state]) result[state] = {}
+          if (!result[state][carName]) result[state][carName] = {}
+          states.push(state)
+          headers.forEach(item => {
+            if (item !== 'car_name' && item !== 'state') {
+              result[state][carName][item] = rowData[item]
+            }
+          })
+        } else {
+          if (!result[states[states.length - 1]][carName]) result[states[states.length - 1]][carName] = {}
+          headers.forEach(item => {
+            if (item !== 'car_name' && item !== 'state') {
+              result[states[states.length - 1]][carName][item] = rowData[item]
+            }
+          })
+        }
+      }
+    })
+
+    // console.log('result: ', result)
+    return result
   }
 
   const fetchMonumentsData = async () => {
@@ -204,7 +246,7 @@ const AuthProvider = ({ children }) => {
 
     if (response.status) {
       const { user_data } = response.data
-      if(!user_data) {
+      if (!user_data) {
         toast.error(response.error)
         return
       }

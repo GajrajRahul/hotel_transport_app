@@ -9,6 +9,7 @@ import UserDataSlice from './UserDataSlice'
 import MonumentDataSlice from './MonumentDataSlice'
 import TravelPackageSlice from './TravelPackageSlice'
 import QuotationHistorySlice from './QuotationHistorySlice'
+import TaxiDetailSlice from './TaxiDetailSlice'
 
 const reducers = combineReducers({
   breadcrumb: BreadCrumbsSlice,
@@ -19,7 +20,8 @@ const reducers = combineReducers({
   transportRateData: TransportDataSlice,
   monumentRateData: MonumentDataSlice,
   travelPackageData: TravelPackageSlice,
-  quotationHistoryData: QuotationHistorySlice
+  quotationHistoryData: QuotationHistorySlice,
+  taxiDetail: TaxiDetailSlice
 })
 
 const reducerProxy = (state, action) => {

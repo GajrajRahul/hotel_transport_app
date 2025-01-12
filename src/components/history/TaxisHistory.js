@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
+import { useRouter } from 'next/router'
 
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
@@ -8,7 +9,7 @@ import Card from '@mui/material/Card'
 import Box from '@mui/material/Box'
 
 import { DataGrid } from '@mui/x-data-grid'
-import { getRequest } from 'src/api-main-file/APIServices'
+import { getRequest, postRequest } from 'src/api-main-file/APIServices'
 
 import Icon from 'src/@core/components/icon'
 import OptionsMenu from 'src/@core/components/option-menu'
@@ -134,6 +135,7 @@ const TaxisHistory = () => {
   const [apiTaxiHistoryList, setApiTaxiHistoryList] = useState([])
   const [taxiHistory, setTaxiHisotry] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const adminColumns = useMemo(
     () => [
@@ -162,7 +164,13 @@ const TaxisHistory = () => {
                   icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      fetchQuotation(row, '/quotations')
+                      const { _id, adminId, partnerId } = row
+                      router.push({
+                        pathname: `/book-taxi/${_id}`,
+                        query: {
+                          filter: adminId ? JSON.stringify({ _id, adminId }) : JSON.stringify({ _id, partnerId })
+                        }
+                      })
                     }
                   }
                 },
@@ -251,7 +259,11 @@ const TaxisHistory = () => {
                   icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      fetchQuotation(row, '/quotations')
+                      const { _id, partnerId } = row
+                      router.push({
+                        pathname: `/book-taxi/${_id}`,
+                        filter: JSON.stringify({ _id, partnerId })
+                      })
                     }
                   }
                 },

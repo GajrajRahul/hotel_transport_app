@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
 import { addDays } from 'date-fns'
@@ -31,6 +31,17 @@ const libraries = ['places']
 
 const TransportInfoStep = ({ handleBack, onSubmit }) => {
   const transportSheetData = useSelector(state => state.transportRateData)
+  const carTypes = useMemo(() => {
+    let carTypesArr = []
+    Object.values(transportSheetData).map(city =>
+      Object.keys(city).map(transport => {
+        if (transport && transport.length > 0 && !carTypesArr.includes(transport)) {
+          carTypesArr.push(transport)
+        }
+      })
+    )
+    return carTypesArr;
+  }, [])
 
   const transportData = localStorage.getItem('transport') ? JSON.parse(localStorage.getItem('transport')) : null
   const travelBasicData = localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null
@@ -107,7 +118,7 @@ const TransportInfoStep = ({ handleBack, onSubmit }) => {
                         }
                         onChange={onChange}
                       >
-                        {Object.keys(transportSheetData).map(transport => (
+                        {carTypes.map(transport => (
                           <MenuItem key={transport} value={transport}>
                             {transport.split('_').join(' ')}
                           </MenuItem>

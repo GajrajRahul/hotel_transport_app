@@ -52,7 +52,7 @@ const data = [
     subtitle: 'Your ride, your way, at your doorstep',
     src: '/images/icons/taxi-stop.png',
     color: '#97D786',
-    href: '/book-taxi'
+    href: '/book-taxi/add'
   },
   {
     title: 'ARH Prime Hotels',
