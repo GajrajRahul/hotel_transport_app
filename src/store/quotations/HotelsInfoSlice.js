@@ -4,6 +4,10 @@ const hotelsInfoSlice = createSlice({
   name: 'hotelsInfo',
   initialState: [],
   reducers: {
+    replaceHotelSheetData(state, action) {
+      state = action.payload;
+      return state;
+    },
     addCities(state, action) {
       state.push(action.payload)
     },
@@ -16,4 +20,4 @@ const hotelsInfoSlice = createSlice({
 
 export default hotelsInfoSlice.reducer
 
-export const { addCities, updateCity, deleteCity } = hotelsInfoSlice.actions
+export const { addCities, updateCity, deleteCity, replaceHotelSheetData } = hotelsInfoSlice.actions

@@ -10,6 +10,7 @@ import { replaceHotelData } from 'src/store/HotelDataSlice'
 import { replaceTransportData } from 'src/store/TransportDataSlice'
 import { replaceMonumentData } from 'src/store/MonumentDataSlice'
 import { transformHotelData, transformMonumentsData, transformTransportData } from 'src/utils/function'
+import { replaceHotelSheetData } from 'src/store/quotations/HotelsInfoSlice'
 
 // ** Defaults
 const defaultProvider = {
@@ -133,6 +134,7 @@ const AuthProvider = ({ children }) => {
 
     try {
       const response = await axios.get(HOTEL_URL)
+      const myData = getProperHotelData(response.data.values)
       return transformHotelData(response.data.values)
     } catch (error) {
       toast.error('Failded fetching quotation data')
@@ -157,6 +159,81 @@ const AuthProvider = ({ children }) => {
     }
   }
 
+  const getProperHotelData = async data => {
+    const headers = data[0] // Extract headers
+    let finalResult = []
+
+    data.slice(1).forEach(item => {
+      const rowData = Object.fromEntries(headers.map((key, index) => [key, item[index]]))
+
+      let meals = []
+      if (rowData.breakfast) {
+        meals.push({ meal: 'Breakfast', price: rowData.breakfast })
+      }
+      if (rowData.lunch) {
+        meals.push({ meal: 'Lunch', price: rowData.lunch })
+      }
+      if (rowData.dinner) {
+        meals.push({ meal: 'Dinner', price: rowData.dinner })
+      }
+
+      let rooms = []
+      if (rowData.room_type_1_tag) {
+        rooms.push({ type: rowData.room_type_1_tag, price: rowData.room_type_1 })
+      }
+      if (rowData.room_type_2_tag) {
+        rooms.push({ type: rowData.room_type_2_tag, price: rowData.room_type_2 })
+      }
+      if (rowData.room_type_3_tag) {
+        rooms.push({ type: rowData.room_type_3_tag, price: rowData.room_type_3 })
+      }
+      if (rowData.room_type_4_tag) {
+        rooms.push({ type: rowData.room_type_4_tag, price: rowData.room_type_4 })
+      }
+
+      const existingCityDataIndex = finalResult.findIndex(cityData => cityData.city == rowData.city)
+      if (existingCityDataIndex != -1) {
+        finalResult[existingCityDataIndex] = {
+          ...finalResult[existingCityDataIndex],
+          hotels: [
+            ...finalResult[existingCityDataIndex]['hotels'],
+            {
+              name: rowData.hotel_name,
+              image: rowData.hotel_img_link || '',
+              type: rowData.type_of_hotel,
+              minMaxRoomPrice: [rooms[0], rooms[rooms.length - 1]],
+              rooms,
+              extraBedPrice: rowData.extrabed,
+              meals,
+              roomCapacity: rowData.room_capacity,
+              isPrime: rowData.prim_hotels == 'TRUE'
+            }
+          ]
+        }
+      } else {
+        finalResult.push({
+          city: rowData.city,
+          state: rowData.destination,
+          hotels: [
+            {
+              name: rowData.hotel_name,
+              image: rowData.hotel_img_link || '',
+              type: rowData.type_of_hotel,
+              minMaxRoomPrice: [rooms[0], rooms[rooms.length - 1]],
+              rooms,
+              extraBedPrice: rowData.extrabed,
+              meals,
+              roomCapacity: rowData.room_capacity,
+              isPrime: rowData.prim_hotels == 'TRUE'
+            }
+          ]
+        })
+      }
+    })
+    dispatch(replaceHotelSheetData(finalResult))
+    // console.log("finalResult: ", finalResult)
+  }
+
   const getProparTransformData = async data => {
     const headers = data[0] // Extract headers
     const result = {}
@@ -170,7 +247,6 @@ const AuthProvider = ({ children }) => {
         const state = rowData.state // Default state if not specified
         const carName = `${rowData.car_name}`
 
-        
         if (state.length != 0 && !states.includes(state)) {
           if (!result[state]) result[state] = {}
           if (!result[state][carName]) result[state][carName] = {}
