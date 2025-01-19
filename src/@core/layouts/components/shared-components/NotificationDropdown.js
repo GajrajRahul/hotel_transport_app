@@ -1,5 +1,8 @@
 // ** React Imports
-import { useState, Fragment } from 'react'
+import { useState, Fragment, useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { format } from 'date-fns'
+import toast from 'react-hot-toast'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -11,6 +14,8 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import MuiMenu from '@mui/material/Menu'
 import MuiMenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
+
+import { io } from 'socket.io-client'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -24,6 +29,7 @@ import CustomAvatar from 'src/@core/components/mui/avatar'
 
 // ** Util Import
 import { getInitials } from 'src/@core/utils/get-initials'
+import { getRequest, putRequest } from 'src/api-main-file/APIServices'
 
 // ** Styled Menu component
 const Menu = styled(MuiMenu)(({ theme }) => ({
@@ -88,18 +94,82 @@ const ScrollWrapper = ({ children, hidden }) => {
   }
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+const socket = io(BASE_URL)
+
 const NotificationDropdown = props => {
+  const clientType = localStorage.getItem('clientType') || 'admin'
+  const clientId = localStorage.getItem('clientId') || 'admin'
+  // const createdQuoteClientId = localStorage.getItem('createdQuoteClientId')
   // ** Props
-  const { settings, notifications } = props
+  const { settings } = props
 
   // ** States
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(null)
+  const [totalNotifications, setTotalNotifications] = useState(0)
+  const [notifications, setNotifications] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
+  const router = useRouter()
 
   // ** Hook
   const hidden = useMediaQuery(theme => theme.breakpoints.down('lg'))
 
   // ** Vars
   const { direction } = settings
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [])
+
+  useEffect(() => {
+    // Listen for new employee signup notifications
+    if (clientType === 'admin') {
+      socket.emit('joinRoom', 'admin')
+      // if(createdQuoteClientId) {
+      //   socket.emit('joinUserRoom', createdQuoteClientId)
+      // }
+      // else {
+      socket.emit('joinUserRoom', 'admin')
+      // }
+
+      socket.on('signup', data => {
+        // console.log(data)
+        setNotifications(prev => [data, ...prev])
+      })
+      socket.on('quotation', data => {
+        // console.log(data)
+        setNotifications(prev => [data, ...prev])
+      })
+
+      return () => {
+        socket.off('signup')
+        socket.off('quotation')
+      }
+    } else if (clientId != 'admin') {
+      socket.emit('joinUserRoom', clientId)
+      socket.on('quotation', data => {
+        // console.log(data)
+        setNotifications(prev => [data, ...prev])
+      })
+      return () => {
+        socket.off('quotation')
+      }
+    }
+  }, [])
+
+  const fetchNotifications = async () => {
+    // const BASE_URL = 'http://localhost:4000/api'
+    const clientType = localStorage.getItem('clientType')
+    const api_url = `${BASE_URL}/${clientType}`
+
+    const response = await getRequest(`${api_url}/fetch-notifications`)
+
+    if (response.status) {
+      setNotifications(response.data.map((data, idx) => ({ ...data, id: idx + 1 })))
+    } else {
+      toast.error(response.error)
+    }
+  }
 
   const handleDropdownOpen = event => {
     setAnchorEl(event.currentTarget)
@@ -109,20 +179,39 @@ const NotificationDropdown = props => {
     setAnchorEl(null)
   }
 
+  const updateNotificationStatus = async id => {
+    // const BASE_URL = 'http://localhost:4000/api'
+    const clientType = localStorage.getItem('clientType')
+    const api_url = `${BASE_URL}/${clientType}`
+
+    const response = await putRequest(`${api_url}/update-notification-status`, { id })
+
+    if (!response.status) {
+      toast.error(response.error)
+    }
+  }
+
+  const handleNotification = notification => {
+    handleDropdownClose()
+    console.log("notification: ", notification)
+    // return;
+    updateNotificationStatus(notification.notificationId)
+    router.push({
+      pathname: notification.type == 'signup' ? '/user-management' : '/quotations-history',
+      query: {
+        filter: JSON.stringify(notification)
+      }
+    })
+  }
+
   const RenderAvatar = ({ notification }) => {
-    const { avatarAlt, avatarImg, avatarIcon, avatarText, avatarColor } = notification
-    if (avatarImg) {
-      return <Avatar alt={avatarAlt} src={avatarImg} />
-    } else if (avatarIcon) {
-      return (
-        <Avatar skin='light' color={avatarColor}>
-          {avatarIcon}
-        </Avatar>
-      )
+    const { logo, name } = notification
+    if (logo) {
+      return <Avatar alt={name} src={logo} />
     } else {
       return (
-        <Avatar skin='light' color={avatarColor}>
-          {getInitials(avatarText)}
+        <Avatar skin='light' color='primary'>
+          {getInitials(name)}
         </Avatar>
       )
     }
@@ -167,21 +256,24 @@ const NotificationDropdown = props => {
         </MenuItem>
         <ScrollWrapper hidden={hidden}>
           {notifications.map((notification, index) => (
-            <MenuItem key={index} onClick={handleDropdownClose}>
+            <MenuItem key={index} onClick={() => handleNotification(notification)}>
+              {/* {console.log(notification)} */}
               <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
                 <RenderAvatar notification={notification} />
                 <Box sx={{ mx: 4, flex: '1 1', display: 'flex', overflow: 'hidden', flexDirection: 'column' }}>
                   <MenuItemTitle>{notification.title}</MenuItemTitle>
-                  <MenuItemSubtitle variant='body2'>{notification.subtitle}</MenuItemSubtitle>
+                  <MenuItemSubtitle sx={{ textWrap: 'wrap' }} variant='body2'>
+                    {notification.description}
+                  </MenuItemSubtitle>
                 </Box>
                 <Typography variant='caption' sx={{ color: 'text.disabled' }}>
-                  {notification.meta}
+                  {format(new Date(notification.createdAt), 'dd MMM yy')}
                 </Typography>
               </Box>
             </MenuItem>
           ))}
         </ScrollWrapper>
-        <MenuItem
+        {/* <MenuItem
           disableRipple
           disableTouchRipple
           sx={{
@@ -196,7 +288,7 @@ const NotificationDropdown = props => {
           <Button fullWidth variant='contained' onClick={handleDropdownClose}>
             Read All Notifications
           </Button>
-        </MenuItem>
+        </MenuItem> */}
       </Menu>
     </Fragment>
   )

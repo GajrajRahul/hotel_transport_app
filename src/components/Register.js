@@ -89,8 +89,7 @@ const Register = ({ registerUrl }) => {
       password: '',
       address: '',
       companyName: '',
-      mobile: '',
-      referringAgent: ''
+      mobile: ''
     }
   })
 
@@ -124,7 +123,7 @@ const Register = ({ registerUrl }) => {
   }
 
   const onSubmit = async data => {
-    // const { logo, name, email, password, address, companyName, mobile, referringAgent } = data
+    // const { logo, name, email, password, address, companyName, mobile } = data
     const routes = registerUrl.split('/')
 
     setIsLoading(true)
@@ -241,7 +240,7 @@ const Register = ({ registerUrl }) => {
                     render={({ field: { value, onChange, onBlur } }) => (
                       <OutlinedInput
                         multiline
-                        rows={5}
+                        rows={1}
                         value={value}
                         onBlur={onBlur}
                         placeholder='Address'
@@ -298,27 +297,6 @@ const Register = ({ registerUrl }) => {
                   />
                   {errors.companyName && (
                     <FormHelperText sx={{ color: 'error.main' }}>{errors.companyName.message}</FormHelperText>
-                  )}
-                </FormControl>
-                <FormControl fullWidth>
-                  <Controller
-                    name='referringAgent'
-                    control={control}
-                    rules={{ required: 'Referring agent is required' }}
-                    render={({ field: { value, onChange, onBlur } }) => (
-                      <OutlinedInput
-                        value={value}
-                        onBlur={onBlur}
-                        placeholder='Referring Agent'
-                        sx={{ background: 'rgba(234, 240, 247, 0.5)' }}
-                        onChange={onChange}
-                        id='auth-login-referringAgent'
-                        error={Boolean(errors.referringAgent)}
-                      />
-                    )}
-                  />
-                  {errors.referringAgent && (
-                    <FormHelperText sx={{ color: 'error.main' }}>{errors.referringAgent.message}</FormHelperText>
                   )}
                 </FormControl>
               </Box>

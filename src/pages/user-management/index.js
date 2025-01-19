@@ -182,17 +182,24 @@ const UserManagement = () => {
   const fetchUsersList = async () => {
     setIsLoading(true)
     const response = await getRequest(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/fetch-users`)
+    // const response = await getRequest(`http://localhost:4000/api/admin/fetch-users`)
     setIsLoading(false)
 
     if (response.status) {
-      const responseData = response.data.map((user, idx) => {
+      let responseData = response.data.map((user, idx) => {
         return { idx: idx + 1, ...user }
       })
       dispatch(replaceUserData(responseData))
+      const filter = router.query.filter
+      if (filter) {
+        const { email } = JSON.parse(filter)
+        responseData = responseData.filter(user => user.email == email).map((user, idx) => ({ ...user, idx: idx + 1 }))
+      }
       setUsersList(responseData)
     } else {
       toast.error(response.error)
     }
+    router.replace('/user-management', undefined, { shallow: true })
   }
 
   const handleCopyLink = userType => {

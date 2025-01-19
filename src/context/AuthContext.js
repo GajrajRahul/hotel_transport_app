@@ -317,6 +317,7 @@ const AuthProvider = ({ children }) => {
     setLoading(true)
     const { email, password, clientType } = params
     const api_url = `${BASE_URL}/${clientType}`
+    // const api_url = `http://localhost:4000/api/${clientType}`
     const response = await postRequest(`${api_url}/login`, { email, password })
     setLoading(false)
 

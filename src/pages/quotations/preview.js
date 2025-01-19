@@ -629,9 +629,13 @@ const getTransportFare2 = (data, transportSheetData) => {
     }
 
     const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
-    const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
+    console.log("tollAmount: ", tollAmount)
+    const driverAmount = Number(vehicleRates['driver_charges_per_day']) * (Number(totalDays) - 1)
+    console.log("driverAmount: ", driverAmount)
     const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
+    console.log("parkingCharges: ", parkingCharges)
     const cleaningAmount = Number(vehicleRates['service_cleaning_charge_one_time'])
+    console.log("cleaningAmount: ", cleaningAmount)
 
     const totalAmount =
       (distanceAmount > distanceAmount2 ? distanceAmount : Math.floor(distanceAmount2)) +

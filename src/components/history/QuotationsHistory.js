@@ -496,7 +496,7 @@ const QuotationsHistory = () => {
     setIsLoading(false)
 
     if (response.status) {
-      const responseData = response.data.map((data, idx) => {
+      let responseData = response.data.map((data, idx) => {
         const {
           quotationName,
           travelInfo,
@@ -538,6 +538,14 @@ const QuotationsHistory = () => {
           createdQuoteClientId: data.employeeId ? data.employeeId : data.partnerId ? data.partnerId : data.adminId
         }
       })
+      const filter = router.query.filter
+      if (filter) {
+        const { quotationId } = JSON.parse(filter)
+        responseData = responseData
+          .filter(quotation => quotation.id == quotationId)
+          .map((quotation, idx) => ({ ...quotation, idx: idx + 1 }))
+      }
+      router.replace('/quotations-history', undefined, { shallow: true })
       setQuotationsHisotry(responseData)
       setApiQuotationHistoryList(responseData)
     } else {
