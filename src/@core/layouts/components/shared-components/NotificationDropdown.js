@@ -96,6 +96,7 @@ const ScrollWrapper = ({ children, hidden }) => {
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
 const socket = io(BASE_URL)
+// const socket = io('http://localhost:4000/api')
 
 const NotificationDropdown = props => {
   const clientType = localStorage.getItem('clientType') || 'admin'
