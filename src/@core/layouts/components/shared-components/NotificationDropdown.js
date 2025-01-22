@@ -95,7 +95,8 @@ const ScrollWrapper = ({ children, hidden }) => {
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-const socket = io()
+const socket = io("https://crm.adventurerichaholidays.com")
+// const socket = io("http://localhost:4000")
 // const socket = io('http://localhost:4000/api')
 
 const NotificationDropdown = props => {
