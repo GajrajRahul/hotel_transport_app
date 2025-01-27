@@ -1,5 +1,6 @@
-import React, { Fragment, useMemo, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { subDays } from 'date-fns'
 
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogContent from '@mui/material/DialogContent'
@@ -23,15 +24,6 @@ import TabPanel from '@mui/lab/TabPanel'
 import { styled, useTheme } from '@mui/material/styles'
 
 import HotelInfoDialog from './HotelInfoDialog'
-
-const defaultHotelInfoValues = {
-  checkInCheckOut: [undefined, undefined],
-  daysNights: '',
-  meals: [],
-  persons: [],
-  rooms: [],
-  extraBed: '0'
-}
 
 const TabList = styled(MuiTabList)(({ theme }) => ({
   '& .MuiTabs-indicator': {
@@ -66,8 +58,16 @@ const getHotelsListData = cityHotelData => {
 }
 
 const HotelsDialog = props => {
-  const { open, onClose, isEdit, selectedCity, selectedHotelInfo, selectedCitiesHotels, setSelectedCitiesHotels } =
-    props
+  const {
+    open,
+    onClose,
+    isEdit,
+    selectedCity,
+    selectedHotelInfo,
+    selectedCitiesHotels,
+    setSelectedCitiesHotels,
+    selectedDates
+  } = props
   const hotelSheetInfo = useSelector(state => state.hotelsInfo)
   // console.log(selectedCity)
 
@@ -88,6 +88,17 @@ const HotelsDialog = props => {
     return []
   }, [selectedCity])
 
+  useEffect(() => {
+    if (isEdit) {
+      setHotelInfo(selectedHotelInfo)
+    } else {
+      setHotelInfo({})
+    }
+  }, [isEdit])
+  // console.log('selectedHotelInfo: ', selectedHotelInfo)
+  // console.log('hotelInfo: ', hotelInfo)
+  // console.log('hotelsList: ', hotelsList)
+
   const handleOpenHotelInfoDialog = hotel => {
     // console.log(hotel)
     setSelectedHotel(hotel)
@@ -104,21 +115,55 @@ const HotelsDialog = props => {
   }
 
   const handleSubmit = () => {
-    console.log(hotelInfo)
-    console.log(selectedCity)
-    console.log(selectedHotelInfo)
-    const { name, type, image, persons, rooms, meals, extraBed, checkInCheckOut, roomPrice } = hotelInfo
-    let personsArr = []
-    persons.map(person => {
-      const count = person.count
-      const type = person.type
-      if (personCount > 0) {
-        personsArr.push(`${count}${type == 'Adult' ? 'A' : type == 'Child' ? 'C' : 'I'}`)
+    // console.log('hotelInfo: ', hotelInfo)
+    // console.log(selectedCity)
+    // console.log(selectedHotelInfo)
+    const { name, type, image, rooms, meals, extraBed, checkInCheckOut, adult, child, infant, daysNights } =
+      hotelInfo
+    // console.log('rooms: ', rooms)
+
+    let minRoomPrice = 1000000000
+    let maxRoomPrice = 0
+
+    rooms.forEach(room => {
+      if (Number(room.price) < minRoomPrice) {
+        minRoomPrice = Number(room.price)
+      }
+      if (Number(room.price) > maxRoomPrice) {
+        maxRoomPrice = Number(room.price)
       }
     })
 
+    let currData = {
+      name,
+      type,
+      image,
+      rooms,
+      meals,
+      extraBed,
+      daysNights,
+      checkInCheckOut,
+      roomsPrice: minRoomPrice == maxRoomPrice ? [minRoomPrice] : [minRoomPrice, maxRoomPrice]
+    }
+
+    selectedDates.current = [
+      ...selectedDates.current,
+      { start: new Date(subDays(new Date(checkInCheckOut[0]), 1)), end: new Date(subDays(new Date(checkInCheckOut[1]), 1)) }
+    ]
+    if (adult) {
+      currData.adult = adult
+    }
+    if (child) {
+      currData.child = child
+    }
+    if (infant) {
+      currData.infant = infant
+    }
+
     const cityToFind = selectedCitiesHotels.find(city => city.label == selectedCity.label)
+    // console.log('cityToFind: ', cityToFind)
     if (isEdit) {
+      // console.log('isEdit: ', isEdit)
       const updatedCities = selectedCitiesHotels.map(city =>
         city.label == selectedCity.label
           ? {
@@ -127,15 +172,7 @@ const HotelsDialog = props => {
                 currHotel.id == selectedHotelInfo.id
                   ? {
                       ...currHotel,
-                      name,
-                      type,
-                      image,
-                      roomPrice,
-                      persons: personsArr,
-                      rooms,
-                      meals,
-                      extraBed,
-                      checkInCheckOut
+                      ...currData
                     }
                   : currHotel
               )
@@ -145,6 +182,7 @@ const HotelsDialog = props => {
 
       setSelectedCitiesHotels(updatedCities)
     } else {
+      // console.log('isEdit: ', isEdit)
       if (cityToFind) {
         const updatedCities = selectedCitiesHotels.map(city =>
           city.label == selectedCity.label
@@ -154,23 +192,17 @@ const HotelsDialog = props => {
                   ...city.info,
                   {
                     id: Date.now(),
-                    name,
-                    type,
-                    image,
-                    roomPrice,
-                    persons: personsArr,
-                    rooms,
-                    meals,
-                    extraBed,
-                    checkInCheckOut
+                    ...currData
                   }
                 ]
               }
             : city
         )
+        // console.log('updatedCities: ', updatedCities)
         setSelectedCitiesHotels(updatedCities)
       }
     }
+    resetFields()
   }
 
   const resetFields = () => {
@@ -187,6 +219,7 @@ const HotelsDialog = props => {
         selectedHotel={selectedHotel}
         open={isHotelInfoDialogOpen}
         setHotelInfo={setHotelInfo}
+        selectedDates={selectedDates}
         hotelInfo={hotelInfo}
       />
       <DialogTitle

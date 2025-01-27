@@ -4,10 +4,12 @@ import { Router } from 'next/router'
 import { Provider } from 'react-redux'
 import store from 'src/store'
 
-import { Toaster } from 'react-hot-toast'
+import toast, { ToastBar, Toaster } from 'react-hot-toast'
 import NProgress from 'nprogress'
 
 import { CacheProvider } from '@emotion/react'
+
+import Box from "@mui/material/Box";
 
 import { defaultACLObj } from 'src/configs/acl'
 import themeConfig from 'src/configs/themeConfig'
@@ -91,7 +93,21 @@ const App = props => {
                       {getLayout(<Component {...pageProps} />)}
                     </Guard>
                     <ReactHotToast>
-                      <Toaster position={settings.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />
+                      {/* <Toaster position={settings.toastPosition} toastOptions={{ className: 'react-hot-toast' }} /> */}
+                      <Toaster position={settings.toastPosition} toastOptions={{ className: "react-hot-toast" }}>
+                          {t => (
+                            <div style={{ cursor: "pointer" }} onClick={() => toast.dismiss(t.id)}>
+                              <ToastBar toast={t}>
+                                {({ icon, message }) => (
+                                  <>
+                                    {icon}
+                                    <Box sx={{ wordBreak: "break-word" }}>{message}</Box>
+                                  </>
+                                )}
+                              </ToastBar>
+                            </div>
+                          )}
+                        </Toaster>
                     </ReactHotToast>
                   </ThemeComponent>
                 )

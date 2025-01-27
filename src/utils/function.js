@@ -216,3 +216,22 @@ export const extractLocationDetails = placeDetails => {
 
   return { city, state, country }
 }
+
+export const generateHotelData = hotelInfoData => {
+  const { id, name, type, image, rooms, meals, checkInCheckOut, daysNights, roomsPrice } = hotelInfoData
+  const { adult, child, infant, extraBed } = hotelInfoData
+
+  let dataToSend = { id, name, type, image, meals, id, checkInCheckOut, daysNights, roomsPrice }
+  dataToSend.rooms = rooms.map(room => {
+    const { type, count, price } = room
+    return { name: type, count }
+  })
+
+  if (adult) dataToSend.adult = adult
+  if (child) dataToSend.child = child
+  if (infant) dataToSend.infant = infant
+  if (extraBed) dataToSend.extraBed = extraBed
+  if (meals && meals.length > 0) dataToSend.meals = meals
+
+  return { ...dataToSend, checkIn: new Date(checkInCheckOut[0]), checkOut: new Date(checkInCheckOut[1]) }
+}

@@ -1,130 +1,125 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { addDays, format } from 'date-fns'
-import toast from 'react-hot-toast'
+import React, { useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
+import toast from 'react-hot-toast'
+import { format } from 'date-fns'
 
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
-import Autocomplete from '@mui/material/Autocomplete'
-import Card from '@mui/material/Card'
-import Divider from '@mui/material/Divider'
-import CardContent from '@mui/material/CardContent'
-import CardMedia from '@mui/material/CardMedia'
-import Stack from '@mui/material/Stack'
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
+import Autocomplete from '@mui/material/Autocomplete'
+import CardContent from '@mui/material/CardContent'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import Accordion from '@mui/material/Accordion'
+import CardMedia from '@mui/material/CardMedia'
+import Divider from '@mui/material/Divider'
+import Button from '@mui/material/Button'
+import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card'
+import Box from '@mui/material/Box'
+
 import { useTheme } from '@mui/material'
 
 import Icon from 'src/@core/components/icon'
 
-import CitiesDialog from '../dialog/CitiesDialog'
-import HotelDialog from '../dialog/HotelDialog'
 import CommonDialog from 'src/components/common/dialog'
-
-let defaultHotelInfoValues = {
-  checkInCheckOut: [undefined, undefined],
-  daysNights: '',
-  breakfast: true,
-  lunch: true,
-  dinner: true,
-  rooms: '0',
-  extraBed: '0',
-  child: '0',
-  adult: '0',
-  persons: '',
-  hotel: null
-}
+import HotelsDialog from '../dialog/HotelsDialog'
+// import HotelsDialog from '../dialog/HotelsDialog'
 
 const HotelInfoStep = props => {
   const { onSubmit, handleBack } = props
-
-  const hotelSheetData = useSelector(state => state.hotelRateData)
+  const hotelSheetInfo = useSelector(state => state.hotelsInfo)
 
   const [selectedCitiesHotels, setSelectedCitiesHotels] = useState(
     localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
   )
 
-  const [openCitiesDialog, setOpenCitiesDialog] = useState(false)
-  const [openHotelDialog, setOpenHotelDialog] = useState(false)
-  const [openEditHotelDialog, setOpenEditHotelDialog] = useState(false)
-  const [selectedCity, setSelectedCity] = useState(null)
-  const [selectedHotelInfo, setSelectedHotelInfo] = useState(defaultHotelInfoValues)
-  const [expanded, setExpanded] = useState('panel0')
+  const [isEditHotelDialogOpen, setIsEditHotelDialogOpen] = useState(false)
+  const [isAddHotelDialogOpen, setIsAddHotelDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [selectedHotelInfo, setSelectedHotelInfo] = useState(null)
+  const [selectedCity, setSelectedCity] = useState(null)
+  const [expanded, setExpanded] = useState('panel0')
+  const selectedDates = useRef([])
   const theme = useTheme()
 
   const citiesList = useMemo(() => {
-    return hotelSheetData.hotelsRate
-      ? Object.keys(hotelSheetData.hotelsRate).map((city, index) => {
-          return { id: index, label: city, info: [] }
-        })
-      : []
+    return hotelSheetInfo.map((cityInfo, index) => {
+      // console.log("cityInfo: ", cityInfo)
+      return {
+        id: index,
+        label: cityInfo.city,
+        state: cityInfo.state,
+        info: []
+      }
+    })
   }, [])
 
   const expandIcon = value => (
     <Icon icon={expanded === value ? 'mdi:minus' : 'mdi:plus'} color={theme.palette.primary.main} />
   )
 
-  const handleChange = panel => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false)
+  const handleAddOpenHotelDialog = city => {
+    setSelectedCity(city)
+    setIsAddHotelDialogOpen(true)
   }
 
-  const handleDeleteCityHotel = (cityId, idToDelete) => {
-    setSelectedCitiesHotels(prev =>
-      prev.map(city =>
-        city.id == cityId ? { ...city, info: city.info.filter(hotel => hotel.id != idToDelete) } : city
-      )
-    )
+  const handleAddCloseHotelDialog = () => {
+    setSelectedCity(null)
+    setIsAddHotelDialogOpen(false)
+  }
+
+  const handleEditOpenHotelDialog = (city, hotel) => {
+    setSelectedCity(city)
+    setSelectedHotelInfo(hotel)
+    setIsEditHotelDialogOpen(true)
+  }
+
+  const handleEditCloseHotelDialog = () => {
+    setSelectedCity(null)
+    setSelectedHotelInfo(null)
+    setIsEditHotelDialogOpen(false)
   }
 
   const handleDeleteCity = () => {
     if (selectedCity) {
       const remainingSelectedCitiesHotels = selectedCitiesHotels.filter(city => city.id != selectedCity.id)
-      const selectedStates = localStorage.getItem('selectedStates')
-        ? JSON.parse(localStorage.getItem('selectedStates'))
-        : []
-      const validCityLabels = remainingSelectedCitiesHotels.map(item => item.label)
+      const deletedCity = selectedCitiesHotels.find(city => city.id == selectedCity.id)
 
-      const updatedSelectedStates = selectedStates
-        .map(state => {
-          const filteredCities = state.cities.filter(city => validCityLabels.includes(city.name))
-          return {
-            ...state,
-            cities: filteredCities
-          }
-        })
-        .filter(state => state.cities.length > 0)
-      localStorage.setItem('selectedStates', JSON.stringify(updatedSelectedStates))
+      const deletedDates = deletedCity.info.map(info => ({
+        start: info.checkInCheckOut[0]
+        // end: info.checkInCheckOut[1]
+      }))
+
+      const filteredDate = selectedDates.current.filter(item => {
+        return !deletedDates.some(deleted => new Date(item.start).getTime() == new Date(deleted.start).getTime())
+      })
+
+      selectedDates.current = filteredDate
       setSelectedCitiesHotels(remainingSelectedCitiesHotels)
     } else {
+      selectedDates.current = []
       localStorage.setItem('selectedState', JSON.stringify([]))
       setSelectedCitiesHotels([])
     }
     handleDeleteDialogClose()
   }
 
-  const handleOpenCitiesDialog = () => {
-    setOpenCitiesDialog(true)
-  }
-
-  const handleCloseCitiesDialog = () => {
-    setOpenCitiesDialog(false)
-  }
-
-  const handleCloseEditHotelDialog = () => {
-    setSelectedCity(null)
-    setSelectedHotelInfo(defaultHotelInfoValues)
-    setOpenEditHotelDialog(false)
-  }
-
-  const handleOpenHotelDialog = city => {
-    setSelectedCity(city)
-    setOpenHotelDialog(true)
+  const handleDeleteCityHotel = (cityName, hotelId) => {
+    const city = selectedCitiesHotels.find(city => city.label == cityName)
+    if (city) {
+      const hotel = city.info.find(hotel => hotel.id == hotelId)
+      // console.log(hotel.checkInCheckOut[0])
+      const updatedDates = selectedDates.current.filter(
+        date => new Date(date.start).getTime() != new Date(hotel.checkInCheckOut[0]).getTime()
+      )
+      // console.log(updatedDates)
+      selectedDates.current = updatedDates
+    }
+    setSelectedCitiesHotels(prev =>
+      prev.map(city =>
+        city.label == cityName ? { ...city, info: city.info.filter(hotel => hotel.id != hotelId) } : city
+      )
+    )
   }
 
   const handleDeleteDialogOpen = () => {
@@ -136,9 +131,8 @@ const HotelInfoStep = props => {
     setIsDeleteDialogOpen(false)
   }
 
-  const handleCloseHotelDialog = () => {
-    setSelectedCity(null)
-    setOpenHotelDialog(false)
+  const handleAccordionChange = panel => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false)
   }
 
   const onHotelInfoSubmit = data => {
@@ -163,6 +157,34 @@ const HotelInfoStep = props => {
 
   return (
     <>
+      <CommonDialog
+        open={isDeleteDialogOpen}
+        onCancel={handleDeleteDialogClose}
+        onSuccess={handleDeleteCity}
+        title='Confirm Deletion'
+        description='Are you sure you want to delete the selected city(ies)? All related data will be permanently removed.'
+      />
+      <HotelsDialog
+        setSelectedCitiesHotels={setSelectedCitiesHotels}
+        selectedCitiesHotels={selectedCitiesHotels}
+        onClose={handleAddCloseHotelDialog}
+        selectedCity={selectedCity}
+        open={isAddHotelDialogOpen}
+        selectedDates={selectedDates}
+        isEdit={false}
+      />
+      {isEditHotelDialogOpen && (
+        <HotelsDialog
+          setSelectedCitiesHotels={setSelectedCitiesHotels}
+          selectedCitiesHotels={selectedCitiesHotels}
+          selectedHotelInfo={selectedHotelInfo}
+          onClose={handleEditCloseHotelDialog}
+          open={isEditHotelDialogOpen}
+          selectedCity={selectedCity}
+          selectedDates={selectedDates}
+          isEdit={true}
+        />
+      )}
       <Grid container spacing={5}>
         <Grid item xs={12}>
           <Autocomplete
@@ -176,8 +198,7 @@ const HotelInfoStep = props => {
                 if (response == 'removeOption') {
                   setSelectedCity(value.option)
                   handleDeleteDialogOpen()
-                }
-                else {
+                } else {
                   handleDeleteDialogOpen()
                 }
               } else {
@@ -195,11 +216,14 @@ const HotelInfoStep = props => {
             disableCloseOnSelect
           />
         </Grid>
+        {/* {console.log('selectedCitiesHotels: ', selectedCitiesHotels)} */}
+
         {selectedCitiesHotels.map((city, index) => (
-          <Grid item xs={12} key={index}>
+          <Grid key={index} item xs={12}>
+            {/* {console.log(city)} */}
             <Accordion
               expanded={expanded === `panel${index}`}
-              onChange={handleChange(`panel${index}`)}
+              onChange={handleAccordionChange(`panel${index}`)}
               sx={{
                 '&.MuiAccordion-root': {
                   borderRadius: '6px'
@@ -235,7 +259,15 @@ const HotelInfoStep = props => {
                 }
                 aria-controls={`customized-panel-content-${index}`}
               >
-                <Box sx={{ width: '100%', backgroundColor: '#FFFFFF80', p: '10px 15px', display: 'flex', gap: 3 }}>
+                <Box
+                  sx={{
+                    width: '100%',
+                    backgroundColor: '#FFFFFF80',
+                    p: '10px 15px',
+                    display: 'flex',
+                    gap: 3
+                  }}
+                >
                   <Typography>
                     {city.label
                       ? city.label
@@ -248,11 +280,16 @@ const HotelInfoStep = props => {
               </AccordionSummary>
               <AccordionDetails>
                 <Grid container spacing={3}>
-                  {city.info.map(data => (
-                    <Grid key={data.id} item xs={12} sm={4}>
+                  {city.info.map(hotel => (
+                    <Grid key={hotel.id} item xs={12} sm={4}>
+                      {/* {console.log('hotel: ', hotel)} */}
                       <Card sx={{ borderRadius: '15px' }}>
-                        <CardMedia sx={{ height: '9.375rem' }} image={`/images/hotels/jaipur.jpg`} />
-                        <CardContent sx={{ p: theme => `${theme.spacing(3, 3, 4)} !important` }}>
+                        <CardMedia sx={{ height: '9.375rem' }} image={hotel.image || `/images/hotels/jaipur.jpg`} />
+                        <CardContent
+                          sx={{
+                            p: theme => `${theme.spacing(3, 3, 4)} !important`
+                          }}
+                        >
                           <Box
                             sx={{
                               display: 'flex',
@@ -264,12 +301,12 @@ const HotelInfoStep = props => {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                               <Icon icon='mdi:custom-hotel' fontSize='1.725rem' />
                               <Typography sx={{ color: 'black' }} variant='h6'>
-                                {data.hotel.name ? `${data.hotel.name.slice(0, 18)}...` : ''}
+                                {hotel.name ? `${hotel.name.slice(0, 18)}...` : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline' }}>
                               <Typography sx={{ color: 'black' }} variant='h6'>
-                                {data.hotel.price}
+                                ₹{hotel.roomsPrice.join('-₹')}
                               </Typography>
                               <Typography variant='caption' sx={{ color: theme => theme.palette.primary.main }}>
                                 /Room
@@ -278,113 +315,74 @@ const HotelInfoStep = props => {
                           </Box>
                           <Divider sx={{ mt: 2, color: 'black' }} />
                           <Box
-                            sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', mt: 3, gap: 3 }}
+                            sx={{
+                              display: 'flex',
+                              flexWrap: 'wrap',
+                              mt: 3,
+                              gap: 5
+                            }}
                           >
-                            <Box
-                              sx={{
-                                pl: 1,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 3
-                              }}
-                            >
-                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                <Icon fontSize='20px' icon='mdi:double-user' />
-                                <Typography fontSize={14}>
-                                  {data.adult != '0' && data.child != '0'
-                                    ? `${data.adult}A, ${data.child}C`
-                                    : data.adult != '0'
-                                    ? `${data.adult}A`
-                                    : `${data.child}C`}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                <Icon fontSize='20px' icon='mdi:custom-door-open' />
-                                <Typography fontSize={14}>
-                                  {data.rooms} {data.rooms == '1' ? 'Room' : 'Rooms'}
-                                </Typography>
-                              </Box>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                              <Icon fontSize='20px' icon='mdi:double-user' />
+                              <Typography fontSize={14}>
+                                {/* {console.log('hotel: ', hotel)} */}
+                                {(hotel.adult ?? 0) + (hotel.child ?? 0) + (hotel.infant ?? 0)} Travelers
+                              </Typography>
                             </Box>
-                            <Box
-                              sx={{
-                                // borderLeft: '1px solid #9A9A9A',
-                                pl: 3,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 3
-                              }}
-                            >
-                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                <Icon fontSize='20px' icon='mdi:custom-hotel' />
-                                <Typography fontSize={14}>{data.hotel.type}</Typography>
-                              </Box>
-                              {data.extraBed != '0' ? (
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                  <Icon fontSize='20px' icon='mdi:double-bed' />
-                                  <Typography fontSize={14}>{data.extraBed} Extra Bed</Typography>
-                                </Box>
-                              ) : data.breakfast || data.lunch || data.dinner ? (
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                  <Icon fontSize='20px' icon='mdi:plate-eating' />
-                                  <Typography fontSize={14}>
-                                    {data.breakfast && data.lunch && data.dinner
-                                      ? 'BB | HB | FB'
-                                      : data.breakfast && data.lunch
-                                      ? 'BB | HB'
-                                      : data.breakfast && data.dinner
-                                      ? 'BB | FB'
-                                      : data.lunch && data.dinner
-                                      ? 'HB | FB'
-                                      : data.breakfast
-                                      ? 'BB'
-                                      : data.lunch
-                                      ? 'HB'
-                                      : 'FB'}
-                                  </Typography>
-                                </Box>
-                              ) : (
-                                <></>
-                              )}
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                              <Icon fontSize='20px' icon='mdi:custom-door-open' />
+                              <Typography fontSize={14}>
+                                {hotel.rooms.map(room => room.count).reduce((acc, count) => acc + count, 0)} Rooms
+                              </Typography>
                             </Box>
-                            <Box
-                              sx={{
-                                // borderLeft: '1px solid #9A9A9A',
-                                pl: 1,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 3,
-                                pr: 5
-                              }}
-                            >
-                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                <Icon fontSize='20px' icon='mdi:curtains-open' />
-                                <Typography fontSize={14}>
-                                  {data.hotel['Base Catagory'] ? 'Base Catagory' : 'Base Category'}
-                                </Typography>
-                              </Box>
-                              {data.extraBed != '0' && (data.breakfast || data.lunch || data.dinner) ? (
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                  <Icon fontSize='20px' icon='mdi:plate-eating' />
-                                  <Typography fontSize={14}>
-                                    {data.breakfast && data.lunch && data.dinner
-                                      ? 'BB | HB | FB'
-                                      : data.breakfast && data.lunch
-                                      ? 'BB | HB'
-                                      : data.breakfast && data.dinner
-                                      ? 'BB | FB'
-                                      : data.lunch && data.dinner
-                                      ? 'HB | FB'
-                                      : data.breakfast
-                                      ? 'BB'
-                                      : data.lunch
-                                      ? 'HB'
-                                      : 'FB'}
-                                  </Typography>
-                                </Box>
-                              ) : (
-                                <></>
-                              )}
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                              <Icon fontSize='20px' icon='mdi:custom-hotel' />
+                              <Typography fontSize={14}>{hotel.type}</Typography>
                             </Box>
+                            {/* {console.log(hotel)} */}
+                            {hotel.extraBed && hotel.extraBed != '0' ? (
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  gap: 2,
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <Icon fontSize='20px' icon='mdi:double-bed' />
+                                <Typography fontSize={14}>{hotel.extraBed} Extra Bed</Typography>
+                              </Box>
+                            ) : hotel.meals.length > 0 ? (
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  gap: 2,
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <Icon fontSize='20px' icon='mdi:plate-eating' />
+                                <Typography fontSize={14}>{hotel.meals.join(' | ')}</Typography>
+                              </Box>
+                            ) : (
+                              <></>
+                            )}
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                              <Icon fontSize='20px' icon='mdi:curtains-open' />
+                              <Typography fontSize={14}>Base Category</Typography>
+                            </Box>
+                            {hotel.extraBed && hotel.extraBed != '0' && hotel.meals.length > 0 ? (
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  gap: 2,
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <Icon fontSize='20px' icon='mdi:plate-eating' />
+                                <Typography fontSize={14}>{hotel.meals.join(' | ')}</Typography>
+                              </Box>
+                            ) : (
+                              <></>
+                            )}
                           </Box>
                           <Box
                             sx={{
@@ -400,18 +398,13 @@ const HotelInfoStep = props => {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                               <Icon fontSize='20px' icon='mdi:checkin-calendar' />
                               <Typography fontSize={14}>
-                                {format(new Date(data.checkInCheckOut[0]), 'dd MMM yyyy')} -{' '}
-                                {format(new Date(data.checkInCheckOut[1]), 'dd MMM yyyy')}{' '}
+                                {format(new Date(hotel.checkInCheckOut[0]), 'dd MMM yyyy')} -
+                                {format(new Date(hotel.checkInCheckOut[1]), 'dd MMM yyyy')}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                               <Icon fontSize='20px' icon='mdi:night-day' />
-                              {/* {console.log(data)} */}
-                              <Typography fontSize={14}>
-                                {/* {format(new Date(data.checkInCheckOut[0]), 'dd MM yyyy')} -{' '}
-                                  {format(new Date(data.checkInCheckOut[1]), 'dd MM yyyy')}{' '} */}
-                                {data.daysNights}
-                              </Typography>
+                              <Typography fontSize={14}>{hotel.daysNights}</Typography>
                             </Box>
                           </Box>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 5, gap: 3 }}>
@@ -419,9 +412,7 @@ const HotelInfoStep = props => {
                               fullWidth
                               variant='contained'
                               onClick={() => {
-                                setSelectedCity(city)
-                                setSelectedHotelInfo(data)
-                                setOpenEditHotelDialog(true)
+                                handleEditOpenHotelDialog(city, hotel)
                               }}
                             >
                               Edit Hotel
@@ -429,7 +420,7 @@ const HotelInfoStep = props => {
                             <Button
                               fullWidth
                               variant='outlined'
-                              onClick={() => handleDeleteCityHotel(city.id, data.id)}
+                              onClick={() => handleDeleteCityHotel(city.label, hotel.id)}
                             >
                               Delete
                             </Button>
@@ -438,8 +429,12 @@ const HotelInfoStep = props => {
                       </Card>
                     </Grid>
                   ))}
+
                   <Grid item xs={12} sm={4}>
-                    <Card sx={{ borderRadius: '15px', cursor: 'pointer' }} onClick={() => handleOpenHotelDialog(city)}>
+                    <Card
+                      sx={{ borderRadius: '15px', cursor: 'pointer' }}
+                      onClick={() => handleAddOpenHotelDialog(city)}
+                    >
                       <CardContent
                         sx={{
                           display: 'flex',
@@ -463,6 +458,7 @@ const HotelInfoStep = props => {
             </Accordion>
           </Grid>
         ))}
+
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button size='large' variant='outlined' color='secondary' onClick={onHotelInfoBack}>
             Back
@@ -472,39 +468,6 @@ const HotelInfoStep = props => {
           </Button>
         </Grid>
       </Grid>
-      <CitiesDialog
-        open={openCitiesDialog}
-        handleClose={handleCloseCitiesDialog}
-        selectedCitiesHotels={selectedCitiesHotels}
-        setSelectedCitiesHotels={setSelectedCitiesHotels}
-      />
-
-      <HotelDialog
-        setSelectedCitiesHotels={setSelectedCitiesHotels}
-        selectedCitiesHotels={selectedCitiesHotels}
-        selectedHotelInfo={defaultHotelInfoValues}
-        handleClose={handleCloseHotelDialog}
-        selectedCity={selectedCity}
-        open={openHotelDialog}
-        isEdit={false}
-      />
-
-      <HotelDialog
-        setSelectedCitiesHotels={setSelectedCitiesHotels}
-        selectedCitiesHotels={selectedCitiesHotels}
-        selectedHotelInfo={selectedHotelInfo}
-        handleClose={handleCloseEditHotelDialog}
-        selectedCity={selectedCity}
-        open={openEditHotelDialog}
-        isEdit={true}
-      />
-      <CommonDialog
-        open={isDeleteDialogOpen}
-        onCancel={handleDeleteDialogClose}
-        onSuccess={handleDeleteCity}
-        title='Confirm Deletion'
-        description='Are you sure you want to delete the selected city(ies)? All related data will be permanently removed.'
-      />
     </>
   )
 }

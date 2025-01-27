@@ -26,7 +26,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import Loader from 'src/components/common/Loader'
 import { deleteRequest, getRequest, putRequest } from 'src/api-main-file/APIServices'
 import CommonDialog from 'src/components/common/dialog'
-import { getDayNightCount } from 'src/utils/function'
+import { generateHotelData, getDayNightCount } from 'src/utils/function'
 
 const defaultColumns = [
   {
@@ -489,27 +489,29 @@ const QuotationsHistory = () => {
 
   const fetchQuotationList = async () => {
     setIsLoading(true)
-    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    const BASE_URL = 'http://localhost:4000/api'
     const api_url = `${BASE_URL}/${clientType}`
 
     const response = await getRequest(`${api_url}/fetch-quotations`)
     setIsLoading(false)
 
     if (response.status) {
+      // console.log(response.data)
       let responseData = response.data.map((data, idx) => {
         const {
-          quotationName,
-          travelInfo,
           citiesHotelsInfo,
           transportInfo,
-          id,
-          userName,
+          quotationName,
           companyName,
+          travelInfo,
+          userName,
+          userId,
           pdfUrl,
-          status
+          status,
+          id
         } = data
-        const adult = citiesHotelsInfo?.cities[0]?.hotelInfo[0]?.adult || 0
-        const child = citiesHotelsInfo?.cities[0]?.hotelInfo[0].child || 0
+
         return {
           id,
           idx: idx + 1,
@@ -520,22 +522,14 @@ const QuotationsHistory = () => {
           travellerName: travelInfo.userName,
           travelDate: format(new Date(travelInfo.journeyStartDate), 'dd MMM yyyy'),
           destination: citiesHotelsInfo?.cities.map(city => city.cityName),
-          persons:
-            Number(adult) == 0 && Number(child) == 0
-              ? ''
-              : Number(adult) != 0 && Number(child) != 0
-              ? `${adult} Adults & ${child} Childs`
-              : Number(adult) == 0
-              ? `${child} Childs`
-              : `${adult} Adults`,
           isHotel: citiesHotelsInfo?.cities[0]?.hotelInfo?.length > 0 ? 'Yes' : 'No',
           isTransport: transportInfo.vehicleType ? 'Yes' : 'No',
-          clientType: data.adminId ? 'Admin' : data.employeeId ? 'Employee' : 'Partner',
+          clientType: userId.includes('admin') ? 'Admin' : userId.includes('employee') ? 'Employee' : 'Partner',
           userName,
           companyName,
           pdfUrl,
           status,
-          createdQuoteClientId: data.employeeId ? data.employeeId : data.partnerId ? data.partnerId : data.adminId
+          createdQuoteClientId: userId
         }
       })
       const filter = router.query.filter
@@ -571,43 +565,7 @@ const QuotationsHistory = () => {
           return {
             id: id,
             cityName,
-            hotelInfo: hotelInfo.map(hotel => {
-              // console.log(hotel)
-              const {
-                checkIn,
-                checkOut,
-                isBreakfast,
-                isLunch,
-                isDinner,
-                rooms,
-                child,
-                extraBed,
-                persons,
-                adult,
-                hotelName,
-                hotelType,
-                price,
-                roomType
-              } = hotel
-              return {
-                id: hotel.id,
-                hotelName,
-                hotelType,
-                rooms,
-                roomType, // it will be like [{roomName: '', roomCount: 1}],
-                adult,
-                child,
-                checkIn: new Date(checkIn),
-                checkOut: new Date(checkOut),
-                isBreakfast,
-                isLunch,
-                isDinner,
-                extraBed,
-                persons, // might remove this,
-                hotelImage: hotel.image, // add this is mongoose,
-                price
-              }
-            })
+            hotelInfo: hotelInfo.map(hotelDetails => generateHotelData(hotelDetails))
           }
         })
       },
@@ -625,17 +583,10 @@ const QuotationsHistory = () => {
 
     const createdClientType = createdQuoteClientId.split('_')[0]
 
-    if (createdClientType == 'employee') {
-      dataToSend = {
-        ...dataToSend,
-        employeeId: createdQuoteClientId
-      }
-    } else if (createdClientType == 'partner') {
-      dataToSend = {
-        ...dataToSend,
-        partnerId: createdQuoteClientId
-      }
+    if (createdClientType == 'employee' || createdClientType == 'partner') {
+      dataToSend = { ...dataToSend, userId: createdQuoteClientId }
     }
+
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
     // const BASE_URL = 'http://localhost:4000/api'
     const api_url = `${BASE_URL}/${createdClientType}`
@@ -701,59 +652,26 @@ const QuotationsHistory = () => {
         id,
         label: cityName,
         info: hotelInfo.map(hotel => {
-          const {
-            isBreakfast,
-            isLunch,
-            isDinner,
-            rooms,
-            adult,
-            child,
-            extraBed,
-            roomType,
-            checkIn,
-            checkOut,
-            hotelName,
-            hotelType,
-            price
-          } = hotel
-          let roomTypes = {}
-          roomType.map(room => {
-            roomTypes = { ...roomTypes, [room.roomName]: room.roomCount }
-          })
+          const { meals, rooms, adult, child, infant, extraBed, checkIn, checkOut, roomsPrice, name, type, id, image } = hotel
+
           const dayNight = getDayNightCount([checkIn, checkOut]) + 1
           return {
-            id: hotel.id,
-            checkInCheckOut: [checkIn, checkOut],
-            breakfast: isBreakfast,
-            lunch: isLunch,
-            dinner: isDinner,
+            id,
+            name,
+            type,
+            image,
             rooms,
-            child,
+            roomsPrice,
+            meals,
+            checkInCheckOut: [checkIn, checkOut],
             daysNights:
               checkOut == null
                 ? '1 Day'
                 : `${dayNight} ${dayNight < 2 ? 'Day' : 'Days'} & ${dayNight - 1} ${dayNight < 3 ? 'Night' : 'Nights'}`,
-            extraBed,
-            hotel: {
-              id: Date.now(),
-              name: hotelName,
-              location: cityName,
-              image: 'singapore',
-              price,
-              selected: false,
-              type: hotelType,
-              ...roomTypes
-              // 'Base Catagory': roomType[0]
-            },
             adult,
-            persons:
-              Number(adult) == 0 && Number(child) == 0
-                ? ''
-                : Number(adult) != 0 && Number(child) != 0
-                ? `${adult} Adults & ${child} Childs`
-                : Number(adult) == 0
-                ? `${child} Childs`
-                : `${adult} Adults`
+            child,
+            infant,
+            extraBed
           }
         })
       }

@@ -9,7 +9,17 @@ import Box from '@mui/material/Box'
 
 import Icon from 'src/@core/components/icon'
 
-const CusomInputWithButttons = ({ name, hotelControl, isRequired, label, errors, icon, theme, rooms }) => {
+const CusomInputWithButttons = ({
+  name,
+  hotelControl,
+  isRequired,
+  label,
+  errors,
+  icon,
+  theme,
+  rooms,
+  width = '100%'
+}) => {
   return (
     <Controller
       name={name}
@@ -29,14 +39,15 @@ const CusomInputWithButttons = ({ name, hotelControl, isRequired, label, errors,
         //   }
         //   />
         <>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width: '100%' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width }}>
             <Icon icon={`mdi:${icon}`} color={theme.palette.primary.main} />
             <IconButton
               edge='end'
               onClick={e => {
                 e.stopPropagation()
                 if (Number(value) != 0) {
-                  onChange(`${Number(value) - 1}`)
+                  // onChange(`${Number(value) - 1}`)
+                  onChange(Number(value) - 1)
                 }
               }}
               aria-label='toggle minus visibility'
@@ -54,17 +65,23 @@ const CusomInputWithButttons = ({ name, hotelControl, isRequired, label, errors,
             >
               <Icon icon='mdi:minus' />
             </IconButton>
-            {value.length == 0 ? 0 : value}
+            {/* {console.log(value)} */}
+            {value == undefined ? 0 : value.length == 0 ? 0 : value}
             <IconButton
               edge='end'
               onClick={e => {
                 e.stopPropagation()
                 if (name == 'extraBed') {
-                  if (Number(value) < Number(rooms)) {
+                  const totalRooms = rooms.reduce((acc, room) => {
+                    acc += Number(room.count)
+                    return acc
+                  }, 0)
+                  if (Number(value) < Number(totalRooms)) {
                     onChange(`${Number(value) + 1}`)
                   }
                 } else {
-                  onChange(`${Number(value) + 1}`)
+                  // onChange(`${Number(value) + 1}`)
+                  onChange(Number(value) + 1)
                 }
               }}
               aria-label='toggle plus visibility'
