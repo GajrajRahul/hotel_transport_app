@@ -215,12 +215,12 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
       <DialogTitle
         sx={{
           '&.MuiDialogTitle-root': {
-            pb: 0
+            padding: '20px 10px 0 30px'
           }
         }}
       >
-        Select Room Type
-        <DialogContentText>Select Cities where you want to book your stay</DialogContentText>
+        Room Details & Preferences
+        <DialogContentText>Choose your room, add traveler details, select meal plan, and set check-in/check-out dates. Optionally, request an extra bed.</DialogContentText>
       </DialogTitle>
       <Box component='form' onSubmit={handleSubmit(onSubmit)}>
         <DialogContent sx={{ pt: 0 }}>
