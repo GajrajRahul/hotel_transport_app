@@ -32,7 +32,6 @@ import Box from '@mui/material/Box'
 
 import { styled, useTheme } from '@mui/material/styles'
 
-import { useMediaQuery } from '@mui/material'
 
 import Icon from 'src/@core/components/icon'
 
@@ -40,6 +39,8 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import CustomInput from 'src/components/common/CustomInput'
 import CusomInputWithButttons from 'src/components/common/CusomInputWithButttons'
 import { getDayNightCount } from 'src/utils/function'
+import { Tooltip, useMediaQuery } from '@mui/material'
+import { DarkHelpIcon, InfoTootipIcon } from 'src/utils/icons'
 
 const defaultValues = {
   checkInCheckOut: [null, null],
@@ -353,6 +354,9 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                               theme={theme}
                             />
                           </Box>
+                          <Tooltip title='13+ years. Max 2 adults/room, 1 more with an extra bed.' placement='top' arrow>
+                            {InfoTootipIcon}
+                          </Tooltip>
                         </MenuItem>
                         <MenuItem
                           sx={{
@@ -376,6 +380,9 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                               theme={theme}
                             />
                           </Box>
+                          <Tooltip title='Ages 6-13. Food charged. No bed unless added as an adult with an extra bed.' placement='top' arrow>
+                            {InfoTootipIcon}
+                          </Tooltip>
                         </MenuItem>
                         <MenuItem
                           sx={{
@@ -399,6 +406,9 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                               theme={theme}
                             />
                           </Box>
+                          <Tooltip title='Below 6 years. No food charges. No bed unless added as an adult with an extra bed.' placement='top' arrow>
+                            {InfoTootipIcon}
+                          </Tooltip>
                         </MenuItem>
                       </MenuList>
                     </Paper>

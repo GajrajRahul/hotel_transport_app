@@ -25,6 +25,7 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { useAuth } from 'src/hooks/useAuth'
 
 import Icon from 'src/@core/components/icon'
+import { DarkHelpIcon } from 'src/utils/icons'
 
 const BoxWrapper = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('xl')]: {
@@ -52,7 +53,7 @@ const CustomLinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none'
 }))
 
-const images = ['/images/login_slider1.jpg', '/images/login_slider2.jpg']
+const images = ['/images/login_slider1.png', '/images/login_slider2.png', '/images/login_slider3.png']
 
 const AdminLoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -64,12 +65,12 @@ const AdminLoginPage = () => {
   const auth = useAuth()
 
   useEffect(() => {
-      const interval = setInterval(() => {
-        setCurrentImage(prevImage => (prevImage + 1) % images.length)
-      }, 5000) // 5000ms = 5 seconds
-  
-      return () => clearInterval(interval) // Clean up on unmount
-    }, [])
+    const interval = setInterval(() => {
+      setCurrentImage(prevImage => (prevImage + 1) % images.length)
+    }, 5000) // 5000ms = 5 seconds
+
+    return () => clearInterval(interval) // Clean up on unmount
+  }, [])
 
   const {
     control,
@@ -109,14 +110,22 @@ const AdminLoginPage = () => {
         <Grid
           container
           spacing={6}
+          alignItems={'center'}
+
           // sx={{
           //   border: '1px solid red'
           // }}
         >
           {!hidden && (
             <Grid item xs={12} md={6}>
-              <Card sx={{ background: 'none', height: '500px' }}>
-                <img src={images[currentImage]} alt='carousel' width={'100%'} height={'100%'} style={{ borderRadius: '10px' }} />
+              <Card sx={{ background: 'none', borderRadius: '15px', lineHeight: '0px' }}>
+                <img
+                  src={images[currentImage]}
+                  alt='carousel'
+                  height={'auto'}
+                  width={'100%'}
+                  style={{ borderRadius: '10px' }}
+                />
               </Card>
             </Grid>
           )}
@@ -124,7 +133,7 @@ const AdminLoginPage = () => {
             <Card className='inner-card'>
               <Box
                 sx={{
-                  p: '0px 40px 0px 40px',
+                  p: '0% 5% 5% 5%',
                   height: '100%',
                   display: 'flex',
                   alignItems: 'center',
@@ -134,10 +143,16 @@ const AdminLoginPage = () => {
               >
                 <BoxWrapper>
                   <Box sx={{ mb: 6, mt: 5 }}>
-                    <TypographyStyled sx={{ typography: { xs: 'h4', laptopSm: 'h3' } }} color='white'>
+                    <TypographyStyled
+                      sx={{ typography: { xs: 'h4', laptopSm: 'h3' }, fontWeight: '700 !important' }}
+                      color='#333333'
+                    >
                       Welcome Back!
                     </TypographyStyled>
-                    <Typography sx={{ typography: { xs: 'body2', laptopSm: 'body1' } }} color='white'>
+                    <Typography
+                      sx={{ typography: { xs: 'body2', laptopSm: 'body1' }, fontWeight: '500 !important' }}
+                      color='#333333'
+                    >
                       Let's Plan Journey's Together!
                     </Typography>
                   </Box>
@@ -221,7 +236,9 @@ const AdminLoginPage = () => {
                         textAlign: 'end'
                       }}
                     >
-                      <LinkStyled href='/forgot-password'>Recover Password?</LinkStyled>
+                      <LinkStyled sx={{ color: '#333333' }} href='/forgot-password'>
+                        Recover Password?
+                      </LinkStyled>
                     </Typography>
                     <Button
                       type='submit'
@@ -238,7 +255,7 @@ const AdminLoginPage = () => {
                       <Typography
                         sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
                         variant='caption'
-                        color='white'
+                        color='#333333'
                       >
                         By logging in, you accept the adventurerichaholidays.com
                       </Typography>
@@ -247,11 +264,19 @@ const AdminLoginPage = () => {
                         variant='caption'
                         color='white'
                       >
-                        <CustomLinkStyled color='blue' href='/'>
+                        <CustomLinkStyled sx={{ color: 'blue' }} href='/'>
                           Terms & conditions
                         </CustomLinkStyled>
-                         and 
-                        <CustomLinkStyled color='blue' href='/'>
+                        <Typography
+                          sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                          variant='caption'
+                          color='#333333'
+                          marginLeft={'5px'}
+                          marginRight={'5px'}
+                        >
+                          and
+                        </Typography>
+                        <CustomLinkStyled sx={{ color: 'blue' }} href='/'>
                           Privacy statement
                         </CustomLinkStyled>
                       </Typography>
@@ -270,14 +295,23 @@ const AdminLoginPage = () => {
           )}
         </Grid>
         <Card className='footer-card'>
-          <CardContent sx={{ pt: '15px !important', pb: '15px !important' }}>
+        <CardContent
+            sx={{
+              pt: '15px !important',
+              pb: '15px !important',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
             <Typography
               sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '1rem' } }}
-              color='white'
+              color='black'
               // fontSize={20}
             >
-              © 2019 - 2024 Adventure Richa Holidays. All rights reserved.
+             © 2024 Adventure Richa Holidays
             </Typography>
+            {DarkHelpIcon}
           </CardContent>
         </Card>
       </Box>

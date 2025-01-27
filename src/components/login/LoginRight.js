@@ -22,6 +22,7 @@ import { styled } from '@mui/material/styles'
 
 import Icon from 'src/@core/components/icon'
 import { useAuth } from 'src/hooks/useAuth'
+import { borderBottom } from '@mui/system'
 
 const TypographyStyled = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
@@ -45,14 +46,17 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
     display: 'none'
   },
   '& .Mui-selected': {
-    backgroundColor: 'transparent !important'
+    // backgroundColor: 'transparent !important'
+     backgroundColor: '#FB7601 !important'
   },
   '& .MuiTab-root': {
     minHeight: 38,
     // minWidth: 130,
     borderRadius: '15px 15px 0px 0px',
-    backgroundColor: 'rgba(61, 61, 61, 0.25)',
-    color: `${theme.palette.common.white} !important`
+    // backgroundColor: 'rgba(61, 61, 61, 0.25)',
+    color: `${theme.palette.common.white} !important`,
+    borderBottom: '1px solid rgba(61, 61, 61, 0.25)',
+    fontWeight : '700'
   }
 }))
 
@@ -117,10 +121,16 @@ const LoginRight = () => {
         >
           <BoxWrapper>
             <Box sx={{ mb: 6, mt: 5 }}>
-              <TypographyStyled sx={{ typography: { xs: 'h4', laptopSm: 'h3' } }} color='white'>
+            <TypographyStyled
+                sx={{ typography: { xs: 'h4', laptopSm: 'h3' }, fontWeight: '700 !important' }}
+                color='#333333'
+              >
                 Welcome Back!
               </TypographyStyled>
-              <Typography sx={{ typography: { xs: 'body2', laptopSm: 'body1' } }} color='white'>
+              <Typography
+                sx={{ typography: { xs: 'body2', laptopSm: 'body1', fontWeight: '500 !important' } }}
+                color='#333333'
+              >
                 Let's Plan Journey's Together!
               </Typography>
             </Box>
@@ -202,7 +212,7 @@ const LoginRight = () => {
                   textAlign: 'end'
                 }}
               >
-                <LinkStyled href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
+                <LinkStyled sx={{ color: '#333333 !important' }} href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
               </Typography>
               <Button
                 type='submit'
@@ -219,7 +229,7 @@ const LoginRight = () => {
                 <Typography
                   sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
                   variant='caption'
-                  color='white'
+                  color='#333333'
                 >
                   By logging in, you accept the adventurerichaholidays.com
                 </Typography>
@@ -228,11 +238,19 @@ const LoginRight = () => {
                   variant='caption'
                   color='white'
                 >
-                  <CustomLinkStyled color='blue' href='/'>
+                  <CustomLinkStyled sx={{color: 'blue'}} href='/'>
                     Terms & conditions
                   </CustomLinkStyled>
-                   and 
-                  <CustomLinkStyled color='blue' href='/'>
+                  <Typography
+                    sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                    variant='caption'
+                    color='#333333'
+                    marginLeft={'5px'}
+                    marginRight={'5px'}
+                  >
+                    and
+                  </Typography>
+                  <CustomLinkStyled sx={{color: 'blue'}} href='/'>
                     Privacy statement
                   </CustomLinkStyled>
                 </Typography>
@@ -254,10 +272,16 @@ const LoginRight = () => {
         >
           <BoxWrapper>
             <Box sx={{ mb: 6, mt: 5 }}>
-              <TypographyStyled color='white' variant='h3'>
+            <TypographyStyled
+                sx={{ typography: { xs: 'h4', laptopSm: 'h3' }, fontWeight: '700 !important' }}
+                color='#333333'
+              >
                 Welcome Back!
               </TypographyStyled>
-              <Typography color='white' variant='body1'>
+              <Typography
+                sx={{ typography: { xs: 'body2', laptopSm: 'body1', fontWeight: '500 !important' } }}
+                color='#333333'
+              >
                 Let's Plan Journey's Together!
               </Typography>
             </Box>
@@ -339,7 +363,7 @@ const LoginRight = () => {
                   textAlign: 'end'
                 }}
               >
-                <LinkStyled href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
+                <LinkStyled sx={{ color: '#333333 !important' }} href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
               </Typography>
               <Button
                 type='submit'
@@ -356,7 +380,7 @@ const LoginRight = () => {
                 <Typography
                   sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
                   variant='caption'
-                  color='white'
+                  color='#333333'
                 >
                   By logging in, you accept the adventurerichaholidays.com
                 </Typography>
@@ -365,11 +389,19 @@ const LoginRight = () => {
                   variant='caption'
                   color='white'
                 >
-                  <CustomLinkStyled color='blue' href='/'>
+                  <CustomLinkStyled sx={{color: 'blue'}} href='/'>
                     Terms & conditions
                   </CustomLinkStyled>
-                   and 
-                  <CustomLinkStyled color='blue' href='/'>
+                  <Typography
+                    sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                    variant='caption'
+                    color='#333333'
+                    marginLeft={'5px'}
+                    marginRight={'5px'}
+                  >
+                    and
+                  </Typography>
+                  <CustomLinkStyled sx={{color: 'blue'}} href='/'>
                     Privacy statement
                   </CustomLinkStyled>
                 </Typography>

@@ -13,8 +13,11 @@ import { useTheme } from '@mui/material/styles'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 import LoginRight from 'src/components/login/LoginRight'
+import { DarkHelpIcon } from 'src/utils/icons'
 
-const images = ['/images/login_slider1.jpg', '/images/login_slider2.jpg']
+
+const images = ['/images/login_slider1.png', '/images/login_slider2.png', '/images/login_slider3.png']
+
 
 const LoginPage = () => {
   const [currentImage, setCurrentImage] = useState(0)
@@ -78,14 +81,23 @@ const LoginPage = () => {
           )}
         </Grid>
         <Card className='footer-card'>
-          <CardContent sx={{ pt: '15px !important', pb: '15px !important' }}>
+        <CardContent
+            sx={{
+              pt: '15px !important',
+              pb: '15px !important',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
             <Typography
               sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '1rem' } }}
-              color='white'
+              color='black'
               // fontSize={20}
             >
-              © 2019 - 2024 Adventure Richa Holidays. All rights reserved.
+             © 2024 Adventure Richa Holidays
             </Typography>
+            {DarkHelpIcon}
           </CardContent>
         </Card>
         {/* <Box sx={{ display: 'flex', justifyContent: 'space-evenly', flexWrap: 'wrap', gap: 3, mb: 3 }}>
