@@ -821,8 +821,8 @@ const QutationPreview = ({ id }) => {
       dataToSend = { ...dataToSend, userId: localStorage.getItem('createdQuoteClientId') }
     }
 
-    // const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-    const BASE_URL = 'http://localhost:4000/api'
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = 'http://localhost:4000/api'
     const api_url = `${BASE_URL}/${createdClientType}`
     setIsLoading(true)
     let response

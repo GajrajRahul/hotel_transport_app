@@ -489,8 +489,8 @@ const QuotationsHistory = () => {
 
   const fetchQuotationList = async () => {
     setIsLoading(true)
-    // const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-    const BASE_URL = 'http://localhost:4000/api'
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = 'http://localhost:4000/api'
     const api_url = `${BASE_URL}/${clientType}`
 
     const response = await getRequest(`${api_url}/fetch-quotations`)
