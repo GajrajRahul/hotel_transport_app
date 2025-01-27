@@ -20,7 +20,9 @@ const DatePickerWrapper = styled(Box)(({ theme }) => {
   return {
     '& .react-datepicker-popper': {
       zIndex: 20,
-      width: '70%'
+      '@media (max-width: 600px)': {
+        width: '70%' // Set width to 70% on mobile
+      }
     },
     '& .react-datepicker-wrapper': {
       width: '100%'
