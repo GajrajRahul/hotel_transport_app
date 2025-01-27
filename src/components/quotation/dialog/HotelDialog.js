@@ -45,7 +45,8 @@ import RoomDialog from './RoomDialog'
 import CustomInput from 'src/components/common/CustomInput'
 import { getDayNightCount } from 'src/utils/function'
 import CusomInputWithButttons from 'src/components/common/CusomInputWithButttons'
-import { useMediaQuery } from '@mui/material'
+import { Tooltip, useMediaQuery } from '@mui/material'
+import { InfoTootipIcon } from 'src/utils/icons'
 
 const TabList = styled(MuiTabList)(({ theme }) => ({
   '& .MuiTabs-indicator': {
@@ -253,7 +254,9 @@ const HotelDialog = ({
       return
     }
 
-    let selectedRoomsList = Object.keys(selectedHotelDetail).filter(roomType => hotelSheetData.roomsList.includes(roomType))
+    let selectedRoomsList = Object.keys(selectedHotelDetail).filter(roomType =>
+      hotelSheetData.roomsList.includes(roomType)
+    )
     let roomCount = 0
     // console.log("hotelSheetData.roomsList: ", hotelSheetData.roomsList)
     // console.log("selectedRoomsList: ", selectedRoomsList)
@@ -643,6 +646,9 @@ const HotelDialog = ({
                               </>
                             )}
                           />
+                          <Tooltip title='Food will be charged for a child' placement='top' arrow>
+                            {InfoTootipIcon}
+                          </Tooltip>
                         </MenuItem>
                         <MenuItem
                           sx={{

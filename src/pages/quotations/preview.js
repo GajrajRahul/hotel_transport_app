@@ -53,6 +53,8 @@ import {
   vehicleType,
   YoutubeIcon
 } from 'src/utils/icons'
+import { Typography } from '@mui/material'
+import { Box } from '@mui/system'
 import { useAuth } from 'src/hooks/useAuth'
 import ShareQuotation from 'src/components/quotation/dialog/ShareQuotation'
 
@@ -147,7 +149,7 @@ const exclusionItems = [
 ]
 
 function generateDayWiseItinerary(cities, transportData, monuments) {
-  console.log("cities: ", cities )
+  console.log('cities: ', cities)
   const itinerary = []
   let cityInclusions = []
   let cityInclusionText = ''
@@ -933,7 +935,7 @@ const QutationPreview = ({ id }) => {
               ? origin == destination
                 ? Math.floor(Number(totalHotelAmount) * 1.44)
                 : Math.floor(Number(totalHotelAmount) * 1.3)
-              : Math.floor(Number(totalHotelAmount) * 0.95)
+              : Math.floor(Number(totalHotelAmount) * 1.11)
           console.log('totalHotelAmount: ', totalHotelAmount)
 
           const transportFinalAmount =
@@ -943,7 +945,7 @@ const QutationPreview = ({ id }) => {
               ? origin == destination
                 ? Math.floor(Number(totalTransportAmount) * 1.44)
                 : Math.floor(Number(totalTransportAmount) * 1.3)
-              : Math.floor(Number(totalTransportAmount) * 0.95)
+              : Math.floor(Number(totalTransportAmount) * 1.11)
 
           // if (clientType.current == 'employee' && origin == destination) {
           //   setTotalAmount(
@@ -1568,7 +1570,23 @@ const QutationPreview = ({ id }) => {
           <Card>
             <CardContent>
               <TextField disabled fullWidth label='ARH Price' value={totalAmount} InputLabelProps={{ shrink: true }} />
-
+              <Box
+                sx={{
+                  mt: 5,
+                  padding: '10px 10px 10px 10px',
+                  backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                  borderRadius: 1.5
+                }}
+              >
+                <Typography
+                  sx={{ mt: 5, color: 'red', lineHeight: '.4em !important', fontWeight: '500' }}
+                  variant='caption'
+                >
+                  Need Help or Looking for the Best Deal?
+                  <br /> Call now at :
+                  <span style={{ color: 'red', fontWeight: '700', fontSize: '15px' }}> +91-97841-89197</span>
+                </Typography>
+              </Box>
               <TextField
                 fullWidth
                 label='Offer Price'
