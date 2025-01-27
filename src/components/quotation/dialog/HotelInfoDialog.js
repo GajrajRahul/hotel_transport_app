@@ -533,7 +533,7 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                                 >
                                   <Typography variant='h6'>
                                     <sup>₹</sup>
-                                    {room.price}
+                                    {room.price[0]}xxx
                                   </Typography>
 
                                   <Typography variant='caption'>/Room</Typography>

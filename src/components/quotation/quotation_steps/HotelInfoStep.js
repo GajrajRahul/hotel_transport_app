@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
-import { format } from 'date-fns'
+import { addDays, format } from 'date-fns'
 
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
@@ -90,8 +90,11 @@ const HotelInfoStep = props => {
         // end: info.checkInCheckOut[1]
       }))
 
+      // const filteredDate = selectedDates.current.filter(item => {
+      //   return !deletedDates.some(deleted => new Date(item.start).getTime() == new Date(deleted.start).getTime())
+      // })
       const filteredDate = selectedDates.current.filter(item => {
-        return !deletedDates.some(deleted => new Date(item.start).getTime() == new Date(deleted.start).getTime())
+        return !deletedDates.some(deleted => new Date(addDays(new Date(item.start), 1)).getTime() == new Date(deleted.start).getTime())
       })
 
       selectedDates.current = filteredDate
@@ -106,13 +109,15 @@ const HotelInfoStep = props => {
 
   const handleDeleteCityHotel = (cityName, hotelId) => {
     const city = selectedCitiesHotels.find(city => city.label == cityName)
+    console.log(city)
     if (city) {
       const hotel = city.info.find(hotel => hotel.id == hotelId)
-      // console.log(hotel.checkInCheckOut[0])
+      console.log(hotel.checkInCheckOut[0])
+      console.log("hotel: ", hotel)
       const updatedDates = selectedDates.current.filter(
-        date => new Date(date.start).getTime() != new Date(hotel.checkInCheckOut[0]).getTime()
+        date => new Date(addDays(new Date(date.start), 1)).getTime() != new Date(hotel.checkInCheckOut[0]).getTime()
       )
-      // console.log(updatedDates)
+      console.log("updatedDates: ", updatedDates)
       selectedDates.current = updatedDates
     }
     setSelectedCitiesHotels(prev =>
@@ -306,7 +311,8 @@ const HotelInfoStep = props => {
                             </Box>
                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline' }}>
                               <Typography sx={{ color: 'black' }} variant='h6'>
-                                ₹{hotel.roomsPrice.join('-₹')}
+                                {/* {console.log(hotel.roomsPrice)} */}
+                                ₹{hotel.roomsPrice.map(price => `${price.toString()[0]}xxx`).join('-₹')}
                               </Typography>
                               <Typography variant='caption' sx={{ color: theme => theme.palette.primary.main }}>
                                 /Room

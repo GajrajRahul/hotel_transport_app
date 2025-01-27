@@ -290,13 +290,13 @@ const HotelsDialog = props => {
                               {hotel.minMaxRoomPrice[0].type == hotel.minMaxRoomPrice[1].type ? (
                                 <Typography variant='h6'>
                                   <sup>₹</sup>
-                                  {hotel.minMaxRoomPrice[0].price}
+                                  {hotel.minMaxRoomPrice[0].price[0]}xxx
                                 </Typography>
                               ) : (
                                 <Typography variant='h6'>
                                   <sup>₹</sup>
-                                  {hotel.minMaxRoomPrice[0].price} - <sup>₹</sup>
-                                  {hotel.minMaxRoomPrice[1].price}
+                                  {hotel.minMaxRoomPrice[0].price[0]}xxx - <sup>₹</sup>
+                                  {hotel.minMaxRoomPrice[1].price[0]}xxx
                                 </Typography>
                               )}
                               <Typography variant='caption'>/Room</Typography>
