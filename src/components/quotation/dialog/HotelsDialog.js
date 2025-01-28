@@ -101,7 +101,29 @@ const HotelsDialog = props => {
 
   const handleOpenHotelInfoDialog = hotel => {
     // console.log(hotel)
-    setSelectedHotel(hotel)
+    // return;
+    // console.log('selectedHotelInfo: ', selectedHotelInfo)
+    // console.log('hotel at dialog click: ', hotel)
+    let updatedRooms = hotel.rooms
+    if (selectedHotelInfo) {
+      let selectedRooms = selectedHotelInfo.rooms
+      if (selectedRooms) {
+        updatedRooms = hotel.rooms.map(room => {
+          // Find the corresponding room in roomsData
+          const matchingRoom = selectedRooms.find(data => data.name === room.type)
+          // Add price to the room if found
+          return {
+            ...room,
+            price: matchingRoom ? matchingRoom.price : room.price,
+            count: matchingRoom ? Number(matchingRoom.count || 0) : 0
+          }
+        })
+      }
+    }
+
+    // console.log('updatedRooms: ', updatedRooms)
+    // setSelectedHotel(hotel)
+    setSelectedHotel({ ...hotel, rooms: updatedRooms })
     setIsHotelDialogOpen(true)
   }
 
@@ -118,8 +140,7 @@ const HotelsDialog = props => {
     // console.log('hotelInfo: ', hotelInfo)
     // console.log(selectedCity)
     // console.log(selectedHotelInfo)
-    const { name, type, image, rooms, meals, extraBed, checkInCheckOut, adult, child, infant, daysNights } =
-      hotelInfo
+    const { name, type, image, rooms, meals, extraBed, checkInCheckOut, adult, child, infant, daysNights } = hotelInfo
     // console.log('rooms: ', rooms)
 
     let minRoomPrice = 1000000000
@@ -148,7 +169,10 @@ const HotelsDialog = props => {
 
     selectedDates.current = [
       ...selectedDates.current,
-      { start: new Date(subDays(new Date(checkInCheckOut[0]), 1)), end: new Date(subDays(new Date(checkInCheckOut[1]), 1)) }
+      {
+        start: new Date(subDays(new Date(checkInCheckOut[0]), 1)),
+        end: new Date(subDays(new Date(checkInCheckOut[1]), 1))
+      }
     ]
     if (adult) {
       currData.adult = adult

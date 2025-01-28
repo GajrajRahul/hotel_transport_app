@@ -32,7 +32,6 @@ import Box from '@mui/material/Box'
 
 import { styled, useTheme } from '@mui/material/styles'
 
-
 import Icon from 'src/@core/components/icon'
 
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
@@ -61,7 +60,8 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
 
   const paperRef = useRef(null)
   const theme = useTheme()
-  //   console.log(selectedHotel)
+  // console.log("selectedHotel: ", selectedHotel)
+  // console.log("hotelInfo: ", hotelInfo)
 
   const {
     reset,
@@ -94,6 +94,7 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
     let dataToSet = defaultValues
 
     if (selectedHotel && !hotelInfo.name) {
+      // console.log("*****************hotelInfo.name is null********************");
       const rooms = []
       selectedHotel.rooms.map(room => {
         if (room) {
@@ -109,6 +110,7 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
 
       reset({ ...dataToSet, meals, rooms })
     } else if (selectedHotel && hotelInfo.name) {
+      // console.log("*****************hotelInfo.name is  not null********************");
       const { name, image, type, rooms, meals, checkInCheckOut, daysNights, extraBed, adult, child, infant } = hotelInfo
       // console.log('hotelInfo: ', hotelInfo)
 
@@ -131,7 +133,7 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
         // console.log('room: ', room)
         const match = rooms.find(currRoom => currRoom.type === room.type)
         // console.log('match: ', match)
-        return match ? { ...room, count: match.count } : { ...room, count: 0 }
+        return match ? { ...room, count: match.count } : { ...room, count: room.count ?? 0 }
       })
       // console.log('mealsArr: ', mealsArr)
 
@@ -156,9 +158,7 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
     }
   }, [])
 
-  useEffect(() => {
-
-  }), [selectedDates.current]
+  useEffect(() => {}), [selectedDates.current]
 
   const handleClickOutside = event => {
     if (paperRef.current && !paperRef.current.contains(event.target)) {
@@ -354,7 +354,11 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                               theme={theme}
                             />
                           </Box>
-                          <Tooltip title='13+ years. Max 2 adults/room, 1 more with an extra bed.' placement='top' arrow>
+                          <Tooltip
+                            title='13+ years. Max 2 adults/room, 1 more with an extra bed.'
+                            placement='top'
+                            arrow
+                          >
                             {InfoTootipIcon}
                           </Tooltip>
                         </MenuItem>
@@ -380,7 +384,11 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                               theme={theme}
                             />
                           </Box>
-                          <Tooltip title='Ages 6-13. Food charged. No bed unless added as an adult with an extra bed.' placement='top' arrow>
+                          <Tooltip
+                            title='Ages 6-13. Food charged. No bed unless added as an adult with an extra bed.'
+                            placement='top'
+                            arrow
+                          >
                             {InfoTootipIcon}
                           </Tooltip>
                         </MenuItem>
@@ -406,7 +414,11 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                               theme={theme}
                             />
                           </Box>
-                          <Tooltip title='Below 6 years. No food charges. No bed unless added as an adult with an extra bed.' placement='top' arrow>
+                          <Tooltip
+                            title='Below 6 years. No food charges. No bed unless added as an adult with an extra bed.'
+                            placement='top'
+                            arrow
+                          >
                             {InfoTootipIcon}
                           </Tooltip>
                         </MenuItem>

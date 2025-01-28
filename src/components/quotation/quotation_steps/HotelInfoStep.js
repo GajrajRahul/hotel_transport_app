@@ -1,7 +1,7 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
-import { addDays, format } from 'date-fns'
+import { addDays, format, subDays } from 'date-fns'
 
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
@@ -32,6 +32,7 @@ const HotelInfoStep = props => {
   const [selectedCitiesHotels, setSelectedCitiesHotels] = useState(
     localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
   )
+  // console.log('selectedCitiesHotels: ', selectedCitiesHotels)
 
   const [isEditHotelDialogOpen, setIsEditHotelDialogOpen] = useState(false)
   const [isAddHotelDialogOpen, setIsAddHotelDialogOpen] = useState(false)
@@ -54,6 +55,25 @@ const HotelInfoStep = props => {
     })
   }, [])
 
+  useEffect(() => {
+    setSelectedDates()
+  }, [])
+
+  const setSelectedDates = () => {
+    let existingDates = []
+    selectedCitiesHotels.map(cities => {
+      cities.info.map(hotel => {
+        const checkInCheckOut = hotel.checkInCheckOut
+        existingDates.push({
+          start: new Date(subDays(new Date(checkInCheckOut[0]), 1)),
+          end: new Date(subDays(new Date(checkInCheckOut[1]), 1))
+        })
+      })
+    })
+
+    selectedDates.current = existingDates
+  }
+
   const expandIcon = value => (
     <Icon icon={expanded === value ? 'mdi:minus' : 'mdi:plus'} color={theme.palette.primary.main} />
   )
@@ -69,8 +89,27 @@ const HotelInfoStep = props => {
   }
 
   const handleEditOpenHotelDialog = (city, hotel) => {
+    const currentCity = hotelSheetInfo.find(data => data.city == city.label)
+    const currHotel = currentCity.hotels.find(data => data.name == hotel.name)
+    const updatedHotelInfo = {
+      ...hotel,
+      rooms: hotel.rooms.map(room => {
+        const matchingRoom = currHotel.rooms.find(data => data.type === room.name)
+        // Add price to the room if found
+        return {
+          ...room,
+          price: matchingRoom ? matchingRoom.price : '0000'
+        }
+      })
+    }
+    // console.log("updatedHotelInfo: ", updatedHotelInfo)
+    // console.log('hotelSheetInfo: ', hotelSheetInfo)
+    // console.log('city: ', city)
+    // console.log('hotel: ', hotel)
+    // return
     setSelectedCity(city)
-    setSelectedHotelInfo(hotel)
+    // setSelectedHotelInfo(hotel)
+    setSelectedHotelInfo(updatedHotelInfo)
     setIsEditHotelDialogOpen(true)
   }
 
@@ -94,7 +133,9 @@ const HotelInfoStep = props => {
       //   return !deletedDates.some(deleted => new Date(item.start).getTime() == new Date(deleted.start).getTime())
       // })
       const filteredDate = selectedDates.current.filter(item => {
-        return !deletedDates.some(deleted => new Date(addDays(new Date(item.start), 1)).getTime() == new Date(deleted.start).getTime())
+        return !deletedDates.some(
+          deleted => new Date(addDays(new Date(item.start), 1)).getTime() == new Date(deleted.start).getTime()
+        )
       })
 
       selectedDates.current = filteredDate
@@ -113,11 +154,11 @@ const HotelInfoStep = props => {
     if (city) {
       const hotel = city.info.find(hotel => hotel.id == hotelId)
       console.log(hotel.checkInCheckOut[0])
-      console.log("hotel: ", hotel)
+      console.log('hotel: ', hotel)
       const updatedDates = selectedDates.current.filter(
         date => new Date(addDays(new Date(date.start), 1)).getTime() != new Date(hotel.checkInCheckOut[0]).getTime()
       )
-      console.log("updatedDates: ", updatedDates)
+      console.log('updatedDates: ', updatedDates)
       selectedDates.current = updatedDates
     }
     setSelectedCitiesHotels(prev =>
@@ -311,8 +352,8 @@ const HotelInfoStep = props => {
                             </Box>
                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'baseline' }}>
                               <Typography sx={{ color: 'black' }} variant='h6'>
-                                {/* {console.log(hotel.roomsPrice)} */}
-                                ₹{hotel.roomsPrice.map(price => `${price.toString()[0]}xxx`).join('-₹')}
+                                {/* {console.log(hotel.roomsPrice)} */}₹
+                                {hotel.roomsPrice.map(price => `${price.toString()[0]}xxx`).join('-₹')}
                               </Typography>
                               <Typography variant='caption' sx={{ color: theme => theme.palette.primary.main }}>
                                 /Room
