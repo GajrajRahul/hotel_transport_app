@@ -458,7 +458,7 @@ const generateMonumentsData = data => {
   return { result }
 }
 
-const getHotelFare = (cities, hotelSheetData) => {
+const getHotelFare = (cities, hotelSheetData, hotelSheetInfo) => {
   // console.log('cities are: ', cities)
   // console.log('hotelSheetData are: ', hotelSheetData)
   let hotelAmount = 0
@@ -480,9 +480,18 @@ const getHotelFare = (cities, hotelSheetData) => {
         ][type][name]
 
       // console.log('hotel: ', hotel)
+      const currentCity = hotelSheetInfo.find(data => data.city == label)
+      // console.log('currentCity: ', currentCity)
+      const curr_hotel = currentCity.hotels.find(data => data.name == name)
+      // console.log('curr_hotel: ', curr_hotel)
+
       rooms.map(room => {
         const { type, count, price } = room
-        hotelAmount += Number(count) * Number(price) * totalDayNight
+        // console.log('room: ', room)
+        const matchingRoom = curr_hotel.rooms.find(data => data.type === room.name)
+        // console.log('room price: ', price)
+        // console.log('matchingRoom: ', matchingRoom)
+        hotelAmount += Number(count) * Number(price ?? matchingRoom.price ?? 0) * totalDayNight
       })
 
       if (meals.includes('Breakfast')) {
@@ -635,6 +644,7 @@ const QutationPreview = ({ id }) => {
   const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' })
   const hotelSheetData = useSelector(state => state.hotelRateData)
   const transportSheetData = useSelector(state => state.transportRateData)
+  const hotelSheetInfo = useSelector(state => state.hotelsInfo)
 
   const quotationId = useRef(localStorage.getItem('quotationId') ?? '')
   const travelInfoData = useRef(localStorage.getItem('travel') ? JSON.parse(localStorage.getItem('travel')) : null)
@@ -926,7 +936,8 @@ const QutationPreview = ({ id }) => {
           console.log('totalTransportAmount: ', totalTransportAmount)
           const { hotelAmount: totalHotelAmount, totalNights: totalNightCount } = getHotelFare(
             cities.current,
-            hotelSheetData
+            hotelSheetData,
+            hotelSheetInfo
           )
           const hotelFinalAmount =
             clientType.current == 'admin'
