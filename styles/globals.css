@@ -56,14 +56,14 @@ code[class*='language-'] {
 }
 
 .inner-card {
-  height: 500px;
-  background-color: rgba(217, 217, 217, 0.8) !important;
+  /* height: 500px; */
+  background-color: rgba(217, 217, 217, 0.4) !important;
   border-radius: 15px !important;
   backdrop-filter: blur(10px);
 }
 
 .footer-card {
-  background-color: rgba(255, 255, 255, 0.8) !important;
+  background-color: rgba(255, 255, 255, 0.4) !important;
   border-radius: 100px !important;
   backdrop-filter: blur(10px);
   margin-bottom: 25px;
