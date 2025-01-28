@@ -39,7 +39,7 @@ import CustomInput from 'src/components/common/CustomInput'
 import CusomInputWithButttons from 'src/components/common/CusomInputWithButttons'
 import { getDayNightCount } from 'src/utils/function'
 import { Tooltip, useMediaQuery } from '@mui/material'
-import { DarkHelpIcon, InfoTootipIcon } from 'src/utils/icons'
+import { InfoTootipIcon } from 'src/utils/icons'
 
 const defaultValues = {
   checkInCheckOut: [null, null],
@@ -218,291 +218,20 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
       <DialogTitle
         sx={{
           '&.MuiDialogTitle-root': {
-            pb: 0
+            padding: '20px 10px 0 30px'
           }
         }}
       >
-        Select Room Type
-        <DialogContentText>Select Cities where you want to book your stay</DialogContentText>
+        Room Details & Preferences
+        <DialogContentText>
+          Choose your room, add traveler details, select meal plan, and set check-in/check-out dates. Optionally,
+          request an extra bed.
+        </DialogContentText>
       </DialogTitle>
       <Box component='form' onSubmit={handleSubmit(onSubmit)}>
         <DialogContent sx={{ pt: 0 }}>
           <DatePickerWrapper sx={{ p: 2, pt: 5 }}>
             <Grid container spacing={6}>
-              <Grid item xs={12} tablet={6}>
-                <Controller
-                  name='checkInCheckOut'
-                  control={control}
-                  rules={{ required: 'Both start and end date required' }}
-                  render={({ field: { value, onChange } }) => {
-                    return (
-                      <DatePicker
-                        selectsRange
-                        minDate={new Date(travelInfoData.dates[0])}
-                        maxDate={new Date(travelInfoData.dates[1])}
-                        excludeDateIntervals={selectedDates.current}
-                        monthsShown={2}
-                        endDate={value[1] ? new Date(value[1]) : null}
-                        // selected={value[0] ? new Date(value[0]) : null}
-                        startDate={value[0] ? new Date(value[0]) : null}
-                        shouldCloseOnSelect={false}
-                        id='date-range-picker-months'
-                        onChange={e => {
-                          onChange(e)
-                          const dayCount = getDayNightCount(e) + 1
-                          setValue(
-                            'daysNights',
-                            e[1] == null
-                              ? '1 Day'
-                              : `${dayCount} ${dayCount < 2 ? 'Day' : 'Days'} & ${dayCount - 1} ${
-                                  dayCount < 3 ? 'Night' : 'Nights'
-                                }`
-                          )
-                        }}
-                        popperPlacement='bottom-start'
-                        customInput={
-                          <CustomInput
-                            label='Check-In & Check-Out'
-                            end={value[1]}
-                            start={value[0]}
-                            propserror={errors}
-                          />
-                        }
-                      />
-                    )
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} tablet={6}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor='stepper-linear-account-daysNights'>Days and Nights</InputLabel>
-                  <Controller
-                    name='daysNights'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field: { value, onChange } }) => (
-                      <OutlinedInput
-                        value={value}
-                        disabled
-                        label='Days and Nights'
-                        id='stepper-linear-account-daysNights'
-                        startAdornment={
-                          <InputAdornment position='start'>
-                            <Icon icon='mdi:night-day' />
-                          </InputAdornment>
-                        }
-                      />
-                    )}
-                  />
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} tablet={6}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor='stepper-linear-account-person'>No. of Persons</InputLabel>
-                  <Controller
-                    name='adult'
-                    control={control}
-                    rules={{ required: 'This field is required' }}
-                    render={({ field: { value, onChange } }) => (
-                      <OutlinedInput
-                        value={`${adult + child + infant == 0 ? '' : `${adult + child + infant} Travelers`}`}
-                        label='No. of Persons'
-                        id='stepper-linear-account-person'
-                        startAdornment={
-                          <InputAdornment position='start'>
-                            <Icon icon='mdi:double-user' color={theme.palette.primary.main} />
-                          </InputAdornment>
-                        }
-                        onFocus={() => {
-                          setOpenMenuList(true)
-                        }}
-                      />
-                    )}
-                  />
-                  {openMenuList && (
-                    <Paper
-                      sx={{
-                        width: '100%',
-                        maxWidth: '100%',
-                        position: 'absolute',
-                        zIndex: 2,
-                        mt: { xs: '57px' }
-                      }}
-                      ref={paperRef}
-                    >
-                      <MenuList>
-                        <MenuItem
-                          sx={{
-                            '&.MuiMenuItem-root': {
-                              backgroundColor: 'transparent'
-                            },
-                            '&.MuiMenuItem-root:hover': {
-                              backgroundColor: 'transparent'
-                            },
-                            cursor: 'default'
-                          }}
-                          disableRipple
-                        >
-                          Adult
-                          <Box sx={{ width: '35%' }}>
-                            <CusomInputWithButttons
-                              name='adult'
-                              hotelControl={control}
-                              isRequired={true}
-                              errors={errors}
-                              theme={theme}
-                            />
-                          </Box>
-                          <Tooltip
-                            title='13+ years. Max 2 adults/room, 1 more with an extra bed.'
-                            placement='top'
-                            arrow
-                          >
-                            {InfoTootipIcon}
-                          </Tooltip>
-                        </MenuItem>
-                        <MenuItem
-                          sx={{
-                            '&.MuiMenuItem-root': {
-                              backgroundColor: 'transparent'
-                            },
-                            '&.MuiMenuItem-root:hover': {
-                              backgroundColor: 'transparent'
-                            },
-                            cursor: 'default'
-                          }}
-                          disableRipple
-                        >
-                          Child
-                          <Box sx={{ width: '35%' }}>
-                            <CusomInputWithButttons
-                              name='child'
-                              hotelControl={control}
-                              isRequired={false}
-                              errors={errors}
-                              theme={theme}
-                            />
-                          </Box>
-                          <Tooltip
-                            title='Ages 6-13. Food charged. No bed unless added as an adult with an extra bed.'
-                            placement='top'
-                            arrow
-                          >
-                            {InfoTootipIcon}
-                          </Tooltip>
-                        </MenuItem>
-                        <MenuItem
-                          sx={{
-                            '&.MuiMenuItem-root': {
-                              backgroundColor: 'transparent'
-                            },
-                            '&.MuiMenuItem-root:hover': {
-                              backgroundColor: 'transparent'
-                            },
-                            cursor: 'default'
-                          }}
-                          disableRipple
-                        >
-                          Infant
-                          <Box sx={{ width: '35%' }}>
-                            <CusomInputWithButttons
-                              name='infant'
-                              hotelControl={control}
-                              isRequired={false}
-                              errors={errors}
-                              theme={theme}
-                            />
-                          </Box>
-                          <Tooltip
-                            title='Below 6 years. No food charges. No bed unless added as an adult with an extra bed.'
-                            placement='top'
-                            arrow
-                          >
-                            {InfoTootipIcon}
-                          </Tooltip>
-                        </MenuItem>
-                      </MenuList>
-                    </Paper>
-                  )}
-                  {errors.adult && (
-                    <FormHelperText sx={{ color: 'error.main' }} id='stepper-linear-account-adult'>
-                      {errors.adult?.message}
-                    </FormHelperText>
-                  )}
-                </FormControl>
-              </Grid>
-              {/* {console.log("meals: ", meals)} */}
-              {meals.length > 0 && meals[0] != undefined && meals[0].isSelected != undefined && (
-                <Grid item xs={12} tablet={6}>
-                  <Box
-                    sx={{
-                      border: '1px solid #9A9A9A',
-                      borderRadius: '6px',
-                      position: 'relative',
-                      height: '56px'
-                    }}
-                  >
-                    <Typography
-                      variant='caption'
-                      sx={{
-                        position: 'absolute',
-                        top: -11.5,
-                        left: 10,
-                        background: 'white',
-                        px: 1
-                      }}
-                    >
-                      Meals
-                    </Typography>
-                    <FormGroup
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-evenly',
-                        height: '100%',
-                        alignItems: 'center',
-                        '&.MuiFormGroup-root': {
-                          flexWrap: 'nowrap'
-                        },
-                        pl: 2
-                      }}
-                    >
-                      {!isBelowTablet && <Icon icon='mdi:plate-eating' color={theme.palette.primary.main} />}
-                      {meals.map((meal, index) => (
-                        <Box key={index}>
-                          {/* {console.log(meal)} */}
-                          <Controller
-                            //   key={index}
-                            name={`meals.${index}.isSelected`}
-                            control={control}
-                            rules={{ required: false }}
-                            render={({ field: { value, onChange } }) => (
-                              <FormControlLabel
-                                value={value}
-                                checked={value || false}
-                                onChange={onChange}
-                                control={<Checkbox key={index} size='small' />}
-                                label={meal.meal}
-                                sx={{
-                                  '& .MuiFormControlLabel-label': {
-                                    fontSize: { xs: '13px', mobileMd: '1 rem' }
-                                  },
-                                  '& .MuiFormControlLabel-root': {
-                                    ml: 0,
-                                    mr: 0
-                                  }
-                                }}
-                              />
-                            )}
-                          />
-                        </Box>
-                      ))}
-                    </FormGroup>
-                  </Box>
-                </Grid>
-              )}
-
               {rooms.length > 0 && (
                 <Grid item xs={12}>
                   <Grid container spacing={5}>
@@ -569,11 +298,349 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                 </Grid>
               )}
 
-              <Grid item xs={12} mobileMd={6} tablet={4}>
+              <Grid item xs={12} tablet={4}>
+                <Controller
+                  name='checkInCheckOut'
+                  control={control}
+                  rules={{ required: 'Both start and end date required' }}
+                  render={({ field: { value, onChange } }) => {
+                    return (
+                      <DatePicker
+                        autoComplete='off'
+                        selectsRange
+                        minDate={new Date(travelInfoData.dates[0])}
+                        maxDate={new Date(travelInfoData.dates[1])}
+                        excludeDateIntervals={selectedDates.current}
+                        monthsShown={2}
+                        endDate={value[1] ? new Date(value[1]) : null}
+                        // selected={value[0] ? new Date(value[0]) : null}
+                        startDate={value[0] ? new Date(value[0]) : null}
+                        shouldCloseOnSelect={false}
+                        id='date-range-picker-months'
+                        onChange={e => {
+                          onChange(e)
+                          const dayCount = getDayNightCount(e) + 1
+                          setValue(
+                            'daysNights',
+                            e[1] == null
+                              ? '1 Day'
+                              : `${dayCount} ${dayCount < 2 ? 'Day' : 'Days'} & ${dayCount - 1} ${
+                                  dayCount < 3 ? 'Night' : 'Nights'
+                                }`
+                          )
+                        }}
+                        popperPlacement='bottom-start'
+                        customInput={
+                          <CustomInput
+                            label='Check-In & Check-Out'
+                            end={value[1]}
+                            start={value[0]}
+                            propserror={errors}
+                          />
+                        }
+                      />
+                    )
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} tablet={3.1}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor='stepper-linear-account-daysNights'>Days and Nights</InputLabel>
+                  <Controller
+                    name='daysNights'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange } }) => (
+                      <OutlinedInput
+                        value={value}
+                        disabled
+                        label='Days and Nights'
+                        id='stepper-linear-account-daysNights'
+                        startAdornment={
+                          <InputAdornment position='start'>
+                            <Icon icon='mdi:night-day' />
+                          </InputAdornment>
+                        }
+                      />
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+
+              {/* {console.log("meals: ", meals)} */}
+              {meals.length > 0 && meals[0] != undefined && meals[0].isSelected != undefined && (
+                <Grid item xs={12} tablet={4.7}>
+                  <Box
+                    sx={{
+                      border: '1px solid #9A9A9A',
+                      borderRadius: '6px',
+                      position: 'relative',
+                      height: '56px'
+                    }}
+                  >
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        position: 'absolute',
+                        top: -11.5,
+                        left: 10,
+                        background: 'white',
+                        px: 1
+                      }}
+                    >
+                      Meals
+                    </Typography>
+                    <FormGroup
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'start', // Space between the icon and checkboxes
+                        alignItems: 'center', // Align items vertically
+                        height: '100%',
+                        padding: '16px 16px', // Adjust padding for overall space
+                        '&.MuiFormGroup-root': {
+                          flexWrap: 'nowrap'
+                        }
+                      }}
+                    >
+                      {!isBelowTablet && (
+                        <Box sx={{ marginRight: 4, display: 'flex', alignItems: 'center' }}>
+                          <Icon icon='mdi:plate-eating' color={theme.palette.primary.main} />
+                        </Box>
+                      )}
+
+                      <Box sx={{ lineHeight: '10px', display: 'flex', width: '100%' }}>
+                        {meals.map((meal, index) => (
+                          <Controller
+                            key={index}
+                            name={`meals.${index}.isSelected`}
+                            control={control}
+                            rules={{ required: false }}
+                            render={({ field: { value, onChange } }) => (
+                              <FormControlLabel
+                                value={value}
+                                checked={value || false}
+                                onChange={onChange}
+                                control={<Checkbox size='small' />}
+                                label={meal.meal}
+                                sx={{
+                                  '& .MuiFormControlLabel-label': {
+                                    fontSize: { xs: '13px', mobileMd: '1rem' }
+                                  },
+                                  '& .MuiFormControlLabel-root': {
+                                    ml: 0,
+                                    mr: 0
+                                  }
+                                }}
+                              />
+                            )}
+                          />
+                        ))}
+                      </Box>
+                    </FormGroup>
+                  </Box>
+                </Grid>
+              )}
+
+              <Grid item xs={12} tablet={3}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor='stepper-linear-account-person'>No. of Persons</InputLabel>
+                  <Controller
+                    name='adult'
+                    control={control}
+                    rules={{ required: 'This field is required' }}
+                    render={({ field: { value, onChange } }) => (
+                      <OutlinedInput
+                        autoComplete='off'
+                        value={`${adult + child + infant == 0 ? '' : `${adult + child + infant} Travelers`}`}
+                        label='No. of Persons'
+                        id='stepper-linear-account-person'
+                        startAdornment={
+                          <InputAdornment position='start'>
+                            <Icon icon='mdi:double-user' color={theme.palette.primary.main} />
+                          </InputAdornment>
+                        }
+                        onFocus={() => {
+                          setOpenMenuList(true)
+                        }}
+                      />
+                    )}
+                  />
+                  {openMenuList && (
+                    <Paper
+                      sx={{
+                        width: '100%',
+                        maxWidth: '100%',
+                        position: 'absolute',
+                        zIndex: 2,
+                        mt: { xs: '57px' }
+                      }}
+                      ref={paperRef}
+                    >
+                      <MenuList>
+                        <MenuItem
+                          sx={{
+                            '&.MuiMenuItem-root': {
+                              backgroundColor: 'transparent'
+                            },
+                            '&.MuiMenuItem-root:hover': {
+                              backgroundColor: 'transparent'
+                            },
+                            cursor: 'default'
+                          }}
+                          disableRipple
+                        >
+                          <span style={{ marginRight: '30px' }}>Adult</span>
+                          <Box>
+                            <CusomInputWithButttons
+                              name='adult'
+                              hotelControl={control}
+                              isRequired={true}
+                              errors={errors}
+                              theme={theme}
+                            />
+                          </Box>
+                          <Tooltip
+                            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                            title='13+ years. Max 2 adults/room, 1 more with an extra bed.'
+                            placement='top'
+                            arrow
+                          >
+                            <svg
+                              style={{
+                                margin: '7px 0px 0px 13px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                height: '100%',
+                                alignItems: 'center'
+                              }}
+                              xmlns='http://www.w3.org/2000/svg'
+                              id='Layer_1'
+                              data-name='Layer 1'
+                              viewBox='0 0 24 24'
+                              width='1.5em'
+                              height='1.5em'
+                              aria-label='13+ years. Max 2 adults/room, 1 more with an extra bed.'
+                            >
+                              <path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16'></path>
+                              <path d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0'></path>
+                            </svg>
+                          </Tooltip>
+                        </MenuItem>
+                        <MenuItem
+                          sx={{
+                            '&.MuiMenuItem-root': {
+                              backgroundColor: 'transparent'
+                            },
+                            '&.MuiMenuItem-root:hover': {
+                              backgroundColor: 'transparent'
+                            },
+                            cursor: 'default'
+                          }}
+                          disableRipple
+                        >
+                          <span style={{ marginRight: '29px' }}>Child</span>
+                          <Box>
+                            <CusomInputWithButttons
+                              name='child'
+                              hotelControl={control}
+                              isRequired={false}
+                              errors={errors}
+                              theme={theme}
+                            />
+                          </Box>
+                          <Tooltip
+                            title='Ages 6-13. Food charged. No bed unless added as an adult with an extra bed.'
+                            placement='top'
+                            arrow
+                          >
+                            <svg
+                              style={{
+                                margin: '7px 0px 0px 13px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                height: '100%',
+                                alignItems: 'center'
+                              }}
+                              xmlns='http://www.w3.org/2000/svg'
+                              id='Layer_1'
+                              data-name='Layer 1'
+                              viewBox='0 0 24 24'
+                              width='1.5em'
+                              height='1.5em'
+                              aria-label='13+ years. Max 2 adults/room, 1 more with an extra bed.'
+                            >
+                              <path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16'></path>
+                              <path d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0'></path>
+                            </svg>
+                          </Tooltip>
+                        </MenuItem>
+                        <MenuItem
+                          sx={{
+                            '&.MuiMenuItem-root': {
+                              backgroundColor: 'transparent'
+                            },
+                            '&.MuiMenuItem-root:hover': {
+                              backgroundColor: 'transparent'
+                            },
+                            cursor: 'default'
+                          }}
+                          disableRipple
+                        >
+                          <span style={{ marginRight: '25px' }}>Infant</span>
+                          <Box>
+                            <CusomInputWithButttons
+                              name='infant'
+                              hotelControl={control}
+                              isRequired={false}
+                              errors={errors}
+                              theme={theme}
+                            />
+                          </Box>
+                          <Tooltip
+                            title='Below 6 years. No food charges. No bed unless added as an adult with an extra bed.'
+                            placement='top'
+                            arrow
+                          >
+                            <svg
+                              style={{
+                                margin: '7px 0px 0px 13px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                height: '100%',
+                                alignItems: 'center'
+                              }}
+                              xmlns='http://www.w3.org/2000/svg'
+                              id='Layer_1'
+                              data-name='Layer 1'
+                              viewBox='0 0 24 24'
+                              width='1.5em'
+                              height='1.5em'
+                              aria-label='13+ years. Max 2 adults/room, 1 more with an extra bed.'
+                            >
+                              <path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16'></path>
+                              <path d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0'></path>
+                            </svg>
+                          </Tooltip>
+                        </MenuItem>
+                      </MenuList>
+                    </Paper>
+                  )}
+                  {errors.adult && (
+                    <FormHelperText sx={{ color: 'error.main' }} id='stepper-linear-account-adult'>
+                      {errors.adult?.message}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} mobileMd={6} tablet={2.5}>
                 <Box
                   sx={{
                     border: '1px solid #9A9A9A',
                     borderRadius: '6px',
+                    justifyContent: 'start',
                     position: 'relative',
                     height: '55.7px',
                     display: 'flex',
@@ -602,6 +669,32 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
                     theme={theme}
                     rooms={rooms}
                   />
+                  <Tooltip
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    title='Adding an extra bed will also include the same meal plan .'
+                    placement='top'
+                    arrow
+                  >
+                    <svg
+                      style={{
+                        margin: '7px 0px 0px 0px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        height: '100%',
+                        alignItems: 'center'
+                      }}
+                      xmlns='http://www.w3.org/2000/svg'
+                      id='Layer_1'
+                      data-name='Layer 1'
+                      viewBox='0 0 24 24'
+                      width='1.5em'
+                      height='1.5em'
+                      aria-label='13+ years. Max 2 adults/room, 1 more with an extra bed.'
+                    >
+                      <path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16'></path>
+                      <path d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0'></path>
+                    </svg>
+                  </Tooltip>
                 </Box>
               </Grid>
             </Grid>

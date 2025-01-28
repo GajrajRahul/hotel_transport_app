@@ -41,6 +41,7 @@ const CusomInputWithButttons = ({
         <>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width }}>
             <Icon icon={`mdi:${icon}`} color={theme.palette.primary.main} />
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <IconButton
               edge='end'
               onClick={e => {
@@ -99,6 +100,7 @@ const CusomInputWithButttons = ({
             >
               <Icon icon='mdi:plus' />
             </IconButton>
+            </Box>
           </Box>
         </>
       )}

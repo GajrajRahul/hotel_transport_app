@@ -52,10 +52,10 @@ const TabList = styled(MuiTabList)(({ theme }) => ({
   '& .MuiTab-root': {
     minHeight: 38,
     // minWidth: 130,
-    borderRadius: '15px 15px 0px 0px',
+    borderRadius: '8px 8px 0px 0px',
     // backgroundColor: 'rgba(61, 61, 61, 0.25)',
     color: `${theme.palette.common.white} !important`,
-    borderBottom: '1px solid rgba(61, 61, 61, 0.25)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
     fontWeight : '700'
   }
 }))
@@ -123,13 +123,13 @@ const LoginRight = () => {
             <Box sx={{ mb: 6, mt: 5 }}>
             <TypographyStyled
                 sx={{ typography: { xs: 'h4', laptopSm: 'h3' }, fontWeight: '700 !important' }}
-                color='#333333'
+                color='#ffffff'
               >
                 Welcome Back!
               </TypographyStyled>
               <Typography
                 sx={{ typography: { xs: 'body2', laptopSm: 'body1', fontWeight: '500 !important' } }}
-                color='#333333'
+                color='#ffffff'
               >
                 Let's Plan Journey's Together!
               </Typography>
@@ -212,7 +212,7 @@ const LoginRight = () => {
                   textAlign: 'end'
                 }}
               >
-                <LinkStyled sx={{ color: '#333333 !important' }} href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
+                <LinkStyled sx={{ color: '#ffffff !important', fontWeight: '500' }} href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
               </Typography>
               <Button
                 type='submit'
@@ -227,24 +227,24 @@ const LoginRight = () => {
               </Button>
               <Box sx={{ mt: 5, display: 'flex', flexDirection: 'column' }}>
                 <Typography
-                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem',fontWeight: '500' } }}
                   variant='caption'
-                  color='#333333'
+                  color='#ffffff'
                 >
                   By logging in, you accept the adventurerichaholidays.com
                 </Typography>
                 <Typography
-                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem',fontWeight: '500' } }}
                   variant='caption'
-                  color='white'
+                  color='#ffffff'
                 >
                   <CustomLinkStyled sx={{color: 'blue'}} href='/'>
                     Terms & conditions
                   </CustomLinkStyled>
                   <Typography
-                    sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                    sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem',fontWeight: '500' } }}
                     variant='caption'
-                    color='#333333'
+                    color='#ffffff'
                     marginLeft={'5px'}
                     marginRight={'5px'}
                   >
@@ -274,13 +274,13 @@ const LoginRight = () => {
             <Box sx={{ mb: 6, mt: 5 }}>
             <TypographyStyled
                 sx={{ typography: { xs: 'h4', laptopSm: 'h3' }, fontWeight: '700 !important' }}
-                color='#333333'
+                color='#ffffff'
               >
                 Welcome Back!
               </TypographyStyled>
               <Typography
                 sx={{ typography: { xs: 'body2', laptopSm: 'body1', fontWeight: '500 !important' } }}
-                color='#333333'
+                color='#ffffff'
               >
                 Let's Plan Journey's Together!
               </Typography>
@@ -363,7 +363,7 @@ const LoginRight = () => {
                   textAlign: 'end'
                 }}
               >
-                <LinkStyled sx={{ color: '#333333 !important' }} href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
+                <LinkStyled sx={{ color: '#ffffff !important', fontWeight: '500' }} href={`/forgot-password/${tabValue}`}>Recover Password?</LinkStyled>
               </Typography>
               <Button
                 type='submit'
@@ -378,24 +378,26 @@ const LoginRight = () => {
               </Button>
               <Box sx={{ mt: 5, display: 'flex', flexDirection: 'column' }}>
                 <Typography
-                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem',fontWeight: '500' } }}
                   variant='caption'
-                  color='#333333'
+                  color='#ffffff'
+
                 >
                   By logging in, you accept the adventurerichaholidays.com
                 </Typography>
                 <Typography
-                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                  sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem',fontWeight: '500' } }}
                   variant='caption'
                   color='white'
+
                 >
                   <CustomLinkStyled sx={{color: 'blue'}} href='/'>
                     Terms & conditions
                   </CustomLinkStyled>
                   <Typography
-                    sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem' } }}
+                    sx={{ fontSize: { xs: '0.56rem', sm: '0.75rem', md: '0.56rem', laptopSm: '0.75rem',fontWeight: '500' } }}
                     variant='caption'
-                    color='#333333'
+                    color='#ffffff'
                     marginLeft={'5px'}
                     marginRight={'5px'}
                   >
