@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useMemo, useState } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import DatePicker from 'react-datepicker'
 import { addDays, format } from 'date-fns'
@@ -30,10 +30,9 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import Icon from 'src/@core/components/icon'
 
 import CustomInput from 'src/components/common/CustomInput'
-// import LocationAutocomplete from 'src/components/quotation/quotation_steps/LocationAutocomplete'
+import LocationAutocomplete from 'src/components/quotation/quotation_steps/LocationAutocomplete'
 
 import { ArrowHead, Dot, HighPrice, DefaultLocationIcon, RouteMapFilled, CancelTimeIcon } from 'src/utils/icons'
-import LocationAutocomplete from 'src/components/common/LocationAutocomplete'
 import { getDayNightCount } from 'src/utils/function'
 import Loader from 'src/components/common/Loader'
 import { postRequest } from 'src/api-main-file/APIServices'
@@ -42,11 +41,16 @@ import { useAuth } from 'src/hooks/useAuth'
 // const libraries = ['places']
 
 const getTransportFare = (data, transportSheetData) => {
-  const { totalDays, totalDistance, vehicleType, additionalStops, from, to } = data
-  const vehicleRates = transportSheetData[vehicleType]
+  const { totalDays, totalDistance, vehicleType, additionalStops, from, to, isLocal } = data
+  const fromState =
+    from.city != 'Jaipur' ? transportSheetData[from.state] || transportSheetData['other'] : transportSheetData['other']
+
+  // const vehicleRates = transportSheetData[vehicleType]
+  const vehicleRates = fromState[vehicleType]
+  console.log('totalDays: ', totalDays)
   // console.log('cities: ', cities)
 
-  if (from.place == to.place) {
+  if (isLocal) {
     let totalAmount = Number(vehicleRates['city_local_fare'] * Number(totalDays))
     // console.log(additionalStops)
     // console.log('totalAmount: ', totalAmount)
@@ -84,13 +88,13 @@ const getTransportFare = (data, transportSheetData) => {
     let distanceAmount2 = totalDistance * Number(vehicleRates['amount_per_km'])
     // console.log('distanceAmount2: ', distanceAmount2)
 
-    // if (totalDistance >= 1500) {
-    //   distanceAmount2 = distanceAmount2 * 1.32
-    // }
+    if (totalDistance >= 1500) {
+      distanceAmount2 = distanceAmount2 * 1.32
+    }
 
     const tollAmount = Number(vehicleRates['toll_charges_per_day']) * Number(totalDays)
     // console.log('tollAmount: ', tollAmount)
-    const driverAmount = Number(vehicleRates['driver_charges_per_day']) * Number(totalDays)
+    const driverAmount = Number(vehicleRates['driver_charges_per_day']) * (Number(totalDays) - 1)
     // console.log('driverAmount: ', driverAmount)
     const parkingCharges = Number(vehicleRates['parking_charges_per_day']) * Number(totalDays)
     // console.log('parkingCharges: ', parkingCharges)
@@ -109,7 +113,7 @@ const getTransportFare = (data, transportSheetData) => {
   }
 }
 
-const getTotalAmount = async (transportData, transportSheetData) => {
+const getTotalAmount = async (transportData, transportSheetData, clientType) => {
   const { from, to, additionalStops, departureReturnDate } = transportData
   const origin = from.place
   const destination = to.place
@@ -166,17 +170,18 @@ const getTotalAmount = async (transportData, transportSheetData) => {
     const totalDistance = (totalDist / 1000).toFixed(2)
     // console.log('totalDistance: ', totalDistance)
 
-    const totalTransportAmount =
+    const tempTotalAmount =
       getTransportFare(
         {
           ...transportData,
           totalDistance,
           totalDays: totalDays + 1,
-          additionalStops
+          waypoints
         },
-        waypoints,
         transportSheetData
       ) ?? 0
+
+    let totalTransportAmount = clientType == 'partner' ? tempTotalAmount * 1.11 : tempTotalAmount
 
     return {
       distance: Math.floor(Number(totalDistance)),
@@ -223,6 +228,18 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
     name: 'additionalStops'
   })
   const theme = useTheme()
+
+  const carTypes = useMemo(() => {
+    let carTypesArr = []
+    Object.values(transportSheetData).map(city =>
+      Object.keys(city).map(transport => {
+        if (transport && transport.length > 0 && !carTypesArr.includes(transport)) {
+          carTypesArr.push(transport)
+        }
+      })
+    )
+    return carTypesArr
+  }, [])
 
   const handleWhatsApp = () => {
     const { pickup, drop, days, stops, vehicleType, distance, amount, tripDate, returnDate } = previewTaxi
@@ -292,27 +309,32 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
   }
 
   const onSubmit = async data => {
-    let stops = [data.from]
-    data.additionalStops.map(stop => {
+    const { from, additionalStops, to, departureReturnDate, isLocal, vehicleType } = data
+    let stops = [from]
+    additionalStops.map(stop => {
       stops.push(stop)
     })
-    stops.push(data.to)
+    stops.push(to)
+    // console.log('data: ', data)
 
-    const amountData = await getTotalAmount(data, transportSheetData)
+    const fromState = transportSheetData[from.state] || transportSheetData['other']
+    const vehicleRates = fromState[vehicleType]
+
+    const amountData = await getTotalAmount(data, transportSheetData, clientType)
     // console.log('amountData: ', amountData)
     if (amountData.status) {
       setPreviewTaxi({
-        pickup: data.from,
-        drop: data.to,
-        days: getDayNightCount(data.departureReturnDate) + 1,
-        tripDate: data.departureReturnDate[0],
-        returnDate: data.departureReturnDate[1],
-        isLocal: data.isLocal,
+        pickup: from,
+        drop: to,
+        days: getDayNightCount(departureReturnDate) + 1,
+        tripDate: departureReturnDate[0],
+        returnDate: departureReturnDate[1],
+        isLocal: isLocal,
         stops,
-        vehicleType: data.vehicleType,
+        vehicleType: vehicleType,
         distance: amountData.distance,
         amount: amountData.amount,
-        killoFare: transportSheetData[data.vehicleType].amount_per_km
+        killoFare: vehicleRates.amount_per_km
       })
     } else {
       // setPreviewTaxi({
@@ -421,7 +443,7 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
       </Grid>
       <Grid container spacing={2} sx={{ marginTop: '20px' }}>
         <Grid item xs={12} sm={6} md={6}>
-          <Card sx={{ backgroundColor: '#ffffff' }}>
+          <Card sx={{ backgroundColor: '#ffffff', maxHeight: '500px', overflow: 'auto' }}>
             <CardContent>
               <Grid component='form' onSubmit={handleSubmit(onSubmit)} container spacing={5}>
                 <Grid item xs={12}>
@@ -447,7 +469,7 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
                             }
                             onChange={onChange}
                           >
-                            {Object.keys(transportSheetData).map(transport => (
+                            {carTypes.map(transport => (
                               <MenuItem key={transport} value={transport}>
                                 {transport.split('_').join(' ')}
                               </MenuItem>
@@ -500,12 +522,10 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
                       render={({ field: { value, onChange } }) => (
                         <LocationAutocomplete
                           label='From'
-                          name='taxi-from'
-                          defaultValue={value}
+                          name='taxt-from'
+                          value={value}
+                          disabled={isLocal}
                           onChange={onChange}
-                          error={errors.to}
-                          theme={theme}
-                          icon='location'
                         />
                       )}
                     />
@@ -552,12 +572,6 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
                       <Grid container spacing={5} key={item.id}>
                         <Grid item xs={10.75} sx={{ mb: index != fields.length - 1 ? 5 : 0 }}>
                           <FormControl fullWidth>
-                            {/* <InputLabel
-                        htmlFor='stepper-linear-account-name'
-                        error={Boolean(errors.additionalStops?.[index])}
-                      >
-                        Stop Added
-                      </InputLabel> */}
                             <Controller
                               name={`additionalStops.${index}`}
                               control={control}
@@ -566,12 +580,8 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
                                 <LocationAutocomplete
                                   label='Stop Added'
                                   name={`additionalStops.${index}`}
-                                  defaultValue={value}
-                                  cities={[]}
+                                  value={value}
                                   onChange={onChange}
-                                  error={errors.additionalStops?.[index]}
-                                  theme={theme}
-                                  icon='location-add'
                                 />
                               )}
                             />
@@ -586,8 +596,6 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
                         <Grid item xs={1.25} sx={{ display: 'flex', alignItems: 'center' }}>
                           <Fab
                             onClick={() => remove(index)}
-                            // disabled={additionalStops.length == 1}
-                            // color='error'
                             sx={{
                               backgroundColor: theme => theme.palette.primary.main,
                               color: 'white',
@@ -637,9 +645,6 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
                 </Grid>
                 <Grid item xs={12}>
                   <FormControl fullWidth>
-                    {/* <InputLabel htmlFor='stepper-linear-account-name' error={Boolean(errors.to)}>
-                To
-              </InputLabel> */}
                     <Controller
                       name='to'
                       control={control}
@@ -648,12 +653,9 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
                         <LocationAutocomplete
                           label='To'
                           name='taxi-to'
-                          defaultValue={value}
-                          cities={[]}
+                          value={value}
+                          disabled={isLocal}
                           onChange={onChange}
-                          error={errors.to}
-                          theme={theme}
-                          icon='flag'
                         />
                       )}
                     />
@@ -677,7 +679,7 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={6}>
-          <Card sx={{ backgroundColor: '#ffffff' }}>
+          <Card sx={{ backgroundColor: '#ffffff', minHeight: '500px', overflow: 'auto' }}>
             <CardContent>
               {previewTaxi && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

@@ -583,7 +583,9 @@ const getTransportFare2 = (data, transportSheetData) => {
   // console.log(from.state)
   // console.log('vehicleType: ', vehicleType)
 
-  const fromState = transportSheetData[from.state] || transportSheetData['other']
+  const fromState =
+    from.city != 'Jaipur' ? transportSheetData[from.state] || transportSheetData['other'] : transportSheetData['other']
+
   // console.log('fromState: ', fromState)
   const vehicleRates = fromState[vehicleType]
   console.log('totalDays: ', totalDays)
