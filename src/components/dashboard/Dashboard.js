@@ -277,10 +277,18 @@ const Dashboard = () => {
                           >
                             <Typography sx={{ color: '#FB7601 !important' }}>{Coins}</Typography>
                             {travelPackage['packages'].map((hotelPackage, idx) => (
+                              // <Typography key={idx} fontSize={18}>
+                              //   ₹{' '}
+                              //   {clientType == 'partner'
+                              //     ? Math.floor(Number(hotelPackage[`package_${idx + 1}_price_per_person`]) * 1.11)
+                              //     : Number(hotelPackage[`package_${idx + 1}_price_per_person`])}
+                              // </Typography>
                               <Typography key={idx} fontSize={18}>
                                 ₹{' '}
-                                {clientType == 'partner'
+                                {clientType === 'partner'
                                   ? Math.floor(Number(hotelPackage[`package_${idx + 1}_price_per_person`]) * 1.11)
+                                  : clientType === 'employee'
+                                  ? Math.floor(Number(hotelPackage[`package_${idx + 1}_price_per_person`]) * 1.3) 
                                   : Number(hotelPackage[`package_${idx + 1}_price_per_person`])}
                               </Typography>
                             ))}
