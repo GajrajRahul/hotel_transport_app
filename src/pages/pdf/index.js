@@ -10,11 +10,11 @@ import Loader from 'src/components/common/Loader'
 
 const PdfTracking = () => {
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter();
+  const router = useRouter()
 
   const trackPdf = async action => {
-    console.log(router.query)
-    return;
+    // console.log(router.query)
+    // return;
     setIsLoading(true)
     const response = await postRequest(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/track-pdf`, {
       id: router.query.id,
@@ -23,6 +23,13 @@ const PdfTracking = () => {
     setIsLoading(false)
 
     if (response.status) {
+      const link = document.createElement('a')
+      link.href = response.data.link
+      link.download = `${router.query.id}.pdf` // The file name for the downloaded file
+      link.target = '_blank' // Ensures it's downloaded, not opened in a new tab
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     } else {
       toast.error(response.error)
     }
