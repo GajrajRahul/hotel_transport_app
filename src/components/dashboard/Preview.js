@@ -466,10 +466,12 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
               {selectedTravelPackage['packages'].map((amount, j) => (
                 <Fragment key={j}>
                   <span></span>
-                  {clientType == 'partner'
+                  {clientType === 'partner'
                     ? Math.floor(Number(amount[`package_${j + 1}_price_per_person`]) * 1.11)
+                    : clientType === 'employee'
+                    ? Math.floor(Number(amount[`package_${j + 1}_price_per_person`]) * 1.3)
                     : Number(amount[`package_${j + 1}_price_per_person`])}
-                  {j != selectedTravelPackage['packages'].length - 1 && (
+                  {j !== selectedTravelPackage['packages'].length - 1 && (
                     <span style={{ color: 'white', fontSize: '15px' }}> to </span>
                   )}
                 </Fragment>
@@ -535,8 +537,15 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
                 {/* Package Rate Section */}
                 <div className='package-rate-section'>
                   <h3 className='package-rate-section-title'>{packageData[`package_${index + 1}_name`]}</h3>
+
                   <h4 className='package-rate-section-Price'>
-                    ₹ {packageData[`package_${index + 1}_price_per_person`]} / Person
+                    ₹{' '}
+                    {clientType === 'partner'
+                      ? Math.floor(Number(packageData[`package_${index + 1}_price_per_person`]) * 1.11)
+                      : clientType === 'employee'
+                      ? Math.floor(Number(packageData[`package_${index + 1}_price_per_person`]) * 1.3)
+                      : Number(packageData[`package_${index + 1}_price_per_person`])}{' '}
+                    / Person
                   </h4>
                 </div>
 
