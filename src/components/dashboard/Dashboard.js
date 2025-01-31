@@ -26,6 +26,7 @@ const Dashboard = () => {
   // console.log(travelPackageReduxData)
   const [travelPackageData, setTravelPackageData] = useState(travelPackageReduxData.travelPackage)
   const [selectedTravelPackage, setSelectedTravelPackage] = useState(null)
+  const clientType = localStorage.getItem('clientType') ?? 'admin'
 
   const [states, setStates] = useState('')
   const [nights, setNights] = useState('')
@@ -147,9 +148,10 @@ const Dashboard = () => {
                   {travelPackageData.map((travelPackage, index) => (
                     <Grid key={index} item xs={12} tablet={6} lg={4} desktopXs={3}>
                       <Card sx={{ cursor: 'pointer' }} onClick={() => setSelectedTravelPackage(travelPackage)}>
+                        {/* {console.log(travelPackage)} */}
                         <CardMedia
                           sx={{ height: '11.25rem', position: 'relative' }}
-                          image='/images/incredibles/incredible_3.jpg'
+                          image={travelPackage.images_url || '/images/incredibles/incredible_3.jpg'}
                         >
                           {travelPackage['mark_as_hot'] == 'TRUE' && (
                             <Box
@@ -276,7 +278,10 @@ const Dashboard = () => {
                             <Typography sx={{ color: '#FB7601 !important' }}>{Coins}</Typography>
                             {travelPackage['packages'].map((hotelPackage, idx) => (
                               <Typography key={idx} fontSize={18}>
-                                ₹ {hotelPackage[`package_${idx + 1}_price_per_person`]}
+                                ₹{' '}
+                                {clientType == 'partner'
+                                  ? Math.floor(Number(hotelPackage[`package_${idx + 1}_price_per_person`]) * 1.11)
+                                  : Number(hotelPackage[`package_${idx + 1}_price_per_person`])}
                               </Typography>
                             ))}
                           </Box>

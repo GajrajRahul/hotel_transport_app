@@ -290,9 +290,9 @@ const getDayWiseItineryStyle = itineraryDayWiseData => {
       currIndex += 1
     }
     background.push(
-      `url(https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/pdf-image/${itinerary.cityName}/${
-        itinerary.cityName.toLowerCase()
-      }00${currIndex + 1}.jpg)`
+      `url(https://arh-cms-doc-storage.s3.ap-south-1.amazonaws.com/images/pdf-image/${
+        itinerary.cityName
+      }/${itinerary.cityName.toLowerCase()}00${currIndex + 1}.jpg)`
     )
     backgroundPosition.push(`0px ${(index + 1) * 1120}px`)
     backgroundSize.push('100%')
@@ -321,6 +321,7 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
       backgroundPosition: ''
     }
   )
+  const clientType = localStorage.getItem('clientType') ?? 'admin'
   // console.log(dayWiseItineryStyle)
   const { user } = useAuth()
   // console.log(dayWiseItinerary)
@@ -464,7 +465,10 @@ const Preview = ({ selectedTravelPackage, onClose }) => {
               Total : ₹
               {selectedTravelPackage['packages'].map((amount, j) => (
                 <Fragment key={j}>
-                  <span>{amount[`package_${j + 1}_price_per_person`]}</span>
+                  <span></span>
+                  {clientType == 'partner'
+                    ? Math.floor(Number(amount[`package_${j + 1}_price_per_person`]) * 1.11)
+                    : Number(amount[`package_${j + 1}_price_per_person`])}
                   {j != selectedTravelPackage['packages'].length - 1 && (
                     <span style={{ color: 'white', fontSize: '15px' }}> to </span>
                   )}
