@@ -842,6 +842,7 @@ const QutationPreview = ({ id }) => {
       ? localStorage.getItem('clientType')
       : 'admin'
   )
+  const [showCopyMessage, setShowCopyMessage] = useState({ status: false, message: '' })
   const quotationName = useRef(localStorage.getItem('quotationName') ? localStorage.getItem('quotationName') : '')
   const [dayWiseItinerary, setDayWiseItinerary] = useState(null)
   const [dayWiseItineryStyle, setDayWiseItineryStyle] = useState({
@@ -1036,7 +1037,10 @@ const QutationPreview = ({ id }) => {
     setIsLoading(false)
 
     if (response.status) {
-      setPdfUrl(response.data.link)
+      const { link, id } = response.data
+
+      setPdfUrl(link)
+      quotationId.current = id
       toast.success(typeof response.data == 'object' ? 'Success' : response.data)
     } else {
       toast.error(response.error)
@@ -1056,6 +1060,25 @@ const QutationPreview = ({ id }) => {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  const copyPdfTrackerUrl = () => {
+    if (quotationId.current.length == 0) {
+      toast.error('Kindly save pdf first.')
+      return
+    }
+
+    navigator.clipboard
+      .writeText(`https://crm.adventurerichaholidays.com/pdf?id=${quotationId.current}`)
+      // .writeText(`http://localhost:3000/pdf?id=${quotationId.current}`)
+      .then(() => {
+        setShowCopyMessage({ status: true, message: 'Link copied' })
+        toast.success('Copied to clipboard')
+      })
+      .catch(err => {
+        setShowCopyMessage({ status: true, message: 'Unable to copy link, Try again!' })
+        toast.error('Unable to copy text to clipboard')
+      })
   }
 
   const getTotalAmount = () => {
@@ -1857,6 +1880,15 @@ const QutationPreview = ({ id }) => {
                 variant='outlined'
               >
                 Download Pdf
+              </Button>
+              <Button
+                fullWidth
+                sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
+                startIcon={<Icon icon='mdi:custom-file-download' />}
+                onClick={() => copyPdfTrackerUrl()}
+                variant='outlined'
+              >
+                Copy PDF Tracker URL
               </Button>
               <Button
                 fullWidth
