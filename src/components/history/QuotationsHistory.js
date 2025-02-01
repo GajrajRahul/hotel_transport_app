@@ -589,6 +589,7 @@ const QuotationsHistory = () => {
 
     let dataToSend = {
       quotationName,
+      willGenerateNewPdf: false,
       travelInfo: {
         userName: travel.userName,
         journeyStartDate: new Date(travel.journeyStartDate),

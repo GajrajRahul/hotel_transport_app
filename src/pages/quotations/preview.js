@@ -964,10 +964,11 @@ const QutationPreview = ({ id }) => {
     })
   }
 
-  const saveQuotation = async status => {
+  const saveQuotation = async (status, willGenerateNewPdf) => {
     // console.log("cities.current: ", cities.current)
     // return;
     let dataToSend = {
+      willGenerateNewPdf: willGenerateNewPdf ?? false,
       quotationName: quotationName.current,
       travelInfo: travelInfoData.current
         ? {
@@ -1841,7 +1842,8 @@ const QutationPreview = ({ id }) => {
                   />
                 )}
             </CardContent>
-            {localStorage.getItem('createdQuoteClientId') &&
+            {clientType == 'admin' &&
+              localStorage.getItem('createdQuoteClientId') &&
               !localStorage.getItem('createdQuoteClientId').includes('admin') &&
               localStorage.getItem('quotationStatus') != 'approved' && (
                 <CardActions>
@@ -1896,15 +1898,17 @@ const QutationPreview = ({ id }) => {
               >
                 Copy PDF Tracker URL
               </Button>
-              <Button
-                fullWidth
-                onClick={() => saveQuotation('pending')}
-                sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
-                variant='outlined'
-                startIcon={<Icon icon='mdi:custom-send-quote' />}
-              >
-                Send Quote For Approval
-              </Button>
+              {clientType != 'admin' && (
+                <Button
+                  fullWidth
+                  onClick={() => saveQuotation('pending')}
+                  sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
+                  variant='outlined'
+                  startIcon={<Icon icon='mdi:custom-send-quote' />}
+                >
+                  Send Quote For Approval
+                </Button>
+              )}
               <Button
                 fullWidth
                 variant='outlined'
@@ -1919,7 +1923,7 @@ const QutationPreview = ({ id }) => {
               </Button>
               <Button
                 fullWidth
-                onClick={() => saveQuotation('draft')}
+                onClick={() => saveQuotation('draft', true)}
                 variant='outlined'
                 sx={{ mb: 3.5, textTransform: 'none', justifyContent: 'flex-start' }}
                 startIcon={<Icon icon='mdi:custom-save-quote' />}
