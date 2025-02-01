@@ -9,12 +9,13 @@ import Card from '@mui/material/Card'
 import Box from '@mui/material/Box'
 
 import { DataGrid } from '@mui/x-data-grid'
-import { getRequest, postRequest } from 'src/api-main-file/APIServices'
+import { deleteRequest, getRequest, postRequest } from 'src/api-main-file/APIServices'
 
 import Icon from 'src/@core/components/icon'
 import OptionsMenu from 'src/@core/components/option-menu'
 import CustomChip from 'src/@core/components/mui/chip'
 import Loader from '../common/Loader'
+import CommonDialog from '../common/dialog'
 
 const defaultColumns = [
   {
@@ -135,6 +136,9 @@ const TaxisHistory = () => {
   const [apiTaxiHistoryList, setApiTaxiHistoryList] = useState([])
   const [taxiHistory, setTaxiHisotry] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedTaxiData, setSelectedTaxiData] = useState(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
   const router = useRouter()
 
   const adminColumns = useMemo(
@@ -164,11 +168,13 @@ const TaxisHistory = () => {
                   icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      const { _id, adminId, partnerId } = row
+                      const { _id, userId } = row
                       router.push({
                         pathname: `/book-taxi/${_id}`,
                         query: {
-                          filter: adminId ? JSON.stringify({ _id, adminId }) : JSON.stringify({ _id, partnerId })
+                          filter: userId.includes('admin')
+                            ? JSON.stringify({ _id, adminId: userId })
+                            : JSON.stringify({ _id, partnerId: userId })
                         }
                       })
                     }
@@ -179,7 +185,7 @@ const TaxisHistory = () => {
                   icon: <Icon icon='mdi:delete-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      openDeleteDialog(row)
+                      handleTaxiOpenDialog(row)
                     }
                   }
                 }
@@ -259,10 +265,13 @@ const TaxisHistory = () => {
                   icon: <Icon icon='mdi:pencil-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      const { _id, partnerId } = row
+                      const { _id, userId } = row
+                      // console.log(row)
                       router.push({
                         pathname: `/book-taxi/${_id}`,
-                        filter: JSON.stringify({ _id, partnerId })
+                        query: {
+                          filter: JSON.stringify({ _id, partnerId: userId })
+                        }
                       })
                     }
                   }
@@ -272,16 +281,7 @@ const TaxisHistory = () => {
                   icon: <Icon icon='mdi:delete-outline' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
-                      openDeleteDialog(row)
-                    }
-                  }
-                },
-                {
-                  text: 'Share',
-                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
-                  menuItemProps: {
-                    onClick: e => {
-                      // fetchCampaignDetail(row.id)
+                      handleTaxiOpenDialog(row)
                     }
                   }
                 }
@@ -298,6 +298,33 @@ const TaxisHistory = () => {
   useEffect(() => {
     fetchTaxiList()
   }, [])
+
+  const handleTaxiOpenDialog = data => {
+    setSelectedTaxiData(data)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleTaxiCloseDialog = () => {
+    setSelectedTaxiData(null)
+    setIsDeleteDialogOpen(false)
+  }
+
+  const handleDeleteTaxiData = async () => {
+    setIsLoading(true)
+
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+    // const BASE_URL = 'http://localhost:4000/api'
+    const api_url = `${BASE_URL}/${clientType}`
+    const response = await deleteRequest(`${api_url}/delete-taxi`, { id: selectedTaxiData.id })
+    setIsLoading(false)
+
+    if (response.status) {
+      toast.success('Deleted')
+      handleTaxiCloseDialog()
+    } else {
+      toast.error(response.error)
+    }
+  }
 
   const fetchTaxiList = async () => {
     setIsLoading(true)
@@ -332,8 +359,14 @@ const TaxisHistory = () => {
 
   return (
     <Card sx={{ height: '100%' }}>
+      <CommonDialog
+        open={isDeleteDialogOpen}
+        onCancel={handleTaxiCloseDialog}
+        onSuccess={handleDeleteTaxiData}
+        description={'Are you sure you want to delete this taxi?'}
+      />
       <Loader open={isLoading} />
-      <CardContent></CardContent>
+      {/* <CardContent></CardContent> */}
       <DataGrid
         autoHeight
         //   pagination

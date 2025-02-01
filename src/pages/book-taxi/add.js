@@ -12,6 +12,8 @@ const AddTaxiBooking = () => {
     ? localStorage.getItem('clientType')
     : 'admin'
 
+  const clientId = localStorage.getItem('clientId') || ''
+
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries
@@ -42,6 +44,7 @@ const AddTaxiBooking = () => {
             }
           }}
           clientType={clientType}
+          clientId={clientId}
         />
       )}
     </div>

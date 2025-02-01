@@ -23,8 +23,6 @@ const getFormatedTaxiData = responseData => {
     userName,
     isLocal,
     companyName,
-    adminId,
-    partnerId
   } = responseData
 
   const additionalStops = []
@@ -34,9 +32,7 @@ const getFormatedTaxiData = responseData => {
       additionalStops.push({ place, city, state })
     }
   })
-  //   console.log("tripDays: ", tripDays)
-  //   console.log(new Date(tripDate))
-  //   console.log("days[1]: ", addDays(new Date(tripDate), Number(tripDays)))
+
   return {
     _id,
     vehicleType,
@@ -53,8 +49,6 @@ const getFormatedTaxiData = responseData => {
     killoFare,
     userName,
     companyName,
-    adminId,
-    partnerId
   }
 }
 
@@ -86,7 +80,7 @@ const EditTaxiBooking = () => {
       const api_url = `${BASE_URL}/${adminId ? 'admin' : 'partner'}`
 
       const response = await postRequest(`${api_url}/fetch-taxi`, {
-        taxiId: _id,
+        id: _id,
         [adminId ? 'adminId' : 'partnerId']: adminId ? adminId : partnerId
       })
       setIsLoading(false)
@@ -117,7 +111,10 @@ const EditTaxiBooking = () => {
             vehicleType: values.vehicleType,
             distance: values.distance,
             amount: values.amount,
-            killoFare: values.killoFare
+            killoFare: values.killoFare,
+            tripDate: values.tripDate,
+            userName: values.userName,
+            id: _id
           }
         })
       } else {

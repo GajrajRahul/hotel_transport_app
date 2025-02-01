@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
 
-// import { useLoadScript } from '@react-google-maps/api'
+import { useLoadScript } from '@react-google-maps/api'
 
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Grid from '@mui/material/Grid'
@@ -35,10 +35,10 @@ import LocationAutocomplete from 'src/components/quotation/quotation_steps/Locat
 import { ArrowHead, Dot, HighPrice, DefaultLocationIcon, RouteMapFilled, CancelTimeIcon } from 'src/utils/icons'
 import { getDayNightCount } from 'src/utils/function'
 import Loader from 'src/components/common/Loader'
-import { postRequest } from 'src/api-main-file/APIServices'
+import { postRequest, putRequest } from 'src/api-main-file/APIServices'
 import { useAuth } from 'src/hooks/useAuth'
 
-// const libraries = ['places']
+const libraries = ['places']
 
 const getTransportFare = (data, transportSheetData) => {
   const { totalDays, totalDistance, vehicleType, additionalStops, from, to, isLocal } = data
@@ -47,7 +47,7 @@ const getTransportFare = (data, transportSheetData) => {
 
   // const vehicleRates = transportSheetData[vehicleType]
   const vehicleRates = fromState[vehicleType]
-  console.log('totalDays: ', totalDays)
+  // console.log('totalDays: ', totalDays)
   // console.log('cities: ', cities)
 
   if (isLocal) {
@@ -175,7 +175,7 @@ const getTotalAmount = async (transportData, transportSheetData, clientType) => 
         {
           ...transportData,
           totalDistance,
-          totalDays: totalDays + 1,
+          totalDays,
           waypoints
         },
         transportSheetData
@@ -200,11 +200,13 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
   const taxiDetailReduxData = useSelector(state => state.taxiDetail)
 
   const [previewTaxi, setPreviewTaxi] = useState(propPreviewTaxi)
+  // console.log('previewTaxi: ', previewTaxi)
+  // console.log('propPreviewTaxi: ', propPreviewTaxi)
   const [isLoading, setIsLoading] = useState(false)
-  // const { isLoaded } = useLoadScript({
-  //   googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-  //   libraries
-  // })
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries
+  })
 
   const router = useRouter()
   const { user } = useAuth()
@@ -268,7 +270,7 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
   }
 
   const handleBookTaxi = async sendToWhatsapp => {
-    setIsLoading(true)
+    // setIsLoading(true)
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
     // const BASE_URL = 'http://localhost:4000/api'
@@ -289,10 +291,13 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
       isLocal,
       tripDate,
       companyName: user.companyName,
-      userName: user.name
+      userName: isEdit ? propPreviewTaxi.userName : user.name,
+      userId: clientId
     }
 
-    const response = await postRequest(`${api_url}/create-taxi`, dataToSend)
+    const response = isEdit
+      ? await putRequest(`${api_url}/update-taxi`, { ...dataToSend, id: propPreviewTaxi.id })
+      : await postRequest(`${api_url}/create-taxi`, dataToSend)
     setIsLoading(false)
 
     if (response.status) {
@@ -321,12 +326,12 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
     const vehicleRates = fromState[vehicleType]
 
     const amountData = await getTotalAmount(data, transportSheetData, clientType)
-    // console.log('amountData: ', amountData)
+
     if (amountData.status) {
       setPreviewTaxi({
         pickup: from,
         drop: to,
-        days: getDayNightCount(departureReturnDate) + 1,
+        days: getDayNightCount(departureReturnDate),
         tripDate: departureReturnDate[0],
         returnDate: departureReturnDate[1],
         isLocal: isLocal,
@@ -354,7 +359,7 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
     router.push('/')
   }
 
-  // if (!isLoaded) return <div>Loading...</div>
+  if (!isLoaded) return <div>Loading...</div>
 
   return (
     <DatePickerWrapper>
