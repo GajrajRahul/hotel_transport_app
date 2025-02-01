@@ -982,7 +982,13 @@ const QutationPreview = ({ id }) => {
           return {
             id: city.id,
             cityName: label,
-            hotelInfo: info.map(hotelDetails => generateHotelData(hotelDetails))
+            hotelInfo: info.map(hotelDetails =>
+              generateHotelData({
+                ...hotelDetails,
+                checkIn: hotelDetails.checkInCheckOut[0],
+                checkOut: hotelDetails.checkInCheckOut[1]
+              })
+            )
           }
         })
       },

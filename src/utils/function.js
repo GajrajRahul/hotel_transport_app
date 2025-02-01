@@ -220,12 +220,13 @@ export const extractLocationDetails = placeDetails => {
 export const generateHotelData = hotelInfoData => {
   const { id, name, type, image, rooms, meals, daysNights, roomsPrice } = hotelInfoData
   const { adult, child, infant, extraBed, checkIn, checkOut } = hotelInfoData
-  console.log(hotelInfoData)
+  // console.log(hotelInfoData)
 
   let dataToSend = { id, name, type, image, meals, id, daysNights, roomsPrice }
   dataToSend.rooms = rooms.map(room => {
-    const { type, count, price } = room
-    return { name: type, count }
+    // console.log(room)
+    const { type, count, price, name } = room
+    return { name: type || name, count }
   })
 
   if (adult) dataToSend.adult = adult

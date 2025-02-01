@@ -539,6 +539,7 @@ const QuotationsHistory = () => {
           view,
           id
         } = data
+        // console.log(citiesHotelsInfo)
 
         const hotel = citiesHotelsInfo?.cities[0]?.hotelInfo[0]
         const persons = hotel?.adult + hotel?.child + hotel?.infant || 0
@@ -688,6 +689,7 @@ const QuotationsHistory = () => {
         info: hotelInfo.map(hotel => {
           const { meals, rooms, adult, child, infant, extraBed, checkIn, checkOut, roomsPrice, name, type, id, image } =
             hotel
+          // console.log('rooms: ', rooms)
 
           const dayNight = getDayNightCount([checkIn, checkOut]) + 1
           return {
@@ -695,7 +697,7 @@ const QuotationsHistory = () => {
             name,
             type,
             image,
-            rooms,
+            rooms: rooms.map(room => ({ ...room, type: room.name })),
             roomsPrice,
             meals,
             checkInCheckOut: [checkIn, checkOut],
