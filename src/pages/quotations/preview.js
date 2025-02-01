@@ -1842,7 +1842,10 @@ const QutationPreview = ({ id }) => {
                   />
                 )}
             </CardContent>
-            {clientType == 'admin' &&
+            {/* {console.log("clientType: ", clientType)}
+            {console.log("isIncludes: ", !localStorage.getItem('createdQuoteClientId').includes('admin'))}
+            {console.log("quoteStatus: ", localStorage.getItem('quotationStatus') != 'approved')} */}
+            {clientType.current == 'admin' &&
               localStorage.getItem('createdQuoteClientId') &&
               !localStorage.getItem('createdQuoteClientId').includes('admin') &&
               localStorage.getItem('quotationStatus') != 'approved' && (
