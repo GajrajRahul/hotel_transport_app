@@ -113,6 +113,7 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
       // console.log("*****************hotelInfo.name is  not null********************");
       const { name, image, type, rooms, meals, checkInCheckOut, daysNights, extraBed, adult, child, infant } = hotelInfo
       // console.log('hotelInfo: ', hotelInfo)
+      console.log(extraBed)
 
       const mealsArr = [
         {
@@ -146,7 +147,7 @@ const HotelInfoDialog = ({ open, onClose, selectedHotel, hotelInfo, setHotelInfo
         rooms: roomsArr,
         checkInCheckOut: [new Date(checkInCheckOut[0]), new Date(checkInCheckOut[1])],
         daysNights,
-        extraBed
+        extraBed: extraBed ?? 0
       })
     }
   }, [selectedHotel, hotelInfo])

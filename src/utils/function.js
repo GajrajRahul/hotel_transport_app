@@ -218,10 +218,11 @@ export const extractLocationDetails = placeDetails => {
 }
 
 export const generateHotelData = hotelInfoData => {
-  const { id, name, type, image, rooms, meals, checkInCheckOut, daysNights, roomsPrice } = hotelInfoData
-  const { adult, child, infant, extraBed } = hotelInfoData
+  const { id, name, type, image, rooms, meals, daysNights, roomsPrice } = hotelInfoData
+  const { adult, child, infant, extraBed, checkIn, checkOut } = hotelInfoData
+  console.log(hotelInfoData)
 
-  let dataToSend = { id, name, type, image, meals, id, checkInCheckOut, daysNights, roomsPrice }
+  let dataToSend = { id, name, type, image, meals, id, daysNights, roomsPrice }
   dataToSend.rooms = rooms.map(room => {
     const { type, count, price } = room
     return { name: type, count }
@@ -233,5 +234,5 @@ export const generateHotelData = hotelInfoData => {
   if (extraBed) dataToSend.extraBed = extraBed
   if (meals && meals.length > 0) dataToSend.meals = meals
 
-  return { ...dataToSend, checkIn: new Date(checkInCheckOut[0]), checkOut: new Date(checkInCheckOut[1]) }
+  return { ...dataToSend, checkIn, checkOut }
 }

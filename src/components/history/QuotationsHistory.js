@@ -118,6 +118,32 @@ const defaultColumns = [
         </Box>
       )
     }
+  },
+  {
+    flex: 0.1,
+    field: 'view',
+    minWidth: 130,
+    headerName: 'View',
+    renderCell: ({ row }) => {
+      return (
+        <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+          {row.view}
+        </Typography>
+      )
+    }
+  },
+  {
+    flex: 0.1,
+    field: 'download',
+    minWidth: 130,
+    headerName: 'Download',
+    renderCell: ({ row }) => {
+      return (
+        <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+          {row.download}
+        </Typography>
+      )
+    }
   }
 ]
 
@@ -506,11 +532,16 @@ const QuotationsHistory = () => {
           companyName,
           travelInfo,
           userName,
+          download,
           userId,
           pdfUrl,
           status,
+          view,
           id
         } = data
+
+        const hotel = citiesHotelsInfo?.cities[0]?.hotelInfo[0]
+        const persons = hotel?.adult + hotel?.child + hotel?.infant || 0
 
         return {
           id,
@@ -525,11 +556,14 @@ const QuotationsHistory = () => {
           isHotel: citiesHotelsInfo?.cities[0]?.hotelInfo?.length > 0 ? 'Yes' : 'No',
           isTransport: transportInfo.vehicleType ? 'Yes' : 'No',
           clientType: userId.includes('admin') ? 'Admin' : userId.includes('employee') ? 'Employee' : 'Partner',
+          persons,
           userName,
           companyName,
           pdfUrl,
           status,
-          createdQuoteClientId: userId
+          createdQuoteClientId: userId,
+          view,
+          download
         }
       })
       const filter = router.query.filter
@@ -652,7 +686,8 @@ const QuotationsHistory = () => {
         id,
         label: cityName,
         info: hotelInfo.map(hotel => {
-          const { meals, rooms, adult, child, infant, extraBed, checkIn, checkOut, roomsPrice, name, type, id, image } = hotel
+          const { meals, rooms, adult, child, infant, extraBed, checkIn, checkOut, roomsPrice, name, type, id, image } =
+            hotel
 
           const dayNight = getDayNightCount([checkIn, checkOut]) + 1
           return {

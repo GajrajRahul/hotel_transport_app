@@ -16,7 +16,11 @@ const PdfTracking = () => {
     // console.log(router.query)
     // return;
     setIsLoading(true)
-    const response = await postRequest(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/track-pdf`, {
+    // const response = await postRequest(`${process.env.NEXT_PUBLIC_BASE_URL}/user/track-pdf`, {
+    //   id: router.query.id,
+    //   action
+    // })
+    const response = await postRequest(`http://localhost:4000/api/user/track-pdf`, {
       id: router.query.id,
       action
     })
