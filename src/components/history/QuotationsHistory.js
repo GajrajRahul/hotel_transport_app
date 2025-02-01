@@ -27,6 +27,7 @@ import Loader from 'src/components/common/Loader'
 import { deleteRequest, getRequest, putRequest } from 'src/api-main-file/APIServices'
 import CommonDialog from 'src/components/common/dialog'
 import { generateHotelData, getDayNightCount } from 'src/utils/function'
+import ShareQuotation from '../quotation/dialog/ShareQuotation'
 
 const defaultColumns = [
   {
@@ -150,6 +151,9 @@ const defaultColumns = [
 const QuotationsHistory = () => {
   const clientType = localStorage.getItem('clientType') || 'admin'
   const quotationHistoryReduxData = useSelector(state => state.quotationHistoryData)
+
+  const [pdfUrl, setPdfUrl] = useState('')
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedQuotation, setSelectedQuotation] = useState(null)
   const [apiQuotationHistoryList, setApiQuotationHistoryList] = useState([])
@@ -181,6 +185,7 @@ const QuotationsHistory = () => {
         headerName: 'Actions',
         renderCell: ({ row }) => (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* {console.log(row)} */}
             <OptionsMenu
               iconProps={{ fontSize: 20 }}
               iconButtonProps={{ size: 'small' }}
@@ -206,27 +211,36 @@ const QuotationsHistory = () => {
                 },
                 {
                   text: 'Download',
-                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  icon: <Icon icon='mdi:custom-file-download' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
+                      downloadPdf(row)
                       // fetchCampaignDetail(row.id)
                     }
                   }
                 },
-                row.clientType != 'Admin' ? (
-                  {
-                    text: 'Edit Status',
-                    icon: <Icon icon='mdi:pencil' fontSize={20} />,
-                    menuItemProps: {
-                      onClick: e => {
-                        fetchQuotation(row, '/quotations/preview')
-                        // fetchCampaignDetail(row.id)
-                      }
+                {
+                  text: 'Share',
+                  icon: <Icon icon='mdi:custom-share-quote' fontSize={20} />,
+                  menuItemProps: {
+                    onClick: e => {
+                      handleOpenShareDialog(row.pdfUrl)
+                      // fetchCampaignDetail(row.id)
                     }
                   }
-                ) : (
-                  <></>
-                )
+                },
+                row.clientType != 'Admin'
+                  ? {
+                      text: 'Edit Status',
+                      icon: <Icon icon='mdi:pencil' fontSize={20} />,
+                      menuItemProps: {
+                        onClick: e => {
+                          fetchQuotation(row, '/quotations/preview')
+                          // fetchCampaignDetail(row.id)
+                        }
+                      }
+                    }
+                  : {}
                 // {
                 //   text: 'Send For Approval',
                 //   icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
@@ -363,18 +377,20 @@ const QuotationsHistory = () => {
                 },
                 {
                   text: 'Download',
-                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  icon: <Icon icon='mdi:custom-file-download' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
+                      downloadPdf(row)
                       // fetchCampaignDetail(row.id)
                     }
                   }
                 },
                 {
                   text: 'Share',
-                  icon: <Icon icon='mdi:file-pdf-box' fontSize={20} />,
+                  icon: <Icon icon='mdi:custom-share-quote' fontSize={20} />,
                   menuItemProps: {
                     onClick: e => {
+                      handleOpenShareDialog(row.pdfUrl)
                       // fetchCampaignDetail(row.id)
                     }
                   }
@@ -462,6 +478,16 @@ const QuotationsHistory = () => {
     handleFilter()
   }, [role, status])
 
+  const handleCloseShareDialog = () => {
+    setIsShareDialogOpen(false)
+    setPdfUrl('')
+  }
+
+  const handleOpenShareDialog = url => {
+    setPdfUrl(url)
+    setIsShareDialogOpen(true)
+  }
+
   const handleSearchQuotation = newValue => {
     setSearchValue(newValue)
     if (newValue.length == 0) {
@@ -537,6 +563,7 @@ const QuotationsHistory = () => {
           pdfUrl,
           status,
           view,
+          comment,
           id
         } = data
         // console.log(citiesHotelsInfo)
@@ -564,7 +591,8 @@ const QuotationsHistory = () => {
           status,
           createdQuoteClientId: userId,
           view,
-          download
+          download,
+          comment
         }
       })
       const filter = router.query.filter
@@ -647,13 +675,14 @@ const QuotationsHistory = () => {
   }
 
   const fetchQuotation = (data, routeUrl) => {
-    const { quotationName, travel, citiesHotels, transport, id, pdfUrl, status, createdQuoteClientId } = data
+    const { quotationName, travel, citiesHotels, transport, id, pdfUrl, status, createdQuoteClientId, comment } = data
 
     localStorage.setItem('quotationStatus', status)
     localStorage.setItem('createdQuoteClientId', createdQuoteClientId)
     localStorage.setItem('pdfUrl', pdfUrl)
     localStorage.setItem('quotationId', id)
     localStorage.setItem('quotationName', quotationName)
+    localStorage.setItem('comment', comment)
     const dayNightCount = getDayNightCount([travel.journeyStartDate, travel.journeyEndDate]) + 1
     localStorage.setItem(
       'travel',
@@ -743,6 +772,17 @@ const QuotationsHistory = () => {
     router.push('/quotations')
   }
 
+  const downloadPdf = row => {
+    const { quotationName, pdfUrl } = row
+    const link = document.createElement('a')
+    link.href = pdfUrl
+    link.download = `${quotationName}.pdf` // The file name for the downloaded file
+    link.target = '_blank' // Ensures it's downloaded, not opened in a new tab
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <Card sx={{ height: '100%' }}>
       <Loader open={isLoading} />
@@ -813,6 +853,9 @@ const QuotationsHistory = () => {
         onSuccess={deleteQuotation}
         description={'Are you sure you want to delete this quotation?'}
       />
+      {pdfUrl.length > 0 && (
+        <ShareQuotation pdfUrl={pdfUrl} open={isShareDialogOpen} handleClose={handleCloseShareDialog} />
+      )}
     </Card>
   )
 }

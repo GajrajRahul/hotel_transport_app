@@ -864,6 +864,7 @@ const QutationPreview = ({ id }) => {
   const [offerPrice, setOfferPrice] = useState('')
   const [pdfUrl, setPdfUrl] = useState(() => localStorage.getItem('pdfUrl') || '')
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [comment, setComment] = useState(() => localStorage.getItem('comment') || '')
 
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
@@ -969,6 +970,7 @@ const QutationPreview = ({ id }) => {
     // return;
     let dataToSend = {
       willGenerateNewPdf: willGenerateNewPdf ?? false,
+      comment,
       quotationName: quotationName.current,
       travelInfo: travelInfoData.current
         ? {
@@ -1828,8 +1830,7 @@ const QutationPreview = ({ id }) => {
               />
 
               {localStorage.getItem('createdQuoteClientId') &&
-                !localStorage.getItem('createdQuoteClientId').includes('admin') &&
-                localStorage.getItem('quotationStatus') != 'approved' && (
+                !localStorage.getItem('createdQuoteClientId').includes('admin') && (
                   <TextField
                     disabled={clientType.current != 'admin'}
                     fullWidth
@@ -1837,8 +1838,8 @@ const QutationPreview = ({ id }) => {
                     rows={3}
                     label='Comment'
                     sx={{ mt: 5 }}
-                    value=''
-                    onChange={e => {}}
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
                   />
                 )}
             </CardContent>
@@ -1847,8 +1848,7 @@ const QutationPreview = ({ id }) => {
             {console.log("quoteStatus: ", localStorage.getItem('quotationStatus') != 'approved')} */}
             {clientType.current == 'admin' &&
               localStorage.getItem('createdQuoteClientId') &&
-              !localStorage.getItem('createdQuoteClientId').includes('admin') &&
-              localStorage.getItem('quotationStatus') != 'approved' && (
+              !localStorage.getItem('createdQuoteClientId').includes('admin') && (
                 <CardActions>
                   <Button variant='contained' sx={{ mr: 2 }} onClick={() => saveQuotation('approved')}>
                     Approve
