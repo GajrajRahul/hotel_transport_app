@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useDispatch, useSelector } from 'react-redux'
+import { format } from 'date-fns'
 
 import { useRouter } from 'next/router'
 
@@ -119,6 +120,66 @@ const defaultColumns = [
         </Box>
       )
     }
+  },
+  {
+    flex: 0.25,
+    field: 'accountCreated',
+    minWidth: 200,
+    headerName: 'Account Created',
+    renderCell: ({ row }) => {
+      return (
+        <Box sx={{ display: 'flex' }}>
+          <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+            {row.createdAt ? format(new Date(row.createdAt), 'dd/MM/yyyy') : '-'}
+          </Typography>
+        </Box>
+      )
+    }
+  },
+  {
+    flex: 0.25,
+    field: 'lastLogin',
+    minWidth: 200,
+    headerName: 'Last Login',
+    renderCell: ({ row }) => {
+      return (
+        <Box sx={{ display: 'flex' }}>
+          <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+            {row.updatedAt ? format(new Date(row.updatedAt), 'dd/MM/yyyy') : '-'}
+          </Typography>
+        </Box>
+      )
+    }
+  },
+  {
+    flex: 0.1,
+    field: 'loginCount',
+    minWidth: 150,
+    headerName: 'Login Count',
+    renderCell: ({ row }) => {
+      return (
+        <Box sx={{ display: 'flex' }}>
+          <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+            {row.loginCount ?? '-'}
+          </Typography>
+        </Box>
+      )
+    }
+  },
+  {
+    flex: 0.1,
+    field: 'totalQuote',
+    minWidth: 200,
+    headerName: 'Total Quote',
+    renderCell: ({ row }) => {
+      return (
+        <Box sx={{ display: 'flex' }}>
+          <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+            {row.totalQuote ?? '-'}
+          </Typography>
+        </Box>
+      )
+    }
   }
 ]
 
@@ -231,80 +292,84 @@ const UserManagement = () => {
   }
 
   return (
-    <Card sx={{ height: '100%' }}>
+    <>
       <Loader open={isLoading} />
-      <CardContent>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-            <Button
-              sx={{ mb: 2, mr: 4 }}
-              variant='outlined'
-              startIcon={<Icon icon='mdi:content-copy' />}
-              onClick={() => handleCopyLink('employee')}
-            >
-              Sign-up Url For Employee
-            </Button>
-            <Button
-              sx={{ mb: 2 }}
-              variant='outlined'
-              startIcon={<Icon icon='mdi:content-copy' />}
-              onClick={() => handleCopyLink('partner')}
-            >
-              Sign-up Url For Partner
-            </Button>
-          </Box>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-            <FormControl>
-              <InputLabel size='small'>Role</InputLabel>
-              <Select
-                size='small'
-                value={role}
-                onChange={e => setRole(e.target.value)}
-                sx={{ mr: 4, mb: 2 }}
-                label='Role'
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box
+            sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}
+          >
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+              <Button
+                sx={{ mb: 2, mr: 4 }}
+                variant='outlined'
+                startIcon={<Icon icon='mdi:content-copy' />}
+                onClick={() => handleCopyLink('employee')}
               >
-                <MenuItem value=''>All</MenuItem>
-                <MenuItem value='Partner'>Partner</MenuItem>
-                <MenuItem value='Employee'>Employee</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl>
-              <InputLabel size='small'>Status</InputLabel>
-              <Select
-                size='small'
-                value={status}
-                onChange={e => setStatus(e.target.value)}
-                sx={{ mr: 4, mb: 2 }}
-                label='Status'
+                Sign-up Url For Employee
+              </Button>
+              <Button
+                sx={{ mb: 2 }}
+                variant='outlined'
+                startIcon={<Icon icon='mdi:content-copy' />}
+                onClick={() => handleCopyLink('partner')}
               >
-                <MenuItem value=''>All</MenuItem>
-                <MenuItem value='pending'>Pending</MenuItem>
-                <MenuItem value='approved'>Approved</MenuItem>
-                <MenuItem value='blocked'>Blocked</MenuItem>
-              </Select>
-            </FormControl>
+                Sign-up Url For Partner
+              </Button>
+            </Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+              <FormControl>
+                <InputLabel size='small'>Role</InputLabel>
+                <Select
+                  size='small'
+                  value={role}
+                  onChange={e => setRole(e.target.value)}
+                  sx={{ mr: 4, mb: 2 }}
+                  label='Role'
+                >
+                  <MenuItem value=''>All</MenuItem>
+                  <MenuItem value='Partner'>Partner</MenuItem>
+                  <MenuItem value='Employee'>Employee</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl>
+                <InputLabel size='small'>Status</InputLabel>
+                <Select
+                  size='small'
+                  value={status}
+                  onChange={e => setStatus(e.target.value)}
+                  sx={{ mr: 4, mb: 2 }}
+                  label='Status'
+                >
+                  <MenuItem value=''>All</MenuItem>
+                  <MenuItem value='pending'>Pending</MenuItem>
+                  <MenuItem value='approved'>Approved</MenuItem>
+                  <MenuItem value='blocked'>Blocked</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
-        </Box>
-      </CardContent>
-      <DataGrid
-        autoHeight
-        //   pagination
-        rows={usersList}
-        columns={otherColumns}
-        checkboxSelection
-        disableRowSelectionOnClick
-        //   pageSizeOptions={[10, 25, 50]}
-        //   paginationModel={paginationModel}
-        //   onPaginationModelChange={setPaginationModel}
-        //   onRowSelectionModelChange={rows => setSelectedRows(rows)}
-      />
+        </CardContent>
+        <DataGrid
+          autoHeight
+          //   pagination
+          rows={usersList}
+          columns={otherColumns}
+          checkboxSelection
+          disableRowSelectionOnClick
+          //   pageSizeOptions={[10, 25, 50]}
+          //   paginationModel={paginationModel}
+          //   onPaginationModelChange={setPaginationModel}
+          //   onRowSelectionModelChange={rows => setSelectedRows(rows)}
+        />
+      </Card>
       <UserDetail
         show={isUserDialogOpen}
         onClose={handleCloseUserDetail}
         selectedUserDetail={selectedUser}
         fetchUsersList={fetchUsersList}
       />
-    </Card>
+    </>
   )
 }
 
