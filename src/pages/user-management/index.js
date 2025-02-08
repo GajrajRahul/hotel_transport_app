@@ -27,6 +27,7 @@ import Loader from 'src/components/common/Loader'
 import { getRequest, putRequest } from 'src/api-main-file/APIServices'
 import UserDetail from 'src/components/user-management/UserDetail'
 import { replaceUserData } from 'src/store/UserDataSlice'
+import CustomNotificationDialog from 'src/components/CustomNotificationDialog'
 
 const defaultColumns = [
   {
@@ -187,9 +188,10 @@ const UserManagement = () => {
   const clientType = localStorage.getItem('clientType') || 'admin'
   const usersData = useSelector(state => state.usersData)
 
+  const [isNotificationDialogOpen, setIsNotifcationDialog] = useState(false)
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const [usersList, setUsersList] = useState([])
   const [role, setRole] = useState('')
@@ -291,6 +293,14 @@ const UserManagement = () => {
     setSelectedUser(null)
   }
 
+  const handleOpenNotificationDialog = () => {
+    setIsNotifcationDialog(true)
+  }
+
+  const handleCloseNotificationDialog = () => {
+    setIsNotifcationDialog(false)
+  }
+
   return (
     <>
       <Loader open={isLoading} />
@@ -318,6 +328,9 @@ const UserManagement = () => {
               </Button>
             </Box>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+              <Button sx={{ mr: 4, mb: 2 }} variant='contained' onClick={handleOpenNotificationDialog}>
+                Create Notification
+              </Button>
               <FormControl>
                 <InputLabel size='small'>Role</InputLabel>
                 <Select
@@ -369,6 +382,7 @@ const UserManagement = () => {
         selectedUserDetail={selectedUser}
         fetchUsersList={fetchUsersList}
       />
+      <CustomNotificationDialog open={isNotificationDialogOpen} handleClose={handleCloseNotificationDialog} />
     </>
   )
 }

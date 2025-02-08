@@ -95,11 +95,14 @@ const ScrollWrapper = ({ children, hidden }) => {
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-const socket = io("https://crm.adventurerichaholidays.com", {
-  path: "/socket.io",
+const socket = io('https://crm.adventurerichaholidays.com', {
+  path: '/socket.io'
 })
-// const socket = io("http://localhost:4000")
-// const socket = io('http://localhost:4000/api')
+
+// const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
+// const socket = io('http://localhost:4000/api', {
+//   path: '/socket.io'
+// })
 
 const NotificationDropdown = props => {
   const clientType = localStorage.getItem('clientType') || 'admin'
@@ -122,7 +125,7 @@ const NotificationDropdown = props => {
   const { direction } = settings
 
   useEffect(() => {
-    fetchNotifications();
+    fetchNotifications()
   }, [])
 
   useEffect(() => {
@@ -151,12 +154,20 @@ const NotificationDropdown = props => {
       }
     } else if (clientId != 'admin') {
       socket.emit('joinUserRoom', clientId)
+
       socket.on('quotation', data => {
         // console.log(data)
         setNotifications(prev => [data, ...prev])
       })
+
+      socket.on('custom', data => {
+        // console.log(data)
+        setNotifications(prev => [data, ...prev])
+      })
+
       return () => {
         socket.off('quotation')
+        socket.off('custom')
       }
     }
   }, [])
@@ -197,7 +208,7 @@ const NotificationDropdown = props => {
 
   const handleNotification = notification => {
     handleDropdownClose()
-    console.log("notification: ", notification)
+    console.log('notification: ', notification)
     // return;
     updateNotificationStatus(notification.notificationId)
     router.push({
@@ -260,7 +271,14 @@ const NotificationDropdown = props => {
         </MenuItem>
         <ScrollWrapper hidden={hidden}>
           {notifications.map((notification, index) => (
-            <MenuItem key={index} onClick={() => handleNotification(notification)}>
+            <MenuItem
+              key={index}
+              onClick={() => {
+                if (notification.type != 'custom') {
+                  handleNotification(notification)
+                }
+              }}
+            >
               {/* {console.log(notification)} */}
               <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
                 <RenderAvatar notification={notification} />
@@ -269,6 +287,18 @@ const NotificationDropdown = props => {
                   <MenuItemSubtitle sx={{ textWrap: 'wrap' }} variant='body2'>
                     {notification.description}
                   </MenuItemSubtitle>
+                  {notification.link && (
+                    <MenuItemSubtitle
+                      sx={{ textWrap: 'wrap', color: 'blue', cursor: 'pointer' }}
+                      variant='body2'
+                      onClick={() => {
+                        updateNotificationStatus(notification.notificationId)
+                        window.open(notification.link, '_blank')
+                      }}
+                    >
+                      {notification.link}
+                    </MenuItemSubtitle>
+                  )}
                 </Box>
                 <Typography variant='caption' sx={{ color: 'text.disabled' }}>
                   {format(new Date(notification.createdAt), 'dd MMM yy')}
