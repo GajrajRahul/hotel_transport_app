@@ -12,6 +12,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import FormControl from '@mui/material/FormControl'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
+import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import Card from '@mui/material/Card'
@@ -278,13 +279,19 @@ const CustomNotificationDialog = ({ open, handleClose }) => {
                         value={value}
                         onChange={(e, newInput) => {
                           // console.log(e)
-                          console.log(newInput)
+                          // console.log(newInput)
                           onChange(newInput)
                         }}
                         // options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))}
                         options={options.sort((a, b) => -b.name.localeCompare(a.name))}
-                        groupBy={option => option.designation}
+                        groupBy={option => option.role}
                         getOptionLabel={option => option.name}
+                        // renderGroup={params => (
+                        //   <>
+                        //   {console.log(params)}
+                        //     <Checkbox {...params} size='small' />
+                        //   </>
+                        // )}
                         renderInput={params => <TextField {...params} label='Users' error={Boolean(errors.users)} />}
                       />
                     )}

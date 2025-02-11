@@ -23,6 +23,7 @@ import Icon from 'src/@core/components/icon'
 
 import CommonDialog from 'src/components/common/dialog'
 import HotelsDialog from '../dialog/HotelsDialog'
+import MonumentsDialog from '../dialog/MonumentsDialog'
 // import HotelsDialog from '../dialog/HotelsDialog'
 
 const HotelInfoStep = props => {
@@ -36,8 +37,10 @@ const HotelInfoStep = props => {
 
   const [isEditHotelDialogOpen, setIsEditHotelDialogOpen] = useState(false)
   const [isAddHotelDialogOpen, setIsAddHotelDialogOpen] = useState(false)
+  const [isMonumentDialogOpen, setIsMonumentDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedHotelInfo, setSelectedHotelInfo] = useState(null)
+  const [selectedMonumentsData, setSelectedMonumentsData] = useState([])
   const [selectedCity, setSelectedCity] = useState(null)
   const [expanded, setExpanded] = useState('panel0')
   const selectedDates = useRef([])
@@ -77,6 +80,16 @@ const HotelInfoStep = props => {
   const expandIcon = value => (
     <Icon icon={expanded === value ? 'mdi:minus' : 'mdi:plus'} color={theme.palette.primary.main} />
   )
+
+  const handleOpenMonumentDialog = city => {
+    setSelectedCity(city)
+    setIsMonumentDialogOpen(true)
+  }
+
+  const handleCloseMonumentDialog = () => {
+    setSelectedCity(null)
+    setIsMonumentDialogOpen(false)
+  }
 
   const handleAddOpenHotelDialog = city => {
     setSelectedCity(city)
@@ -150,21 +163,27 @@ const HotelInfoStep = props => {
 
   const handleDeleteCityHotel = (cityName, hotelId) => {
     const city = selectedCitiesHotels.find(city => city.label == cityName)
-    console.log(city)
+    // console.log(city)
     if (city) {
       const hotel = city.info.find(hotel => hotel.id == hotelId)
       console.log(hotel.checkInCheckOut[0])
-      console.log('hotel: ', hotel)
+      // console.log('hotel: ', hotel)
       const updatedDates = selectedDates.current.filter(
         date => new Date(addDays(new Date(date.start), 1)).getTime() != new Date(hotel.checkInCheckOut[0]).getTime()
       )
-      console.log('updatedDates: ', updatedDates)
+      // console.log('updatedDates: ', updatedDates)
       selectedDates.current = updatedDates
     }
     setSelectedCitiesHotels(prev =>
       prev.map(city =>
         city.label == cityName ? { ...city, info: city.info.filter(hotel => hotel.id != hotelId) } : city
       )
+    )
+  }
+
+  const handleDeleteCityMonument = cityName => {
+    setSelectedCitiesHotels(prev =>
+      prev.map(city => (city.label == cityName ? { ...city, monuments: undefined } : city))
     )
   }
 
@@ -209,6 +228,16 @@ const HotelInfoStep = props => {
         onSuccess={handleDeleteCity}
         title='Confirm Deletion'
         description='Are you sure you want to delete the selected city(ies)? All related data will be permanently removed.'
+      />
+      <MonumentsDialog
+        setSelectedCitiesHotels={setSelectedCitiesHotels}
+        selectedCitiesHotels={selectedCitiesHotels}
+        onClose={handleCloseMonumentDialog}
+        selectedCity={selectedCity}
+        open={isMonumentDialogOpen}
+        selectedDates={selectedDates}
+        selectedMonumentsData={selectedMonumentsData}
+        // isEdit={false}
       />
       <HotelsDialog
         setSelectedCitiesHotels={setSelectedCitiesHotels}
@@ -467,7 +496,14 @@ const HotelInfoStep = props => {
                             <Button
                               fullWidth
                               variant='outlined'
-                              onClick={() => handleDeleteCityHotel(city.label, hotel.id)}
+                              onClick={() => {
+                                if(city.monuments && city.monuments.length > 0) {
+                                  toast.error('Delete monuments first.');
+                                }
+                                else {
+                                  handleDeleteCityHotel(city.label, hotel.id)
+                                }
+                              }}
                             >
                               Delete
                             </Button>
@@ -476,7 +512,58 @@ const HotelInfoStep = props => {
                       </Card>
                     </Grid>
                   ))}
-
+                  {city.monuments && (
+                    <Grid item xs={12} sm={4}>
+                      <Card sx={{ borderRadius: '15px' }}>
+                        <CardContent
+                          sx={{
+                            p: theme => `${theme.spacing(3, 3, 4)} !important`
+                          }}
+                        >
+                          {city.monuments.map((monument, idx) => (
+                            <Box
+                              key={idx}
+                              sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: idx != 0 ? 5 : 0 }}
+                            >
+                              <Typography sx={{ fontWeight: 600 }}>Monument Name:</Typography>
+                              <Typography sx={{ color: 'text.primary', whiteSpace: 'normal' }}>
+                                {monument.names.join(', ')}
+                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <Typography sx={{ fontWeight: 600 }}>Days:</Typography>
+                                <Typography sx={{ color: 'text.primary', whiteSpace: 'normal' }}>
+                                  {monument.days}
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <Typography sx={{ fontWeight: 600 }}>Price:</Typography>
+                                <Typography sx={{ color: 'text.primary', whiteSpace: 'normal' }}>
+                                  {monument.price}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          ))}
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 5, gap: 3 }}>
+                            <Button
+                              fullWidth
+                              variant='contained'
+                              onClick={() => {
+                                // console.log(city.monuments)
+                                handleOpenMonumentDialog(city)
+                                setSelectedMonumentsData(city.monuments)
+                                // handleEditOpenHotelDialog(city, hotel)
+                              }}
+                            >
+                              Edit Monument
+                            </Button>
+                            <Button fullWidth variant='outlined' onClick={() => handleDeleteCityMonument(city.label)}>
+                              Delete
+                            </Button>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  )}
                   <Grid item xs={12} sm={4}>
                     <Card
                       sx={{ borderRadius: '15px', cursor: 'pointer' }}
@@ -500,6 +587,39 @@ const HotelInfoStep = props => {
                       </CardContent>
                     </Card>
                   </Grid>
+                  {/* {console.log(city)} */}
+                  {!city.monuments && (
+                    <Grid item xs={12} sm={4}>
+                      <Card
+                        sx={{ borderRadius: '15px', cursor: 'pointer' }}
+                        onClick={() => {
+                          if(city.info && city.info.length > 0) {
+                            handleOpenMonumentDialog(city)
+                          }
+                          else {
+                            toast.error('Kindly add atlead 1 hotel')
+                          }
+                        }}
+                      >
+                        <CardContent
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                            gap: 3,
+                            height: '407px'
+                          }}
+                        >
+                          <Icon icon='mdi:flag-outline' color={theme.palette.primary.main} fontSize='3.5rem' />
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Icon icon='mdi:plus' color={theme.palette.primary.main} />
+                            <Typography fontWeight={600}>Add Attractions</Typography>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  )}
                 </Grid>
               </AccordionDetails>
             </Accordion>
