@@ -27,6 +27,7 @@ import TravelInfoStep from 'src/components/quotation/quotation_steps/TravelInfoS
 import HotelInfoStep from 'src/components/quotation/quotation_steps/HotelInfoStep'
 import TransportInfoStep from 'src/components/quotation/quotation_steps/TransportInfoStep'
 import StepperCustomDot from 'src/components/common/StepperCustomDot'
+import toast from 'react-hot-toast'
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
@@ -108,6 +109,92 @@ const Quotations = () => {
     if (activeStep != steps.length - 1) {
       setActiveStep(activeStep + 1)
     } else {
+      const citiesHotels = localStorage.getItem('citiesHotels') ? JSON.parse(localStorage.getItem('citiesHotels')) : []
+
+      let allSelectedMonumentsCities = []
+      citiesHotels.map(city => {
+        console.log(city)
+        city.monuments.map(monument => {
+          const { showAlert, city: selectedCity, names, area } = monument
+          if (showAlert) {
+            // console.log(area)
+            let existingCityIndex = allSelectedMonumentsCities.findIndex(c => c.city == selectedCity)
+            if (existingCityIndex != -1) {
+              allSelectedMonumentsCities[existingCityIndex] = {
+                city: selectedCity,
+                names: [...allSelectedMonumentsCities[existingCityIndex].names, ...names],
+                area: [...allSelectedMonumentsCities[existingCityIndex].area, area]
+              }
+            } else {
+              allSelectedMonumentsCities.push({ city: selectedCity, names, area: [area] })
+            }
+          }
+        })
+      })
+
+      let finalSelectedMonumentsCities = []
+      if (allSelectedMonumentsCities.length > 0) {
+        for (let citiesMonuments of allSelectedMonumentsCities) {
+          let existingCity = []
+          for (let monument of citiesMonuments.area) {
+            let isExist = false
+            if (
+              data.from.city &&
+              monument ==
+                data.from.city
+                  .split(' ')
+                  .map(c => c.toLowerCase())
+                  .join('_')
+            ) {
+              isExist = true
+            } else if (
+              data.to.city &&
+              monument ==
+                data.to.city
+                  .split(' ')
+                  .map(c => c.toLowerCase())
+                  .join('_')
+            ) {
+              isExist = true
+            } else if (data.additionalStops && data.additionalStops.length > 0) {
+              for (let stop of data.additionalStops) {
+                if (
+                  stop.city &&
+                  stop.city
+                    .split(' ')
+                    .map(c => c.toLowerCase())
+                    .join('_') == monument
+                ) {
+                  isExist = true
+                  break
+                }
+              }
+            }
+            if (!isExist && !existingCity.includes(citiesMonuments.city)) {
+              existingCity.push(citiesMonuments.city)
+              finalSelectedMonumentsCities.push(citiesMonuments)
+            }
+          }
+        }
+
+        if (finalSelectedMonumentsCities.length > 0) {
+          {
+            finalSelectedMonumentsCities.map((monument, idx) =>
+              toast.error(t => (
+                <div key={idx}>
+                  {/* {console.log(monument)} */}
+                  Please select <b>{monument.area.join(', ')} </b>
+                  in your trip of <b>{`${monument.city[0].toUpperCase()}${monument.city.slice(1)}`}</b>
+                </div>
+              ))
+            )
+          }
+          return
+        }
+      }
+
+      // console.log("data: ", data);
+      // console.log("allSelectedMonumentsCities: ", allSelectedMonumentsCities);
       localStorage.setItem('transport', JSON.stringify(data))
       router.push('/quotations/preview')
       // window.open('/quotations/preview', '_blank')

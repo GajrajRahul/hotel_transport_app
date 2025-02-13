@@ -324,6 +324,7 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
 
     const fromState = transportSheetData[from.state] || transportSheetData['other']
     const vehicleRates = fromState[vehicleType]
+    // console.log(vehicleRates)
 
     const amountData = await getTotalAmount(data, transportSheetData, clientType)
 
@@ -331,7 +332,7 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
       setPreviewTaxi({
         pickup: from,
         drop: to,
-        days: getDayNightCount(departureReturnDate),
+        days: getDayNightCount(departureReturnDate) + 1,
         tripDate: departureReturnDate[0],
         returnDate: departureReturnDate[1],
         isLocal: isLocal,
@@ -339,7 +340,8 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
         vehicleType: vehicleType,
         distance: amountData.distance,
         amount: amountData.amount,
-        killoFare: vehicleRates.amount_per_km
+        killoFare: vehicleRates.amount_per_km,
+        seats: vehicleRates.no_of_seats
       })
     } else {
       // setPreviewTaxi({
@@ -764,7 +766,7 @@ const TaxiBooking = ({ isEdit, defaultValues, clientType, clientId = '', propPre
                     </Typography>
                     {Dot}
                     <Typography variant='body1' sx={{ color: '#333333', fontWeight: 600 }}>
-                      4 Seats
+                      {previewTaxi.seats} Seats
                     </Typography>
                     {Dot}
                     <Typography variant='body1' sx={{ color: '#333333', fontWeight: 600 }}>

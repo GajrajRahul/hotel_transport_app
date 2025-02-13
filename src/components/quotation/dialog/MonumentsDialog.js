@@ -29,6 +29,21 @@ import Loader from 'src/views/common/Loader'
 const defaultColumns = [
   {
     flex: 0.15,
+    field: 'area',
+    minWidth: 200,
+    headerName: 'Area',
+    renderCell: ({ row }) => {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'auto' }}>
+          <Typography variant='body2' sx={{ color: 'text.primary', fontWeight: 600, whiteSpace: 'normal', overflow: 'auto' }}>
+            {row.area ? `${row.area[0].toUpperCase()}${row.area.slice(1)}` : '-'}
+          </Typography>
+        </Box>
+      )
+    }
+  },
+  {
+    flex: 0.15,
     field: 'name',
     minWidth: 200,
     headerName: 'Monument Name',
@@ -206,7 +221,16 @@ const MonumentsDialog = ({
       if (row.length > 0) {
         const rowData = Object.fromEntries(headers.map((key, index) => [key, row[index]]))
 
-        const cityKey = `${
+        const showInCity = `${
+          rowData.show_in_city
+            ? rowData.show_in_city
+                .split(' ')
+                .map(c => c.toLowerCase())
+                .join('_')
+            : rowData.show_in_city
+        }`
+
+        const city = `${
           rowData.city
             ? rowData.city
                 .split(' ')
@@ -221,15 +245,18 @@ const MonumentsDialog = ({
         const know_before_you_go = rowData.know_before_you_go ? `${rowData.know_before_you_go}` : ''
         const price = rowData.price_in_rs ? `${rowData.price_in_rs}` : ''
         const days = rowData.trip_duration_in_days ? `${rowData.trip_duration_in_days}` : ''
+        const showAlert = rowData.missing_monuments_alert == 'TRUE' ? true : false
 
         result.push({
           id: idx,
           price,
           days,
+          showAlert,
           names: monuments.length > 0 ? monuments.split('|').map(monument => monument.trim()) : [],
           inclusion: inclusion || '',
           exclusion: exclusion || '',
-          city: cityKey,
+          city: showInCity,
+          area: city,
           know_before_you_go: know_before_you_go || ''
         })
       }

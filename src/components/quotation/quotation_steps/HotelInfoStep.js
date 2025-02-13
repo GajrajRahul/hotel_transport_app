@@ -206,6 +206,13 @@ const HotelInfoStep = props => {
       return
     }
 
+    const emptyMomunentsList = selectedCitiesHotels.filter(city => !city.monuments || city.monuments.length == 0)
+    // console.log(emptyMomunentsList)
+    if(emptyMomunentsList.length > 0) {
+      toast.error('At least 1 attraction is required')
+      return
+    }
+
     const emptyCitisList = selectedCitiesHotels.filter(city => city.info.length == 0)
     if (emptyCitisList.length > 0) {
       toast.error('City and Hotel is Required')
