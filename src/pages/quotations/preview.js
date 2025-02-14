@@ -274,6 +274,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
       let allInclusions = ''
       let allExclusion = ''
       let know_before_you_go = ''
+      let monumentDetails = ''
       monumentsInCityButIsFalse.map(monument => {
         monument.names.map(name => {
           tempMonumentName.push(name)
@@ -281,6 +282,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
         allInclusions += monument.inclusion
         allExclusion += monument.exclusion
         know_before_you_go += monument.know_before_you_go
+        monumentDetails += monument.monumentDetails
       })
 
       finalMonuments = {
@@ -289,13 +291,14 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
         exclusions: allExclusion,
         know_before_you_go: know_before_you_go,
         area: monumentsInCityButIsFalse[0].area,
-        city: monumentsInCityButIsFalse[0].city
+        city: monumentsInCityButIsFalse[0].city,
+        monumentDetails
       }
     } else {
       const cityIsInDayVisit = dayVisitInBetweenCitiesData.find(city => city.betweenCity == currCityName)
 
       if(monumentsInCityButISTrue.length != 0 && cityIsInDayVisit) {
-        
+
       }
     }
 
@@ -371,7 +374,7 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
         if (remainingMonuments > 0) remainingMonuments--
 
         console.log('finalMonuments.names: ', finalMonuments.names)
-        const dayMonuments = finalMonuments.names.slice(
+        let dayMonuments = finalMonuments.names.slice(
           currentMonumentIndex,
           currentMonumentIndex + dailyMonumentsCount
         )
@@ -496,7 +499,12 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
           if (meals.includes('Breakfast')) {
             description += 'Enjoy a delicious breakfast at the hotel.'
           }
-          description += 'complete the check-out formalities and proceed to your onward journey.'
+          description += 'Complete the check-out formalities and proceed to your onward journey.'
+          const cityIsInDayVisit = dayVisitInBetweenCitiesData.find(city => city.betweenCity == currCityName)
+          if(anyTrueMonumentExist && !cityIsInDayVisit) {
+            dayMonuments = [];
+            description += `You will be visiting ${cityName} via ${cityIsInDayVisit}`
+          }
           // description += `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
           description += `Upon your arrival in ${cityName}, ''}`
           if (transportData.vehicleType) {

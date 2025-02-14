@@ -240,6 +240,7 @@ const MonumentsDialog = ({
         }`
 
         const monuments = rowData.monument_names ? `${rowData.monument_names}` : ''
+        const monumentDetails = rowData.monument_details ? `${rowData.monument_details}` : ''
         const inclusion = rowData.inclusion ? `${rowData.inclusion}` : ''
         const exclusion = rowData.exclusion ? `${rowData.exclusion}` : ''
         const know_before_you_go = rowData.know_before_you_go ? `${rowData.know_before_you_go}` : ''
@@ -257,7 +258,8 @@ const MonumentsDialog = ({
           exclusion: exclusion || '',
           city: showInCity,
           area: city,
-          know_before_you_go: know_before_you_go || ''
+          know_before_you_go: know_before_you_go || '',
+          monumentDetails
         })
       }
     })
