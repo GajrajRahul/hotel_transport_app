@@ -221,17 +221,60 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   const { vehicleType } = transportData
   let prevCity = ''
 
+  // need to remove
+  let totalRoomTypes = []
+  let mealsData = []
+  let cityInclusions = []
+  let cityInclusionText = ''
+  let cityExclusions = []
+  let cityExclusionText = ''
+  let cityKnowBefores = []
+  let cityKnowBeforeText = ''
+  let currentDate = null
+  let currentHotel = null
+  let currentCity = null
+  // need to remove
+
+  const transportCities = [
+    transportData.from.city || '', // city from "from"
+    ...transportData.additionalStops.map(stop => stop.city || ''), // cities from "additionalStops"
+    transportData.to.city || '' // city from "to"
+  ]
+
+  const dayVisitInBetweenCitiesData = getCitiesBetweenSameCity(transportCities, cities)
+
   for (let i = 0; i < cities.length; i++) {
     const { label, state, info, monuments } = cities[i]
+    let allMonuments = []
+    monuments.map((monument, idx) => {
+      if(monument && monument.monumentDetails) {
+        const currMonument = monument.monumentDetails.split('|')
+        currMonument.map((currMonu) => {
+          allMonuments.push(currMonu)
+        })
+      }
+    })
 
     let totalDaysInCity = 0
 
     const cityName = label.toLowerCase()
     let prevHotelName = ''
 
+    const citiesMonuments = monuments
+    let monumentsInCityButIsFalse = citiesMonuments.filter(
+      monuments => !monuments.showAlert
+    )
+    // console.log('monumentsInCityButIsFalse: ', monumentsInCityButIsFalse)
+
+    let monumentsInCityButISTrue = citiesMonuments.filter(
+      monuments => monuments.showAlert
+    )
+    // console.log('monumentsInCityButISTrue: ', monumentsInCityButISTrue)
+
     for (let j = 0; j < info.length; j++) {
       const { name: hotelName, type, image, rooms, meals, daysNights, checkInCheckOut, extraBed } = info[j]
       totalRoomTypes.push(...rooms.map(room => room.type))
+      mealsData = meals
 
       totalDaysInCity += Number(daysNights.split(' Days')[0])
       let totalDaysInSingleHotel = Number(daysNights.split(' Days')[0])
@@ -273,7 +316,8 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             date: '',
             description,
             // attractions: dayAttractions,
-            attractions: [],
+            // attractions: [],
+            attractions: allMonuments,
             footer,
             checkInCheckOut: checkInOut,
             // cityImage: monuments[cityName].cityImage,
@@ -314,7 +358,8 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             date: '',
             description,
             // attractions: dayAttractions,
-            attractions: [],
+            // attractions: [],
+            attractions: allMonuments,
             footer,
             checkInCheckOut: checkInOut,
             // cityImage: monuments[cityName].cityImage,
@@ -366,7 +411,8 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             date: '',
             description,
             // attractions: dayAttractions,
-            attractions: [],
+            // attractions: [],
+            attractions: allMonuments,
             footer,
             checkInCheckOut: checkInOut,
             // cityImage: monuments[cityName].cityImage,
