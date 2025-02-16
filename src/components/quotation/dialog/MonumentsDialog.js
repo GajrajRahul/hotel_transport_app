@@ -35,7 +35,10 @@ const defaultColumns = [
     renderCell: ({ row }) => {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'auto' }}>
-          <Typography variant='body2' sx={{ color: 'text.primary', fontWeight: 600, whiteSpace: 'normal', overflow: 'auto' }}>
+          <Typography
+            variant='body2'
+            sx={{ color: 'text.primary', fontWeight: 600, whiteSpace: 'normal', overflow: 'auto' }}
+          >
             {row.area ? `${row.area[0].toUpperCase()}${row.area.slice(1)}` : '-'}
           </Typography>
         </Box>
@@ -50,7 +53,10 @@ const defaultColumns = [
     renderCell: ({ row }) => {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'auto' }}>
-          <Typography variant='body2' sx={{ color: 'text.primary', fontWeight: 600, whiteSpace: 'normal', overflow: 'auto' }}>
+          <Typography
+            variant='body2'
+            sx={{ color: 'text.primary', fontWeight: 600, whiteSpace: 'normal', overflow: 'auto' }}
+          >
             {row.names ? row.names.join(', ') : '-'}
           </Typography>
         </Box>
@@ -196,15 +202,22 @@ const MonumentsDialog = ({
       // console.log(monuments)
       const monumentsInfo = monuments.filter(monument => monument.city == selectedCity.label.toLowerCase())
       // console.log(monumentsInfo)
-      // console.log('selectedCity: ', selectedCity)
+      console.log('selectedCity: ', selectedCity)
       const totalSelectedDays = selectedCity.info.reduce(
         (sum, hotel) => sum + Number(hotel.daysNights.split('& ')[1].split(' ')[0]),
         0
       )
-      // console.log('totalSelectedDays: ', totalSelectedDays)
-      setRemainingDays(totalSelectedDays)
       setMonumentsData(monumentsInfo)
       setSelectedRows(selectedMonumentsData.map(monument => monument.id))
+      console.log('selectedMonumentsData: ', selectedMonumentsData)
+      if (isEdit) {
+        const remDays = selectedMonumentsData.reduce((sum, monument) => sum + Number(monument.days), 0)
+        console.log('remDays: ', remDays)
+        setRemainingDays(totalSelectedDays - remDays)
+      } else {
+        console.log('totalSelectedDays: ', totalSelectedDays)
+        setRemainingDays(totalSelectedDays)
+      }
     } catch (error) {
       toast.error('Failed fetching monuments data')
       console.error('Error fetching data:', error)
@@ -310,7 +323,7 @@ const MonumentsDialog = ({
           Select Monuments
         </DialogTitle>
         <DialogContent>
-          <Box sx={{height: '300px', overflow: 'auto'}}>
+          <Box sx={{ height: '300px', overflow: 'auto' }}>
             <DataGrid
               autoHeight
               rows={monumentsData}

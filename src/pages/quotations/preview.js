@@ -207,191 +207,51 @@ function getCitiesBetweenSameCity(cities, citiesHotels) {
 }
 
 function generateDayWiseItinerary(cities, transportData, monuments) {
-  console.log('hotelsCities: ', cities)
-  console.log('transportData: ', transportData)
-  const itinerary = []
-  let cityInclusions = []
-  let cityInclusionText = ''
-  let cityExclusions = []
-  let cityExclusionText = ''
-  let cityKnowBefores = []
-  let cityKnowBeforeText = ''
-  let currentDate = null
-  let currentHotel = null
-  let currentCity = null
-  let mealsData = []
-  let totalRoomTypes = []
-
-  const transportCities = [
-    transportData.from.city || '', // city from "from"
-    ...transportData.additionalStops.map(stop => stop.city || ''), // cities from "additionalStops"
-    transportData.to.city || '' // city from "to"
-  ]
+  // console.log('hotelsCities: ', cities)
+  // console.log('transportData: ', transportData)
 
   // const inBetweenCitiesData = getCitiesBetweenSameCity(transportCities, cities)
-  const dayVisitInBetweenCitiesData = getCitiesBetweenSameCity(transportCities, cities)
-  let currDay = 0
+  // const dayVisitInBetweenCitiesData = getCitiesBetweenSameCity(transportCities, cities)
+  // let currDay = 0
 
-  let originalTotalDaysInCity = 0
+  // let originalTotalDaysInCity = 0
+  let itineraries = []
+  let currDay = 1
+
+  const { vehicleType } = transportData
+  let prevCity = ''
+
   for (let i = 0; i < cities.length; i++) {
-    const city = cities[i]
-    const cityName = city.label.toLowerCase()
-    const currCityName = city.label
-      .split(' ')
-      .map(c => c.toLowerCase())
-      .join('_')
-    let hotels = city.info
-
-    // let isInBetweenCurrCity = inBetweenCitiesData.find(stop => stop.betweenCity === cityName)
-
-    // let attractions = monuments[cityName] ? monuments[cityName].cityAttractions.split('|') : []
-
-    // cityInclusionText += monuments[cityName] ? monuments[cityName].cityInclusion : ''
-    // cityExclusionText += monuments[cityName] ? monuments[cityName].cityExclusion : ''
-    // cityKnowBeforeText += monuments[cityName] ? monuments[cityName].know_before_you_go : ''
-
-    // const totalAttractions = attractions.length
-    const citiesMonuments = city.monuments
-
-    let monumentsInCityButIsFalse = citiesMonuments.filter(
-      monuments => !monuments.showAlert
-    )
-    console.log('monumentsInCityButIsFalse: ', monumentsInCityButIsFalse)
-
-    let monumentsInCityButISTrue = citiesMonuments.filter(
-      monuments => monuments.showAlert
-    )
-    console.log('monumentsInCityButISTrue: ', monumentsInCityButISTrue)
-
-    let finalMonuments = { names: [] }
-    let anyTrueMonumentExist = true
-
-    if (
-      monumentsInCityButISTrue.length == 0
-    ) {
-      anyTrueMonumentExist = false
-      let tempMonumentName = []
-      let allInclusions = ''
-      let allExclusion = ''
-      let know_before_you_go = ''
-      let monumentDetails = ''
-      monumentsInCityButIsFalse.map(monument => {
-        monument.names.map(name => {
-          tempMonumentName.push(name)
-        })
-        allInclusions += monument.inclusion
-        allExclusion += monument.exclusion
-        know_before_you_go += monument.know_before_you_go
-        monumentDetails += monument.monumentDetails
-      })
-
-      finalMonuments = {
-        names: tempMonumentName,
-        inclusions: allInclusions,
-        exclusions: allExclusion,
-        know_before_you_go: know_before_you_go,
-        area: monumentsInCityButIsFalse[0].area,
-        city: monumentsInCityButIsFalse[0].city,
-        monumentDetails
-      }
-    } else {
-      const cityIsInDayVisit = dayVisitInBetweenCitiesData.find(city => city.betweenCity == currCityName)
-
-      if(monumentsInCityButISTrue.length != 0 && cityIsInDayVisit) {
-
-      }
-    }
+    const { label, state, info, monuments } = cities[i]
 
     let totalDaysInCity = 0
 
-    for (const hotel of hotels) {
-      const [checkIn, checkOut] = hotel.checkInCheckOut.map(date => new Date(date))
-      totalDaysInCity += Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
-    }
+    const cityName = label.toLowerCase()
+    let prevHotelName = ''
 
-    // let attractionsPerDay = Math.floor(totalAttractions / totalDaysInCity)
-    // let remainingAttractions = totalAttractions % totalDaysInCity
+    for (let j = 0; j < info.length; j++) {
+      const { name: hotelName, type, image, rooms, meals, daysNights, checkInCheckOut, extraBed } = info[j]
+      totalRoomTypes.push(...rooms.map(room => room.type))
 
-    // let currentAttractionIndex = 0
+      totalDaysInCity += Number(daysNights.split(' Days')[0])
+      let totalDaysInSingleHotel = Number(daysNights.split(' Days')[0])
+      // let currHotelDay = j == 0 ? 2 : 1
+      let currHotelDay = 2
 
-    let currentMonumentIndex = 0
-
-    let monumentsPerDay
-    let remainingMonuments
-
-    if (!anyTrueMonumentExist) {
-      monumentsPerDay = Math.floor(finalMonuments.names.length / totalDaysInCity)
-      remainingMonuments = monumentsPerDay % totalDaysInCity
-    }
-
-    for (let j = 0; j < hotels.length; j++) {
-      const { type, extraBed, image, name: hotelName, rooms, checkInCheckOut, meals } = hotels[j]
       let [checkIn, checkOut] = checkInCheckOut.map(date => new Date(date))
       const checkInOut = `${format(checkIn, 'dd MMM yyyy')} to ${format(checkOut, 'dd MMM yyyy')}`
 
-      // if (isInBetweenCurrCity && isInBetweenCurrCity.citiesInBetween.length > 0) {
-      //   if (i != 0 || (i == 0 && j != 0)) {
-      //     checkIn = new Date(subDays(new Date(checkInCheckOut[0]), 1))
-      //   }
-      // }
+      let hotelInfo = { hotelType: type, extraBed, roomTypes: rooms.map(room => room.type) }
+      console.log('Number(totalDaysInSingleHotel): ', Number(totalDaysInSingleHotel))
 
-      totalRoomTypes.push(...rooms.map(room => room.type))
-      if (!currentDate) currentDate = checkIn
-
-      // if (j == hotels.length - 1 && isInBetweenCurrCity && isInBetweenCurrCity.citiesInBetween.length > 0) {
-      //   checkOut = new Date(subDays(new Date(checkOut), 1))
-      // }
-
-      // if (i != 0 && isInBetweenCurrCity && isInBetweenCurrCity.citiesInBetween.length > 0) {
-      //   checkOut = new Date(subDays(new Date(checkOut), 1))
-      // }
-      while (currentDate < checkOut) {
-        currDay++
-        const journeyStartDate = new Date(cities[0].info[0].checkInCheckOut[0])
-        const journeyEndDate = new Date(
-          cities[cities.length - 1].info[cities[cities.length - 1].info.length - 1].checkInCheckOut[1]
-        )
-
-        const diffInMs = journeyEndDate - journeyStartDate // Difference in milliseconds
-        const diffInDays = diffInMs / (1000 * 60 * 60 * 24)
-        if (currDay == diffInDays + 1) {
-          break
-        }
-
-        originalTotalDaysInCity++
-        const day = itinerary.length + 1
-        if (!currentCity) {
-          currentCity = cityName
-        }
-
-        // let dailyAttractionsCount = attractionsPerDay + (remainingAttractions > 0 ? 1 : 0)
-        // if (remainingAttractions > 0) remainingAttractions--
-
-        // const dayAttractions = attractions.slice(currentAttractionIndex, currentAttractionIndex + dailyAttractionsCount)
-        // currentAttractionIndex += dailyAttractionsCount
-
-        let dailyMonumentsCount = monumentsPerDay + (remainingMonuments > 0 ? 1 : 0)
-        if (remainingMonuments > 0) remainingMonuments--
-
-        console.log('finalMonuments.names: ', finalMonuments.names)
-        let dayMonuments = finalMonuments.names.slice(
-          currentMonumentIndex,
-          currentMonumentIndex + dailyMonumentsCount
-        )
-        currentMonumentIndex += dailyMonumentsCount
-
-        let hotelInfo = {
-          hotelType: type,
-          extraBed,
-          roomTypes: rooms.map(room => room.type)
-        }
-
-        // First day in the city
-        if (day == 1) {
-          // let description = `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
-          let description = `Upon your arrival in ${cityName}, }`
-          if (transportData.vehicleType) {
-            description += `you will be transferred to your hotel in a comfortable ${transportData.vehicleType} Vehicle`
+      while (currHotelDay <= Number(totalDaysInSingleHotel)) {
+        console.log('currHotelDay: ', currHotelDay)
+        if (currDay == 1) {
+          prevCity = cityName
+          prevHotelName = hotelName
+          let description = `Upon your arrival in ${cityName}`
+          if (vehicleType) {
+            description += `you will be transferred to your hotel in a comfortable ${vehicleType} Vehicle`
           }
           description += `Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
           if (meals.includes('Lunch')) {
@@ -405,110 +265,35 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
             footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
           }
 
-          itinerary.push({
-            head: `Day ${currDay} | Arrival in ${cityName}`,
+          itineraries.push({
+            head: `Day 1 | Arrival in ${cityName}`,
             hotelInfo: { ...hotelInfo, meals },
             hotelImage: image != 'singapore' ? image : '',
             hotelName,
             date: '',
             description,
             // attractions: dayAttractions,
-            attractions: dayMonuments,
+            attractions: [],
             footer,
             checkInCheckOut: checkInOut,
             // cityImage: monuments[cityName].cityImage,
             cityImage: '',
             cityName
           })
-          currentCity = cityName
-          currentHotel = hotelName
-        }
-        // If staying in the same city
-        else if (currentCity === cityName) {
-          // If the hotel changes
-          if (currentHotel !== hotelName) {
-            let description = ''
-            if (meals.includes('Breakfast')) {
-              description += 'Enjoy a delicious breakfast at the hotel.'
-            }
-            description += 'complete the check-out formalities and proceed to your next hotel.'
-            if (transportData.vehicleType) {
-              description += `you will be transferred to your hotel in a comfortable ${transportData.vehicleType} Vehicle.`
-            }
-            description += `Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}. Dive deeper into the city's charm`
-            if (meals.includes('Lunch')) {
-              description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
-            }
-            let footer = ''
-            if (meals.includes('Dinner')) {
-              footer += 'Return to the hotel in the evening and enjoy a sumptuous dinner, specially prepared for you.'
-            } else {
-              footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
-            }
-            itinerary.push({
-              head: `Day ${currDay} | From ${currentHotel} to ${hotelName} in ${cityName}`,
-              hotelInfo: { ...hotelInfo, meals },
-              hotelImage: image != 'singapore' ? image : '',
-              hotelName,
-              date: '',
-              description,
-              // attractions: dayAttractions,
-              attractions: dayMonuments,
-              footer,
-              checkInCheckOut: checkInOut,
-              // cityImage: monuments[cityName].cityImage,
-              cityImage: '',
-              cityName
-            })
-            currentHotel = hotelName
-          } else {
-            let description = "Dive deeper into the city's charm"
-            if (meals.includes('Breakfast')) {
-              description += 'Enjoy a delicious breakfast at the hotel.'
-            }
-            if (meals.includes('Lunch')) {
-              description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
-            }
-
-            let footer = ''
-            if (meals.includes('Dinner')) {
-              footer += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
-            } else {
-              footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
-            }
-            itinerary.push({
-              head: `Day ${currDay} | Continue exploring ${cityName}`,
-              hotelInfo: { ...hotelInfo, meals },
-              hotelImage: image != 'singapore' ? image : '',
-              hotelName,
-              date: '',
-              description,
-              // attractions: dayAttractions,
-              attractions: dayMonuments,
-              footer,
-              checkInCheckOut: checkInOut,
-              // cityImage: monuments[cityName].cityImage,
-              cityImage: '',
-              cityName
-            })
-          }
-        }
-        // If the city changes
-        else {
+          // currDay++
+          // } else if (currHotelDay == 2) {
+        } else if (prevCity != cityName) {
           let description = ''
+          prevHotelName = hotelName
           if (meals.includes('Breakfast')) {
             description += 'Enjoy a delicious breakfast at the hotel.'
           }
           description += 'Complete the check-out formalities and proceed to your onward journey.'
-          const cityIsInDayVisit = dayVisitInBetweenCitiesData.find(city => city.betweenCity == currCityName)
-          if(anyTrueMonumentExist && !cityIsInDayVisit) {
-            dayMonuments = [];
-            description += `You will be visiting ${cityName} via ${cityIsInDayVisit}`
-          }
+
           // description += `Upon your arrival in ${cityName}, ${monuments[cityName]?.cityIntro ?? ''}`
-          description += `Upon your arrival in ${cityName}, ''}`
-          if (transportData.vehicleType) {
-            description += `you will be transferred to your hotel in a comfortable ${transportData.vehicleType} Vehicle`
+          description += `Upon your arrival in ${cityName}, `
+          if (vehicleType) {
+            description += `you will be transferred to your hotel in a comfortable ${vehicleType} Vehicle`
           }
           description += `Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}`
           if (meals.includes('Lunch')) {
@@ -520,82 +305,89 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
           } else {
             footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
           }
-          itinerary.push({
-            head: `Day ${currDay} | ${currentCity} to ${cityName}`,
+
+          itineraries.push({
+            head: `Day ${currDay} | ${prevCity} to ${cityName}`,
             hotelInfo: { ...hotelInfo, meals },
             hotelImage: image != 'singapore' ? image : '',
             hotelName,
             date: '',
             description,
             // attractions: dayAttractions,
-            attractions: dayMonuments,
+            attractions: [],
             footer,
             checkInCheckOut: checkInOut,
             // cityImage: monuments[cityName].cityImage,
             cityImage: '',
             cityName
           })
-          currentCity = cityName
-          currentHotel = hotelName
+          prevCity = cityName
+          // currDay++
+        } else {
+          let description = ''
+
+          console.log('prevHotelName: ', prevHotelName)
+          console.log('hotelName: ', hotelName)
+          if (prevHotelName != hotelName) {
+            if (meals.includes('Breakfast')) {
+              description += 'Enjoy a delicious breakfast at the hotel.'
+            }
+            description += 'Complete the check-out formalities and proceed to your next hotel.'
+            if (vehicleType) {
+              description += `you will be transferred to your hotel in a comfortable ${transportData.vehicleType} Vehicle.`
+            }
+            description += `Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}. Dive deeper into the city's charm`
+          } else {
+            description += "Dive deeper into the city's charm"
+            if (meals.includes('Breakfast')) {
+              description += 'Enjoy a delicious breakfast at the hotel.'
+            }
+          }
+          if (meals.includes('Lunch')) {
+            description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
+          }
+
+          let footer = ''
+          if (meals.includes('Dinner')) {
+            footer += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
+          } else {
+            footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
+          }
+
+          // `Day ${currDay} | From ${currentHotel} to ${hotelName} in ${cityName}`
+          itineraries.push({
+            head:
+              prevHotelName != hotelName
+                ? `Day ${currDay} | From ${prevHotelName} to ${hotelName} in ${cityName}`
+                : `Day ${currDay} | Continue exploring ${cityName}`,
+            hotelInfo: { ...hotelInfo, meals },
+            hotelImage: image != 'singapore' ? image : '',
+            hotelName,
+            date: '',
+            description,
+            // attractions: dayAttractions,
+            attractions: [],
+            footer,
+            checkInCheckOut: checkInOut,
+            // cityImage: monuments[cityName].cityImage,
+            cityImage: '',
+            cityName
+          })
+          prevHotelName = hotelName
         }
-
-        // Move to the next day
-        currentDate.setDate(currentDate.getDate() + 1)
+        currDay++
+        currHotelDay++
       }
-
-      mealsData = meals
     }
 
-    // if (
-    //   originalTotalDaysInCity != 0 &&
-    //   isInBetweenCurrCity &&
-    //   isInBetweenCurrCity.citiesInBetween.length > 0 &&
-    //   hotels[hotels.length - 1]
-    // ) {
-    //   currDay++
-    //   const { type, extraBed, rooms, name: hotelName, meals, image, checkInCheckOut } = hotels[hotels.length - 1]
-    //   const [checkIn, checkOut] = checkInCheckOut.map(date => new Date(date))
-    //   const checkInOut = `${format(checkIn, 'dd MMM yyyy')} to ${format(checkOut, 'dd MMM yyyy')}`
-
-    //   let hotelInfo = {
-    //     hotelType: type,
-    //     extraBed,
-    //     roomTypes: rooms.map(room => room.type)
-    //   }
-
-    //   let description = ''
-    //   if (meals.includes('Breakfast')) {
-    //     description += 'Enjoy a delicious breakfast at the hotel.'
-    //   }
-    //   description += 'Complete the check-out formalities and proceed to your next hotel.'
-    //   if (transportData.vehicleType) {
-    //     description += `you will be transferred to your hotel in a comfortable ${transportData.vehicleType} Vehicle.`
-    //   }
-    //   description += `Once at the hotel, complete the check-in and verification formalities as per hotel policy. After settling into your accommodations, take some time to relax and rejuvenate before heading out to explore the enchanting sights and sounds of ${cityName}. Dive deeper into the city's charm`
-    //   if (meals.includes('Lunch')) {
-    //     description += 'Return to the hotel for a delightful lunch, experiencing authentic flavors.'
-    //   }
-    //   let footer = ''
-    //   if (meals.includes('Dinner')) {
-    //     footer += 'Return to the hotel in the evening and enjoy a sumptuous dinner, specially prepared for you.'
-    //   } else {
-    //     footer += 'End your day with a delightful dinner at the local restaurant & Head back to the hotel.'
-    //   }
-    //   itinerary.push({
-    //     head: `Day ${currDay} | ${isInBetweenCurrCity.citiesInBetween.join(', ')} Day Visit`,
-    //     hotelInfo: { ...hotelInfo, meals },
-    //     hotelImage: image != 'singapore' ? image : '',
-    //     hotelName,
-    //     date: '',
-    //     description,
-    //     attractions: [],
-    //     footer,
-    //     checkInCheckOut: checkInOut,
-    //     cityImage: monuments[cityName].cityImage,
-    //     cityName
-    //   })
-    // }
+    prevCity = cityName
   }
+
+  // const inBetweenCitiesData = getCitiesBetweenSameCity(transportCities, cities)
+  // const dayVisitInBetweenCitiesData = getCitiesBetweenSameCity(transportCities, cities)
+  // let currDay = 0
+
+  // let originalTotalDaysInCity = 0
 
   cityInclusions = [
     ...inclusionItems.map(inclusion => {
@@ -633,7 +425,8 @@ function generateDayWiseItinerary(cities, transportData, monuments) {
   ]
 
   return {
-    itinerary,
+    // itinerary,
+    itinerary: itineraries,
     cityInclusions,
     cityExclusions,
     cityKnowBefores,
@@ -1556,6 +1349,7 @@ const QutationPreview = ({ id }) => {
 
                         <div>
                           <p className='day-description'>{itinerary.description}</p>
+                          {console.log('itinerary.attractions: ', itinerary.attractions)}
                           {itinerary.attractions.map((place, idx) => (
                             <div
                               key={idx}

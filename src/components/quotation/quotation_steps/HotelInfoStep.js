@@ -38,6 +38,7 @@ const HotelInfoStep = props => {
   const [isEditHotelDialogOpen, setIsEditHotelDialogOpen] = useState(false)
   const [isAddHotelDialogOpen, setIsAddHotelDialogOpen] = useState(false)
   const [isMonumentDialogOpen, setIsMonumentDialogOpen] = useState(false)
+  const [isEditMonumentDialogOpen, setIsEditMonumentDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedHotelInfo, setSelectedHotelInfo] = useState(null)
   const [selectedMonumentsData, setSelectedMonumentsData] = useState([])
@@ -88,7 +89,19 @@ const HotelInfoStep = props => {
 
   const handleCloseMonumentDialog = () => {
     setSelectedCity(null)
+    setSelectedMonumentsData([])
     setIsMonumentDialogOpen(false)
+  }
+
+  const handleEditOpenMonumentDialog = city => {
+    setSelectedCity(city)
+    setIsEditMonumentDialogOpen(true)
+  }
+
+  const handleEditCloseMonumentDialog = () => {
+    setSelectedCity(null)
+    setSelectedMonumentsData([])
+    setIsEditMonumentDialogOpen(false)
   }
 
   const handleAddOpenHotelDialog = city => {
@@ -208,7 +221,7 @@ const HotelInfoStep = props => {
 
     const emptyMomunentsList = selectedCitiesHotels.filter(city => !city.monuments || city.monuments.length == 0)
     // console.log(emptyMomunentsList)
-    if(emptyMomunentsList.length > 0) {
+    if (emptyMomunentsList.length > 0) {
       toast.error('At least 1 attraction is required')
       return
     }
@@ -236,16 +249,30 @@ const HotelInfoStep = props => {
         title='Confirm Deletion'
         description='Are you sure you want to delete the selected city(ies)? All related data will be permanently removed.'
       />
-      <MonumentsDialog
-        setSelectedCitiesHotels={setSelectedCitiesHotels}
-        selectedCitiesHotels={selectedCitiesHotels}
-        onClose={handleCloseMonumentDialog}
-        selectedCity={selectedCity}
-        open={isMonumentDialogOpen}
-        selectedDates={selectedDates}
-        selectedMonumentsData={selectedMonumentsData}
-        // isEdit={false}
-      />
+      {isMonumentDialogOpen && (
+        <MonumentsDialog
+          setSelectedCitiesHotels={setSelectedCitiesHotels}
+          selectedCitiesHotels={selectedCitiesHotels}
+          onClose={handleCloseMonumentDialog}
+          selectedCity={selectedCity}
+          open={isMonumentDialogOpen}
+          selectedDates={selectedDates}
+          selectedMonumentsData={selectedMonumentsData}
+          isEdit={false}
+        />
+      )}
+      {isEditMonumentDialogOpen && (
+        <MonumentsDialog
+          setSelectedCitiesHotels={setSelectedCitiesHotels}
+          selectedCitiesHotels={selectedCitiesHotels}
+          onClose={handleEditCloseMonumentDialog}
+          selectedCity={selectedCity}
+          open={isEditMonumentDialogOpen}
+          selectedDates={selectedDates}
+          selectedMonumentsData={selectedMonumentsData}
+          isEdit={true}
+        />
+      )}
       <HotelsDialog
         setSelectedCitiesHotels={setSelectedCitiesHotels}
         selectedCitiesHotels={selectedCitiesHotels}
@@ -504,10 +531,9 @@ const HotelInfoStep = props => {
                               fullWidth
                               variant='outlined'
                               onClick={() => {
-                                if(city.monuments && city.monuments.length > 0) {
-                                  toast.error('Delete monuments first.');
-                                }
-                                else {
+                                if (city.monuments && city.monuments.length > 0) {
+                                  toast.error('Delete monuments first.')
+                                } else {
                                   handleDeleteCityHotel(city.label, hotel.id)
                                 }
                               }}
@@ -556,7 +582,7 @@ const HotelInfoStep = props => {
                               variant='contained'
                               onClick={() => {
                                 // console.log(city.monuments)
-                                handleOpenMonumentDialog(city)
+                                handleEditOpenMonumentDialog(city)
                                 setSelectedMonumentsData(city.monuments)
                                 // handleEditOpenHotelDialog(city, hotel)
                               }}
@@ -600,10 +626,9 @@ const HotelInfoStep = props => {
                       <Card
                         sx={{ borderRadius: '15px', cursor: 'pointer' }}
                         onClick={() => {
-                          if(city.info && city.info.length > 0) {
+                          if (city.info && city.info.length > 0) {
                             handleOpenMonumentDialog(city)
-                          }
-                          else {
+                          } else {
                             toast.error('Kindly add atlead 1 hotel')
                           }
                         }}
